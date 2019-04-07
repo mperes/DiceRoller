@@ -66,13 +66,16 @@ function dice_initialize(container) {
     function before_roll(vectors, notation, callback) {
         info_div.style.display = 'none';
         selector_div.style.display = 'none';
-        //console.log(vectors);
-        //console.log(notation);
-        console.log(callback);
-        // do here rpc call or whatever to get your own result of throw.
-        // then callback with array of your result, example:
-        // callback([2, 2, 2, 2]); // for 4d6 where all dice values are 2.
-        callback();
+
+        if(forceResults.length > 0) {
+          callback(forceResults)
+          forceResults = [];
+        } else {
+          var rollSet = notation.set.join('+') + "+" + notation.constant;
+          var results = rollResults(notation.set);
+          callback(results);
+          sendRoll(rollSet, results);
+        }
     }
 
     function notation_getter() {
@@ -95,6 +98,7 @@ function dice_initialize(container) {
     box.bind_mouse(container, notation_getter, before_roll, after_roll);
     box.bind_throw($t.id('throw'), notation_getter, before_roll, after_roll);
 
+    /*
     $t.bind(container, ['mouseup', 'touchend'], function(ev) {
         ev.stopPropagation();
         if (selector_div.style.display == 'none') {
@@ -110,6 +114,7 @@ function dice_initialize(container) {
             on_set_change();
         }
     });
+    */
 
     if (params.notation) {
         set.value = params.notation;
@@ -141,11 +146,14 @@ function showFile() {
    reader.readAsText(file);
 }
 
+var sessionID, rollingID, roomID, ws;
+var forceResults = [];
+
 function showCustomRolls() {
   var customRollsContainer = $('<div id="custom_rolls" />');
-  for(var i=0; i<customRolls.length; i++) {
+  for(var i=0; i<customRolls.groups.length; i++) {
       var customRollsList = $('<ul />');
-      var group = customRolls[i];
+      var group = customRolls.groups[i];
       customRollsList.append('<li class="title">'+group.group+'</li>');
       for (var roll in group.rolls) {
         if (group.rolls.hasOwnProperty(roll)) {
@@ -157,6 +165,8 @@ function showCustomRolls() {
       }
       customRollsContainer.append(customRollsList);
   }
+  var multiplayer = $('<div id="multiplayer"><h4>Multiplayer</h4><input type="button" value="Create" onClick="startMultiPlayer();" /><input type="button" value="Join" onClick="joinMultiPlayer();" /></div>');
+  customRollsContainer.prepend(multiplayer);
   $('body').prepend(customRollsContainer);
   $('body').addClass('show_custom_rolls');
   var customRollsWidth = ($('body').hasClass('show_custom_rolls')) ? 300 : 0;
@@ -171,6 +181,107 @@ function rollCustom(roll, label) {
   $('#label').text('Rolling '+label+'...');
   Trigger.mousedown($("#throw"));
   Trigger.mouseup($("#throw"));
+  forceResults = [];
+}
+
+function rollForced(roll, label) {
+  $('#set').val(roll);
+  $('#label').show();
+  $('#label').text('Rolling '+label+'...');
+  Trigger.mousedown($("#throw"));
+  Trigger.mouseup($("#throw"));
 }
 
 $('#label').hide();
+
+function startMultiPlayer() {
+  var multiplayerID = uuid();
+  connect(multiplayerID);
+  $('#multiplayerID').val(multiplayerID);
+}
+
+function joinMultiPlayer() {
+  var multiplayerID = prompt("Please enter your Session ID", "");
+  if(multiplayerID === '') return;
+  connect(multiplayerID);
+}
+
+function connect(multiplayerID) {
+  ws = new WebSocket('ws://achex.ca:4010');
+  // add event handler for incomming message
+  ws.onmessage = function(evt){
+  	var message = JSON.parse(evt.data);
+    if(message.hasOwnProperty('SID')) {
+      sessionID = message['SID']
+    }
+    else if(message.hasOwnProperty('type') && message['type'] === 'roll') {
+      console.log(message.results);
+      if(parseInt(message['sID']) === parseInt(sessionID)) return;
+      forceResults = message['results'];
+      rollForced(message['set'], "alguma coisa");
+    }
+  };
+
+  // add event handler for diconnection
+  ws.onclose= function(evt){
+  	console.log('log: Diconnected');
+    $('#multiplayer').html('<h4>Multiplayer</h4><input type="button" value="Create" onClick="startMultiPlayer();" /><input type="button" value="Join" onClick="joinMultiPlayer();" />');
+  };
+
+  // add event handler for error
+  ws.onerror= function(evt){
+  	console.log('log: Error');
+  };
+
+  // add event handler for new connection
+  ws.onopen= function(evt){
+  	console.log('log: Connected');
+    var id = 'DiceRoller_' + multiplayerID;
+    send('{"setID":"'+id+'", "passwd":"none"}');
+    roomID = id;
+    $('#multiplayer').html('<h4>Multiplayer</h4><p id="multiplayerID">'+multiplayerID+'</p><input type="button" value="Copy to Clipboard" onClick="copyID();" />');
+  };
+}
+
+// make a simple send function
+function send(value){
+	ws.send(value);
+}
+
+function sendRoll(rollSet, result) {
+  var userID = roomID;
+  var roll = {
+    to: userID,
+    player: 'Miguel',
+    type: 'roll',
+    set: rollSet,
+    results: result
+  };
+  send(JSON.stringify(roll));
+}
+
+function copyID() {
+  var id = jQuery('#multiplayerID').text();
+  var textArea = jQuery('<input id="textToCopy" value="'+id+'" style="positon: fixed; top: -9999; left:-9999;"/>');
+  jQuery('body').append(textArea);
+  jQuery('#textToCopy')[0].select();
+  document.execCommand('copy');
+  jQuery('#textToCopy').remove();
+}
+
+function uuid() {
+  return Math.floor(Math.random()*1E16);
+}
+
+function rollResults(set) {
+  var results = [];
+  for(var i=0; i<set.length; i++) {
+    var dice = parseInt(set[i].substring(1));
+    results.push(getRandomInt(dice));
+  }
+  return results;
+}
+
+function getRandomInt(max) {
+  return Math.floor(Math.random() * Math.floor(max)) + 1;
+}

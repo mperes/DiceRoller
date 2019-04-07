@@ -58,11 +58,13 @@ p {
   background: #333;
   color: white;
   font-family: sans-serif;
-  position: fixed;
-  min-height: 100%;
+  position: absolute;
+  height: 100%;
   margin-left: -300px;
   padding: 20px;
   box-sizing: border-box;
+  padding-bottom: 170px;
+  overflow-y: scroll;
 }
 
 body.show_custom_rolls {
@@ -116,4 +118,75 @@ body.show_custom_rolls {
   width: 40%;
   text-align: right;
   font-weight: lighter;
+}
+#multiplayer {
+  position: fixed;
+  bottom: 0px;
+  left: 15px;
+  width: 270px;
+  background: #333;
+  box-shadow: 0 -10px 10px rgba(51,51,51,1);
+  box-sizing: border-box;
+  padding: 0 5px 20px 5px;
+  overflow: hidden;
+}
+#multiplayer input {
+  background-color: #4CAF50;
+  border: none;
+  color: white;
+  padding: 16px 32px;
+  text-decoration: none;
+  margin: 4px 0px;
+  cursor: pointer;
+  width: 100%;
+}
+
+#multiplayer h4 {
+  margin-bottom: 5px;
+}
+
+#multiplayerID {
+  border: 1px solid #eee;
+  height: 45px;
+  line-height: 45px;
+  text-align: center;
+  box-sizing: border-box;
+  margin: 4px 0px;
+}
+#multiplayerID:before {
+  content: 'Session ID: ';
+}
+#custom_rolls_loader {
+  width: 260px;
+  height: 50px;
+  position: relative;
+  overflow: hidden;
+}
+#custom_rolls_loader input {
+  font-size: 100px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 50px;
+  width: 100%;
+  opacity: 0;
+  cursor: pointer;
+  -webkit-appearance: button;
+  -moz-appearance: button;
+  appearance: button;
+}
+#custom_rolls_loader:after {
+  content: 'Load Character Sheet';
+  display: block;
+  width: 100%;
+  background-color: #4CAF50;
+  border: none;
+  color: white;
+  text-decoration: none;
+  cursor: pointer;
+  box-sizing: border-box;
+  font-family: sans-serif;
+  height: 50px;
+  line-height: 50px;
+  text-align: center;
 }

@@ -1,26 +1,29 @@
-[
-  {
-    "group": "Combate",
-    "rolls": {
-      "Iniciativa": "1d10",
-      "Ataque (Espada)" : "1d20+3",
-      "Dano (Espada)": "1d8+4"
+{
+  "Character": "Mabula Jones",
+  "groups": [
+    {
+      "group": "Combate",
+      "rolls": {
+        "Iniciativa": "1d10",
+        "Ataque (Espada)" : "1d20+3",
+        "Dano (Espada)": "1d8+4"
+      }
+    },
+    {
+      "group": "Skills",
+      "rolls": {
+        "Stealth": "1d20+3",
+        "Persuasion" : "1d20+1",
+        "Arcana": "1d20+1"
+      }
+    },
+    {
+      "group": "Magias",
+      "rolls": {
+        "Cura": "1d6+3",
+        "Magic Missile" : "3d6+1",
+        "Burning Hands": "3d4"
+      }
     }
-  },
-  {
-    "group": "Skills",
-    "rolls": {
-      "Stealth": "1d20+3",
-      "Persuasion" : "1d20+1",
-      "Arcana": "1d20+1"
-    }
-  },
-  {
-    "group": "Magias",
-    "rolls": {
-      "Cura": "1d6+3",
-      "Magic Missile" : "3d6+1",
-      "Burning Hands": "3d4"
-    }
-  }
-]
+  ]
+}
