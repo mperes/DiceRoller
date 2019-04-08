@@ -95,7 +95,7 @@ function dice_initialize(container) {
         info_div.style.display = 'inline-block';
     }
 
-    box.bind_mouse(container, notation_getter, before_roll, after_roll);
+    //box.bind_mouse(container, notation_getter, before_roll, after_roll);
     box.bind_throw($t.id('throw'), notation_getter, before_roll, after_roll);
 
     /*
@@ -245,7 +245,7 @@ function connect(multiplayerID) {
 
 // make a simple send function
 function send(value){
-	ws.send(value);
+  if(ws) ws.send(value);
 }
 
 function sendRoll(rollSet, result) {
