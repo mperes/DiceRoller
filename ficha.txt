@@ -4,7 +4,7 @@
     {
       "group": "Combate",
       "rolls": {
-        "Iniciativa": "1d10",
+        "Iniciativa": "1d4",
         "Ataque (Espada)" : "1d20+3",
         "Dano (Espada)": "1d8+4"
       }

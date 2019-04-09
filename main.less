@@ -201,19 +201,63 @@ input.squareButton.primary {
     border: 1px solid #eee;
     height: 45px;
     line-height: 45px;
-    text-align: center;
+    text-align: left;
     box-sizing: border-box;
     margin: 4px 0px;
+    font-size: 11px;
+    padding: 0 20px;
+    position: relative;
+    cursor: pointer;
     &::before {
-      content: 'Session ID: ';
+      content: 'Room: ';
+    }
+    &::after {
+      content: 'copy';
+      display: inline-block;
+      background: #505e69;
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      width: 50px;
+      height: 35px;
+      line-height: 36px;
+      text-align: center;
+      font-size: 9px;
+      font-weight: 100;
+      text-transform: uppercase;
     }
   }
 }
 
-#multiplayerID
 #custom_rolls_loader {
-  width: 260px;
-  height: 50px;
   position: relative;
   overflow: hidden;
+}
+
+body {
+  #sidebar {
+    #multiplayer {
+      .sign-in {
+        display: block;
+      }
+      .sign-off {
+        display: none;
+      }
+    }
+  }
+}
+body.signed-in {
+  #table-dice {
+    #sidebar {
+      padding-bottom: 95px;
+      #multiplayer {
+        .sign-in {
+          display: none;
+        }
+        .sign-off {
+          display: block;
+        }
+      }
+    }
+  }
 }

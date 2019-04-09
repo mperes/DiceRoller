@@ -9,7 +9,7 @@
     function prepare_rnd(callback) {
         if (!random_storage.length && $t.dice.use_true_random) {
             try {
-                $t.rpc({ method: "random", n: 512 }, 
+                $t.rpc({ method: "random", n: 512 },
                 function(random_responce) {
                     if (!random_responce.error)
                         random_storage = random_responce.result.random.data;
@@ -174,41 +174,47 @@
         return materials;
     }
 
-    this.create_d4_materials = function(size, margin) {
-        function create_d4_text(text, color, back_color) {
-            var canvas = document.createElement("canvas");
-            var context = canvas.getContext("2d");
-            var ts = calc_texture_size(size + margin) * 2;
-            canvas.width = canvas.height = ts;
-            context.font = (ts - margin) / 1.5 + "pt Arial";
-            context.fillStyle = back_color;
-            context.fillRect(0, 0, canvas.width, canvas.height);
-            context.textAlign = "center";
-            context.textBaseline = "middle";
-            context.fillStyle = color;
-            for (var i in text) {
-                context.fillText(text[i], canvas.width / 2,
-                        canvas.height / 2 - ts * 0.3);
-                context.translate(canvas.width / 2, canvas.height / 2);
-                context.rotate(Math.PI * 2 / 3);
-                context.translate(-canvas.width / 2, -canvas.height / 2);
-            }
-            var texture = new THREE.Texture(canvas);
-            texture.needsUpdate = true;
-            return texture;
-        }
-        var materials = [];
-        var labels = [[], [0, 0, 0], [2, 4, 3], [1, 3, 4], [2, 1, 4], [1, 2, 3]];
-        for (var i = 0; i < labels.length; ++i)
-            materials.push(new THREE.MeshPhongMaterial($t.copyto(this.material_options,
-                        { map: create_d4_text(labels[i], this.label_color, this.dice_color) })));
-        return materials;
+    var d4_labels = [
+        [[], [0, 0, 0], [2, 4, 3], [1, 3, 4], [2, 1, 4], [1, 2, 3]],
+        [[], [0, 0, 0], [2, 3, 4], [3, 1, 4], [2, 4, 1], [3, 2, 1]],
+        [[], [0, 0, 0], [4, 3, 2], [3, 4, 1], [4, 2, 1], [3, 1, 2]],
+        [[], [0, 0, 0], [4, 2, 3], [1, 4, 3], [4, 1, 2], [1, 3, 2]]
+    ];
+
+    this.create_d4_materials = function(size, margin, labels) {
+      function create_d4_text(text, color, back_color) {
+          var canvas = document.createElement("canvas");
+          var context = canvas.getContext("2d");
+          var ts = calc_texture_size(size + margin) * 2;
+          canvas.width = canvas.height = ts;
+          context.font = (ts - margin) / 1.5 + "pt Arial";
+          context.fillStyle = back_color;
+          context.fillRect(0, 0, canvas.width, canvas.height);
+          context.textAlign = "center";
+          context.textBaseline = "middle";
+          context.fillStyle = color;
+          for (var i in text) {
+              context.fillText(text[i], canvas.width / 2,
+                      canvas.height / 2 - ts * 0.3);
+              context.translate(canvas.width / 2, canvas.height / 2);
+              context.rotate(Math.PI * 2 / 3);
+              context.translate(-canvas.width / 2, -canvas.height / 2);
+          }
+          var texture = new THREE.Texture(canvas);
+          texture.needsUpdate = true;
+          return texture;
+      }
+      var materials = [];
+      for (var i = 0; i < labels.length; ++i)
+          materials.push(new THREE.MeshPhongMaterial($t.copyto(this.material_options,
+                      { map: create_d4_text(labels[i], this.label_color, this.dice_color) })));
+      return materials;
     }
 
     this.create_d4_geometry = function(radius) {
-        var vertices = [[1, 1, 1], [-1, -1, 1], [-1, 1, -1], [1, -1, -1]];
-        var faces = [[1, 0, 2, 1], [0, 1, 3, 2], [0, 3, 2, 3], [1, 2, 3, 4]];
-        return create_geom(vertices, faces, radius, -0.1, Math.PI * 7 / 6, 0.96);
+      var vertices = [[1, 1, 1], [-1, -1, 1], [-1, 1, -1], [1, -1, -1]];
+      var faces = [[1, 0, 2, 1], [0, 1, 3, 2], [0, 3, 2, 3], [1, 2, 3, 4]];
+      return create_geom(vertices, faces, radius, -0.1, Math.PI * 7 / 6, 0.96);
     }
 
     this.create_d6_geometry = function(radius) {
@@ -278,7 +284,7 @@
     this.use_shadows = true;
 
     this.known_types = ['d4', 'd6', 'd8', 'd10', 'd12', 'd20', 'd100'];
-    this.dice_face_range = { 'd4': [1, 4], 'd6': [1, 6], 'd8': [1, 8], 'd10': [0, 9], 
+    this.dice_face_range = { 'd4': [1, 4], 'd6': [1, 6], 'd8': [1, 8], 'd10': [0, 9],
         'd12': [1, 12], 'd20': [1, 20], 'd100': [0, 9] };
     this.dice_mass = { 'd4': 300, 'd6': 300, 'd8': 340, 'd10': 350, 'd12': 350, 'd20': 400, 'd100': 350 };
     this.dice_inertia = { 'd4': 5, 'd6': 13, 'd8': 10, 'd10': 9, 'd12': 8, 'd20': 6, 'd100': 9 };
@@ -288,7 +294,7 @@
     this.create_d4 = function() {
         if (!this.d4_geometry) this.d4_geometry = this.create_d4_geometry(this.scale * 1.2);
         if (!this.d4_material) this.d4_material = new THREE.MeshFaceMaterial(
-                this.create_d4_materials(this.scale / 2, this.scale * 2));
+                this.create_d4_materials(this.scale / 2, this.scale * 2, d4_labels[0]));
         return new THREE.Mesh(this.d4_geometry, this.d4_material);
     }
 
@@ -360,7 +366,7 @@
 
     this.stringify_notation = function(nn) {
         var dict = {}, notation = '';
-        for (var i in nn.set) 
+        for (var i in nn.set)
             if (!dict[nn.set[i]]) dict[nn.set[i]] = 1; else ++dict[nn.set[i]];
         for (var i in dict) {
             if (notation.length) notation += ' + ';
@@ -476,7 +482,7 @@
         this.scene.add(this.light);
 
         if (this.desk) this.scene.remove(this.desk);
-        this.desk = new THREE.Mesh(new THREE.PlaneGeometry(this.w * 2, this.h * 2, 1, 1), 
+        this.desk = new THREE.Mesh(new THREE.PlaneGeometry(this.w * 2, this.h * 2, 1, 1),
                 new THREE.MeshPhongMaterial({ color: that.desk_color }));
         this.desk.receiveShadow = that.use_shadows;
         this.scene.add(this.desk);
@@ -641,7 +647,7 @@
         this.running = false;
         var dice;
         while (dice = this.dices.pop()) {
-            this.scene.remove(dice); 
+            this.scene.remove(dice);
             if (dice.body) this.world.remove(dice.body);
         }
         if (this.pane) this.scene.remove(this.pane);
@@ -660,7 +666,8 @@
     }
 
     function shift_dice_faces(dice, value, res) {
-        var r = that.dice_face_range[dice.dice_type];
+      var r = that.dice_face_range[dice.dice_type];
+        if (dice.dice_type == 'd10' && value == 10) value = 0;
         if (!(value >= r[0] && value <= r[1])) return;
         var num = value - res;
         var geom = dice.geometry.clone();
@@ -671,6 +678,11 @@
             while (matindex > r[1]) matindex -= r[1];
             while (matindex < r[0]) matindex += r[1];
             geom.faces[i].materialIndex = matindex + 1;
+        }
+        if (dice.dice_type == 'd4' && num != 0) {
+            if (num < 0) num += 4;
+            dice.material = new THREE.MeshFaceMaterial(
+                    that.create_d4_materials(that.scale / 2, that.scale * 2, d4_labels[num]));
         }
         dice.geometry = geom;
     }
@@ -712,7 +724,7 @@
 
     this.dice_box.prototype.search_dice_by_mouse = function(ev) {
         var m = $t.get_mouse_coords(ev);
-        var intersects = (new THREE.Raycaster(this.camera.position, 
+        var intersects = (new THREE.Raycaster(this.camera.position,
                     (new THREE.Vector3((m.x - this.cw) / this.aspect,
                                        1 - (m.y - this.ch) / this.aspect, this.w / 9))
                     .sub(this.camera.position).normalize())).intersectObjects(this.dices);
@@ -722,7 +734,7 @@
     this.dice_box.prototype.draw_selector = function() {
         this.clear();
         var step = this.w / 4.5;
-        this.pane = new THREE.Mesh(new THREE.PlaneGeometry(this.w * 6, this.h * 6, 1, 1), 
+        this.pane = new THREE.Mesh(new THREE.PlaneGeometry(this.w * 6, this.h * 6, 1, 1),
                 new THREE.MeshPhongMaterial(that.selector_back_colors));
         this.pane.receiveShadow = true;
         this.pane.position.set(0, 0, 1);
@@ -810,4 +822,3 @@
     }
 
 }).apply(teal.dice = teal.dice || {});
-

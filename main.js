@@ -216,7 +216,6 @@ function connect(multiplayerID) {
       sessionID = message['SID']
     }
     else if(message.hasOwnProperty('type') && message['type'] === 'roll') {
-      console.log(message.results);
       if(parseInt(message['sID']) === parseInt(sessionID)) return;
       forceResults = message['results'];
       rollForced(message['set'], "alguma coisa");
@@ -226,7 +225,7 @@ function connect(multiplayerID) {
   // add event handler for diconnection
   ws.onclose= function(evt){
   	console.log('log: Diconnected');
-    $('#multiplayer').html('<h4>Multiplayer</h4><input type="button" value="Create" onClick="startMultiPlayer();" /><input type="button" value="Join" onClick="joinMultiPlayer();" />');
+    jQuery('body').removeClass('signed-in');
   };
 
   // add event handler for error
@@ -240,7 +239,8 @@ function connect(multiplayerID) {
     var id = 'DiceRoller_' + multiplayerID;
     send('{"setID":"'+id+'", "passwd":"none"}');
     roomID = id;
-    $('#multiplayer').html('<h4>Multiplayer</h4><p id="multiplayerID">'+multiplayerID+'</p><input type="button" value="Copy to Clipboard" onClick="copyID();" />');
+    $('#multiplayer .sign-off p').text(multiplayerID);
+    jQuery('body').addClass('signed-in');
   };
 }
 

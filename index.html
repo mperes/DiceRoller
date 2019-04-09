@@ -26,8 +26,13 @@ Math.random=function(a,c,d,b){return function(){return 300>d++?(a=(1103515245*a+
         </div>
         <div id="multiplayer">
           <h4>Multiplayer</h4>
-          <input type="button" value="Create" class="squareButton" onclick="startMultiPlayer();" />
-          <input type="button" value="Join" class="squareButton" onclick="joinMultiPlayer();" />
+          <div class="sign-in">
+            <input type="button" value="Create" class="squareButton" onclick="startMultiPlayer();" />
+            <input type="button" value="Join" class="squareButton" onclick="joinMultiPlayer();" />
+          </div>
+          <div class="sign-off">
+            <p id="multiplayerID" onClick="copyID();"></p>
+          </div>
         </div>
       </div>
       <div id="dicebox">
