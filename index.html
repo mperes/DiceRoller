@@ -19,14 +19,15 @@ Math.random=function(a,c,d,b){return function(){return 300>d++?(a=(1103515245*a+
     <div id="table-dice">
       <div id="sidebar">
         <div id="custom_rolls_loader">
-          <input name="custom_rolls" type="file" onchange="showFile();">
+          <input name="custom_rolls" type="file" class="fileUpload" onchange="showFile();" />
+          <input type="button" value="Load Character Sheet" class="squareButton primary" />
         </div>
         <div id="custom_rolls">
-          <div id="multiplayer">
-            <h4>Multiplayer</h4>
-            <input type="button" value="Create" onclick="startMultiPlayer();">
-            <input type="button" value="Join" onclick="joinMultiPlayer();">
-          </div>
+        </div>
+        <div id="multiplayer">
+          <h4>Multiplayer</h4>
+          <input type="button" value="Create" class="squareButton" onclick="startMultiPlayer();" />
+          <input type="button" value="Join" class="squareButton" onclick="joinMultiPlayer();" />
         </div>
       </div>
       <div id="dicebox">

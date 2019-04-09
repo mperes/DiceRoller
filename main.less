@@ -37,10 +37,6 @@ em {
     border-radius: 3px;
 }
 
-body {
-    font-family: Georgia;
-}
-
 h6 {
     font-size: 100%;
     font-weight: normal;
@@ -75,15 +71,14 @@ p {
     height: 100%;
     padding: 20px;
     box-sizing: border-box;
+    padding-bottom: 140px;
 
     background: #333;
+    color: white;
 
     #custom_rolls {
-      color: white;
-      position: absolute;
       height: 100%;
       box-sizing: border-box;
-      padding-bottom: 170px;
       overflow-y: scroll;
     }
   }
@@ -91,6 +86,14 @@ p {
   #dicebox {
     width: 100%;
     height: 100%;
+
+    #canvas {
+      height: 100%;
+      canvas {
+        width: 100%;
+        height: 100%;
+      }
+    }
   }
 
 }
@@ -153,55 +156,12 @@ body.show_custom_rolls {
   text-align: right;
   font-weight: lighter;
 }
-#multiplayer {
-  position: fixed;
-  bottom: 0px;
-  left: 15px;
-  width: 270px;
-  background: #333;
-  box-shadow: 0 -10px 10px rgba(51,51,51,1);
-  box-sizing: border-box;
-  padding: 0 5px 20px 5px;
-  overflow: hidden;
-}
-#multiplayer input {
-  background-color: #4CAF50;
-  border: none;
-  color: white;
-  padding: 16px 32px;
-  text-decoration: none;
-  margin: 4px 0px;
-  cursor: pointer;
-  width: 100%;
-}
-
-#multiplayer h4 {
-  margin-bottom: 5px;
-}
-
-#multiplayerID {
-  border: 1px solid #eee;
-  height: 45px;
-  line-height: 45px;
-  text-align: center;
-  box-sizing: border-box;
-  margin: 4px 0px;
-}
-#multiplayerID:before {
-  content: 'Session ID: ';
-}
-#custom_rolls_loader {
-  width: 260px;
-  height: 50px;
-  position: relative;
-  overflow: hidden;
-}
-#custom_rolls_loader input {
+input.fileUpload {
   font-size: 100px;
   position: absolute;
   top: 0;
   left: 0;
-  height: 50px;
+  height: 100%;
   width: 100%;
   opacity: 0;
   cursor: pointer;
@@ -209,18 +169,51 @@ body.show_custom_rolls {
   -moz-appearance: button;
   appearance: button;
 }
-#custom_rolls_loader:after {
-  content: 'Load Character Sheet';
-  display: block;
-  width: 100%;
-  background-color: #4CAF50;
+input.squareButton {
+  background-color: #505e69;
   border: none;
   color: white;
+  padding: 16px 32px;
   text-decoration: none;
   cursor: pointer;
+  width: 100%;
+}
+input.squareButton.primary {
+  background-color: #4CAF50;
+}
+#multiplayer {
+  position: fixed;
+  bottom: 0px;
+  left: 15px;
+  width: 270px;
+  background: #333;
+  box-shadow: 0 -10px 10px #333;
   box-sizing: border-box;
-  font-family: sans-serif;
+  padding: 0 5px 20px 5px;
+  overflow: hidden;
+  z-index: 9999;
+  h4 {
+  }
+  .squareButton {
+    margin-top: 8px;
+  }
+  #multiplayerID {
+    border: 1px solid #eee;
+    height: 45px;
+    line-height: 45px;
+    text-align: center;
+    box-sizing: border-box;
+    margin: 4px 0px;
+    &::before {
+      content: 'Session ID: ';
+    }
+  }
+}
+
+#multiplayerID
+#custom_rolls_loader {
+  width: 260px;
   height: 50px;
-  line-height: 50px;
-  text-align: center;
+  position: relative;
+  overflow: hidden;
 }

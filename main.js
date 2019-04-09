@@ -6,10 +6,10 @@ var m = "t";
 function dice_initialize(container) {
     $t.remove($t.id('loading_text'));
 
-    var canvas = $t.id('canvas');
+    //var canvas = $t.id('canvas');
     var customRollsWidth = ($('body').hasClass('show_custom_rolls')) ? 300 : 0;
-    canvas.style.width = window.innerWidth - 1 - customRollsWidth + 'px';
-    canvas.style.height = window.innerHeight - 1 + 'px';
+    //canvas.style.width = window.innerWidth - 1 - customRollsWidth + 'px';
+    //canvas.style.height = window.innerHeight - 1 + 'px';
     var label = $t.id('label');
     var set = $t.id('set');
     var selector_div = $t.id('selector_div');
@@ -52,8 +52,8 @@ function dice_initialize(container) {
 
     $t.bind(window, 'resize', function() {
         var customRollsWidth = ($('body').hasClass('show_custom_rolls')) ? 300 : 0;
-        canvas.style.width = window.innerWidth - 1 - customRollsWidth + 'px';
-        canvas.style.height = window.innerHeight - 1 + 'px';
+        //canvas.style.width = window.innerWidth - 1 - customRollsWidth + 'px';
+        //canvas.style.height = window.innerHeight - 1 + 'px';
         box.reinit(canvas, { w: 500, h: 300 });
     });
 
@@ -150,7 +150,8 @@ var sessionID, rollingID, roomID, ws;
 var forceResults = [];
 
 function showCustomRolls() {
-  var customRollsContainer = $('<div id="custom_rolls" />');
+  var customRollsContainer = $('#custom_rolls');
+  customRollsContainer.html('');
   for(var i=0; i<customRolls.groups.length; i++) {
       var customRollsList = $('<ul />');
       var group = customRolls.groups[i];
@@ -165,13 +166,13 @@ function showCustomRolls() {
       }
       customRollsContainer.append(customRollsList);
   }
-  var multiplayer = $('<div id="multiplayer"><h4>Multiplayer</h4><input type="button" value="Create" onClick="startMultiPlayer();" /><input type="button" value="Join" onClick="joinMultiPlayer();" /></div>');
-  customRollsContainer.prepend(multiplayer);
-  $('body').prepend(customRollsContainer);
-  $('body').addClass('show_custom_rolls');
-  var customRollsWidth = ($('body').hasClass('show_custom_rolls')) ? 300 : 0;
-  canvas.style.width = window.innerWidth - 1 - customRollsWidth + 'px';
-  canvas.style.height = window.innerHeight - 1 + 'px';
+  //var multiplayer = $('<div id="multiplayer"><h4>Multiplayer</h4><input type="button" value="Create" onClick="startMultiPlayer();" /><input type="button" value="Join" onClick="joinMultiPlayer();" /></div>');
+  //customRollsContainer.prepend(multiplayer);
+  //$('#custom_rolls').prepend(customRollsContainer);
+  //$('body').addClass('show_custom_rolls');
+  //var customRollsWidth = ($('body').hasClass('show_custom_rolls')) ? 300 : 0;
+  //canvas.style.width = window.innerWidth - 1 - customRollsWidth + 'px';
+  //canvas.style.height = window.innerHeight - 1 + 'px';
   m.reinit(canvas, { w: 500, h: 300 });
 }
 
