@@ -9,6 +9,37 @@ body {
   font-family: sans-serif;
 }
 
+input[type=text] {
+  width: 100%;
+  border: 0;
+  padding: 4px;
+  background: none;
+  color: white;
+  pointer-events: none;
+  box-sizing: border-box;
+  border-radius:3px;
+  &:focus {
+    outline:0;
+  }
+}
+
+.editOnly {
+  display: none;
+}
+.editing {
+  input[type=text] {
+    background: rgba(255,255,255,0.1);
+    pointer-events: all;
+    color: #EEE;
+    &:focus {
+      color: #FFF;
+    }
+  }
+  .editOnly {
+    display: unset;
+  }
+}
+
 #svg *, .svg * {
     -moz-user-select: none;
     -webkit-user-select: none;
@@ -71,7 +102,7 @@ p {
     height: 100%;
     padding: 20px;
     box-sizing: border-box;
-    padding-bottom: 140px;
+    padding-bottom: 135px;
 
     background: #333;
     color: white;
@@ -143,18 +174,31 @@ body.show_custom_rolls {
   cursor: pointer;
 }
 #custom_rolls ul li.title {
-  font-size: 1.5em;
-  cursor: default;
+  input {
+    font-size: 1.5em;
+  }
 }
 #custom_rolls .roll_label {
   float: left;
-  width: 60%;
+  width:70%;
+  box-sizing: border-box;
+  padding-right: 2px;
+  overflow: hidden;
+  input {
+  }
 }
-#custom_rolls .roll_value {
+#custom_rolls .roll_set {
   float: left;
-  width: 40%;
+  width: 30%;
   text-align: right;
   font-weight: lighter;
+  box-sizing: border-box;
+  padding-left: 2px;
+  overflow: hidden;
+  input {
+    text-align: right;
+    text-transform: uppercase;
+  }
 }
 input.fileUpload {
   font-size: 100px;
@@ -177,6 +221,9 @@ input.squareButton {
   text-decoration: none;
   cursor: pointer;
   width: 100%;
+  &:focus {
+    outline:0;
+  }
 }
 input.squareButton.primary {
   background-color: #4CAF50;
@@ -196,6 +243,19 @@ input.squareButton.primary {
   }
   .squareButton {
     margin-top: 8px;
+  }
+  .sign-in {
+    input {
+      width: 50%;
+      float: left;
+      border-left: 4px solid #333;
+      &:first-child {
+        width: 50%;
+        float: left;
+        border-left: 0;
+        border-right: 4px solid #333;
+      }
+    }
   }
   #multiplayerID {
     border: 1px solid #eee;
@@ -249,7 +309,6 @@ body {
 body.signed-in {
   #table-dice {
     #sidebar {
-      padding-bottom: 95px;
       #multiplayer {
         .sign-in {
           display: none;

@@ -2,6 +2,8 @@
 
 var customRolls;
 var m = "t";
+var sessionID, rollingID, roomID, ws, sheet;
+var forceResults = [];
 
 function dice_initialize(container) {
     $t.remove($t.id('loading_text'));
@@ -136,18 +138,15 @@ function showFile() {
 
    if (file.type.match(textFile)) {
       reader.onload = function (event) {
-         customRolls = JSON.parse(event.target.result);
-         showCustomRolls();
-         $('#custom_rolls_loader').hide();
+         sheet = new Sheet('#custom_rolls', event.target.result);
+         //showCustomRolls();
+         //$('#custom_rolls_loader').hide();
       }
    } else {
       preview.innerHTML = "<span class='error'>It doesn't seem to be a text file!</span>";
    }
    reader.readAsText(file);
 }
-
-var sessionID, rollingID, roomID, ws;
-var forceResults = [];
 
 function showCustomRolls() {
   var customRollsContainer = $('#custom_rolls');

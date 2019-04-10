@@ -1,5 +1,5 @@
 {
-  "Character": "Mabula Jones",
+  "character": "Mabula Jones",
   "groups": [
     {
       "group": "Combate",
