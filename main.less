@@ -372,6 +372,17 @@
 // //----------------------------------
 
 @primaryColor: #00c0ff;
+@totalCards: 82;
+@maxShadow: 0.75;
+
+.deck-shadow-loop (@i) when (@i > 0) {
+  #deck-pile[data-amount="@{i}"], #deck-graveyard[data-amount="@{i}"] {
+    @opacity: @maxShadow * @i / 82;
+    box-shadow: 5px 5px 30px rgba(0,0,0, @opacity);
+    //~"@{i}%";
+  }
+  .deck-shadow-loop(@i - 1);
+}
 
 html, body {
   height: 100%;
@@ -426,7 +437,7 @@ input.squareButton.primary {
     left: 50px;
     display: inline-block;
     border-radius: 15px;
-    box-shadow: 5px 5px 30px rgba(0,0,0,0.75);
+    //box-shadow: 5px 5px 30px rgba(0,0,0,0.75);
     .card{
       position: absolute;
       border-right: 1px solid #422719;
@@ -440,6 +451,26 @@ input.squareButton.primary {
       }
     }
   }
+  #deck-graveyard {
+    position: absolute;
+    top: 320px;
+    left: 50px;
+    display: inline-block;
+    border-radius: 15px;
+    .card{
+      position: absolute;
+      border-right: 1px solid #422719;
+      border-bottom: 1px solid #2f1b11;
+      &:first-child {
+        box-shadow: 1px 1px 5px rgba(0,0,0,0.5);
+      }
+      &.even {
+        border-bottom: 1px solid #422719;
+        border-right: 1px solid #2f1b11;
+      }
+    }
+  }
+  .deck-shadow-loop(@totalCards);
   #play-area {
     text-align: center;
     padding: 50px 50px 0 250px;

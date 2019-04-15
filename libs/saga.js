@@ -15,16 +15,29 @@ const SUIT_SWORD = 8;
 const ON_PILE = 0;
 const ON_TABLE = 1;
 const ON_HAND = 2;
+const ON_GRAVEYARD = 3;
 
 const CARD_COLORS = ['White', 'Red', 'Black'];
 const CARD_SUITS = ['Arrow', 'Crown', 'Dragon', 'Heart', 'Helm', 'Moon', 'Orb', 'Shield', 'Sword'];
 
+const DECK_SIZE = 82;
+const DEFAULT_CARD_WIDTH = 262;
+const DEFAULT_CARD_HEIGHT = 375;
+
+class GameSession {
+  constructor(isDM, handSize) {
+    this._flipped = (typeof isDM === 'boolean') ? isDM : false;
+    this._deck = new Deck('#play-area', '#deck-pile', '#deck-graveyard', 150);
+    this._player = new Player(isDM, this._deck, handSize, '#player-hand');
+  }
+}
+
 class Deck {
   constructor(table, pile, graveyard, cardWidth) {
     this._container = {table: $(table), pile: $(pile), graveyard: $(graveyard)};
-    this._cardWidth = (isNaN(cardWidth)) ? 262 : cardWidth;
-    this._cardHeight = 375 * (this._cardWidth / 262);
-    this._cardRatio = this._cardWidth / 262;
+    this._cardWidth = (isNaN(cardWidth)) ? DEFAULT_CARD_WIDTH : cardWidth;
+    this._cardHeight = DEFAULT_CARD_HEIGHT * (this._cardWidth / DEFAULT_CARD_WIDTH);
+    this._cardRatio = this._cardWidth / DEFAULT_CARD_WIDTH;
     this._graveyard = [];
     this._table = [];
 
@@ -116,6 +129,7 @@ class Deck {
     ];
     this.shuffle();
     this.renderPile();
+    this.renderGraveyeard();
   }
   play(player, card) {
     let cardIndex = this.getCardIndex(player._hand, card._id);
@@ -134,8 +148,11 @@ class Deck {
       this._table.push(card);
       card._view.addClass('trump');
       this._container.table.append(card._view);
+      card._view.css({ top: 0, left: 0});
+      card._view.removeClass('even');
       amount--;
     }
+    this.setShadowSize(this._container.pile);
   }
   draw(hand, view, amount) {
     if(isNaN(amount)) amount = 1;
@@ -146,8 +163,11 @@ class Deck {
       card.flip(card._view);
       hand.push(card);
       view.append(card._view);
+      card._view.css({ top: 0, left: 0});
+      card._view.removeClass('even');
       amount--;
     }
+    this.setShadowSize(this._container.pile);
   }
   getBack(player, card)  {
     let cardIndex = this.getCardIndex(this._table, card._id);
@@ -155,6 +175,23 @@ class Deck {
     card._state = ON_HAND;
     player._hand.push(card);
     player._container.hand.append(card._view);
+  }
+  sendCardFromTableToGraveyard() {
+    let top = (this._graveyard.length > 0) ? this._container.graveyard.children().last().position().top : 0;
+    let left = (this._graveyard.length > 0) ? this._container.graveyard.children().last().position().left : 0;
+    for(let i=this._table.length-1; i>=0; i--) {
+      let card = this._table[i];
+      this._table.pop();
+      card._state = ON_GRAVEYARD;
+      this._graveyard.push(card);
+      let even = (i % 2 === 0);
+      if(even) card._view.addClass('even');
+      top -= Math.random()/2 * this._cardRatio;
+      left -= Math.random()/2 * this._cardRatio;
+      card._view.css({ top: top, left: left});
+      this._container.graveyard.append(card._view);
+    }
+    this.setShadowSize(this._container.graveyard);
   }
   renderPile() {
     this._container.pile.width(this._cardWidth)
@@ -168,9 +205,14 @@ class Deck {
       if(even) card.addClass('even');
       top -= Math.random()/2 * this._cardRatio;
       left -= Math.random()/2 * this._cardRatio;
-      card.offset({ top: top, left: left});
+      card.css({ top: top, left: left});
       this._container.pile.append(card);
     }
+    this.setShadowSize(this._container.pile);
+  }
+  renderGraveyeard() {
+    this._container.graveyard.width(this._cardWidth)
+    this._container.graveyard.height(this._cardHeight);
   }
   renderTable() {
     this._container.table.html('');
@@ -188,14 +230,17 @@ class Deck {
     let index = cardArray.findIndex(card => card._id === id);
     return index;
   }
+  setShadowSize(pile) {
+    pile.attr('data-amount', pile.children().length);
+  }
 }
 
 class Card {
   constructor(id, suit, value, name, nature, behavior, color, background, width, flipped, deck) {
-    this._width = (isNaN(width)) ? 262 : width;
+    this._width = (isNaN(width)) ? DEFAULT_CARD_WIDTH : width;
     this._flipped = (typeof flipped === 'boolean') ? flipped : true;
-    this._height = 375 * (this._width / 262);
-    this._ratio = this._width / 262;
+    this._height = DEFAULT_CARD_HEIGHT * (this._width / DEFAULT_CARD_WIDTH);
+    this._ratio = this._width / DEFAULT_CARD_WIDTH;
     this._id = id;
     this._suit = suit;
     this._value = value;
@@ -212,12 +257,12 @@ class Card {
     const context = this;
     let card = $('<div/>');
     card.attr('id', 'card-'+this._id);
-    card.attr('data-suit', CARD_SUITS[this._suit]);
-    card.attr('data-value', this._value);
-    card.attr('data-name', this._name);
-    card.attr('data-nature', this._nature);
-    card.attr('data-behavior', this._behavior);
-    card.attr('data-color', CARD_COLORS[this._color]);
+    //card.attr('data-suit', CARD_SUITS[this._suit]);
+    //card.attr('data-value', this._value);
+    //card.attr('data-name', this._name);
+    //card.attr('data-nature', this._nature);
+    //card.attr('data-behavior', this._behavior);
+    //card.attr('data-color', CARD_COLORS[this._color]);
     card.addClass('card');
     if(this._flipped) card.addClass('flipped');
     let backgroundPositionX = -this._background[1] * this._width + 'px';
@@ -246,7 +291,8 @@ class Card {
 }
 
 class Player {
-  constructor(deck, handSize, handContainer) {
+  constructor(isDM, deck, handSize, handContainer) {
+    this.isDM = isDM;
     this._container = {hand: $(handContainer)};
     this._hand = [];
     this._deck = deck;
@@ -266,11 +312,11 @@ class Player {
           this._trumped = true;
           break;
         case ON_HAND:
-          context._deck.play(player, card);
+          context._deck.play(context, card);
           break;
         case ON_TABLE:
           if(!this._trumped)
-            context._deck.getBack(player, card);
+            context._deck.getBack(context, card);
           else
             card.flip(view);
           break;
@@ -302,6 +348,7 @@ class Player {
   }
   endTurn() {
     this._deck.draw(this._hand, this._container.hand, this.getNumberOfCardsUsed());
+    this._deck.sendCardFromTableToGraveyard();
     this._playing = false;
     this._trumped = false;
   }
