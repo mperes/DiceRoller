@@ -1,243 +1,392 @@
 //"out": true, "compress": true
 
+// @primaryColor: #00c0ff;
+// html, body {
+//   height: 100%;
+//   min-height: 100%;
+// }
+//
+// body {
+//   font-family: sans-serif;
+//   font-size: 11px;
+// }
+//
+// h3 {
+//   font-size: 1.5em;
+// }
+//
+// a {
+//   color: @primaryColor;
+//   text-decoration: underline;
+// }
+//
+// input[type=text] {
+//   width: 100%;
+//   border: 0;
+//   padding: 4px;
+//   background: none;
+//   color: white;
+//   pointer-events: none;
+//   box-sizing: border-box;
+//   border-radius:3px;
+//   &:focus {
+//     outline:0;
+//   }
+// }
+//
+// .editOnly {
+//   display: none;
+// }
+// #table-dice #sidebar.editing {
+//   padding-bottom: 75px;
+//   input[type=text] {
+//     background: rgba(255,255,255,0.1);
+//     pointer-events: all;
+//     color: #EEE;
+//     &:focus {
+//       color: #FFF;
+//     }
+//   }
+//   .editOnly {
+//     display: unset;
+//   }
+//   li {
+//     border-bottom: 1px solid #505050!important;
+//   }
+//   #multiplayer {
+//     display: none;
+//   }
+// }
+//
+// body.sheetLoaded {
+//   #custom_rolls_loader {
+//     display: none;
+//   }
+// }
+//
+// #svg *, .svg * {
+//     -moz-user-select: none;
+//     -webkit-user-select: none;
+//     -khtml-user-select: none;
+//     -o-user-select: none;
+//     user-select: none;
+// }
+//
+// #waitform {
+//     position: absolute;
+//     width: 100%;
+//     height: 100%;
+//     z-index: 10000;
+//     cursor: wait;
+// }
+//
+// em {
+//     border: 1px rgba(0, 0, 0, 0.2) solid;
+//     font-style: normal;
+//     padding: 0px 3px;
+//     background-color: rgba(0, 0, 0, 0.08);
+//     border-radius: 3px;
+// }
+//
+// h6 {
+//     font-size: 100%;
+//     font-weight: normal;
+//     margin: 0px;
+// }
+//
+// p {
+//     font-size: 80%;
+//     margin-top: 5px;
+//     margin-bottom: 0px;
+// }
+//
+// .control_panel {
+//     padding: 15px;
+//     padding-bottom: 0px;
+//     position: absolute;
+//     z-index: 10;
+// }
+//
+// @sidebarWidth: 300px;
+//
+// #table-dice {
+//   height: 100%;
+//   position: relative;
+//   padding-left: @sidebarWidth;
+//
+//   #sidebar {
+//     position: absolute;
+//     top: 0;
+//     left: 0;
+//     width: @sidebarWidth;
+//     height: 100%;
+//     padding: 20px;
+//     box-sizing: border-box;
+//     padding-bottom: 135px;
+//
+//     background: #333;
+//     color: white;
+//
+//     #custom_rolls {
+//       height: 100%;
+//       box-sizing: border-box;
+//       overflow-y: scroll;
+//     }
+//   }
+//
+//   #dicebox {
+//     width: 100%;
+//     height: 100%;
+//
+//     #canvas {
+//       height: 100%;
+//       canvas {
+//         width: 100%;
+//         height: 100%;
+//       }
+//     }
+//   }
+//
+// }
+//
+// #selector_div, #control_panel h6 {
+//   display: none!important;
+// }
+//
+//
+//
+// body.show_custom_rolls {
+//   padding-left: 300px;
+// }
+//
+// #info_div {
+//   position: relative;
+//   display: block!important;
+// }
+// .center_field {
+//     position: absolute;
+//     top: 20px;
+//     left: 50%;
+//     text-align: center;
+//     height: auto!important;
+//     width: auto!important;
+//     transform: translateX(-50%);
+// }
+//
+// #label {
+//     white-space: nowrap;
+//     font-size: 30px!important;
+//     word-spacing: 0!important;
+// }
+//
+// #custom_rolls ul {
+//   list-style: none;
+//   padding: 0;
+//   margin: 0 0 20px 0;
+// }
+// #custom_rolls ul {
+//   list-style: none;
+// }
+// #custom_rolls ul li {
+//   overflow: hidden;
+//   border-bottom: 1px solid #555;
+//   padding: 5px 0;
+//   cursor: pointer;
+// }
+// #custom_rolls ul li.title {
+//   input {
+//     font-size: 1.5em;
+//   }
+// }
+// #custom_rolls .roll_label {
+//   float: left;
+//   width:70%;
+//   box-sizing: border-box;
+//   padding-right: 2px;
+//   overflow: hidden;
+//   input {
+//   }
+// }
+// #custom_rolls .roll_set {
+//   float: left;
+//   width: 30%;
+//   text-align: right;
+//   font-weight: lighter;
+//   box-sizing: border-box;
+//   padding-left: 2px;
+//   overflow: hidden;
+//   input {
+//     text-align: right;
+//     text-transform: uppercase;
+//   }
+// }
+// input.fileUpload {
+//   font-size: 100px;
+//   position: absolute;
+//   top: 0;
+//   left: 0;
+//   height: 100%;
+//   width: 100%;
+//   opacity: 0;
+//   cursor: pointer;
+//   -webkit-appearance: button;
+//   -moz-appearance: button;
+//   appearance: button;
+// }
+// input.squareButton {
+//   background-color: #505e69;
+//   border: none;
+//   color: white;
+//   padding: 16px 32px;
+//   text-decoration: none;
+//   cursor: pointer;
+//   width: 100%;
+//   &.small {
+//     padding: 6px 12px;
+//     background-color: transparent;
+//     color: @primaryColor;
+//   }
+//   &:focus {
+//     outline:0;
+//   }
+//   &.dashed {
+//     background-color: transparent;
+//     border: 1px dashed #7b7b7b;
+//   }
+// }
+// input.squareButton.primary {
+//   background-color: @primaryColor;
+//   font-weight: bold;
+// }
+// #custom_rolls_save {
+//   position: fixed;
+//   bottom: 0px;
+//   left: 15px;
+//   width: 270px;
+//   background: #333;
+//   box-shadow: 0 -10px 10px #333;
+//   box-sizing: border-box;
+//   padding: 0 5px 20px 5px;
+//   overflow: hidden;
+//   z-index: 9999;
+// }
+// #multiplayer {
+//   position: fixed;
+//   bottom: 0px;
+//   left: 15px;
+//   width: 270px;
+//   background: #333;
+//   box-shadow: 0 -10px 10px #333;
+//   box-sizing: border-box;
+//   padding: 0 5px 20px 5px;
+//   overflow: hidden;
+//   z-index: 9999;
+//   h4 {
+//   }
+//   .squareButton {
+//     margin-top: 8px;
+//   }
+//   .sign-in {
+//     input {
+//       width: 50%;
+//       float: left;
+//       border-left: 4px solid #333;
+//       &:first-child {
+//         width: 50%;
+//         float: left;
+//         border-left: 0;
+//         border-right: 4px solid #333;
+//       }
+//     }
+//   }
+//   #multiplayerID {
+//     border: 1px solid #eee;
+//     height: 45px;
+//     line-height: 45px;
+//     text-align: left;
+//     box-sizing: border-box;
+//     margin: 4px 0px;
+//     font-size: 11px;
+//     padding: 0 20px;
+//     position: relative;
+//     cursor: pointer;
+//     &::before {
+//       content: 'Room: ';
+//     }
+//     &::after {
+//       content: 'copy';
+//       display: inline-block;
+//       background: #505e69;
+//       position: absolute;
+//       top: 4px;
+//       right: 4px;
+//       width: 50px;
+//       height: 35px;
+//       line-height: 36px;
+//       text-align: center;
+//       font-size: 9px;
+//       font-weight: 100;
+//       text-transform: uppercase;
+//     }
+//   }
+// }
+//
+// #custom_rolls_loader {
+//   div {
+//     position: relative;
+//     overflow: hidden;
+//     margin-bottom: 5px;
+//   }
+//   a {
+//     cursor: pointer;
+//   }
+// }
+//
+// body {
+//   #sidebar {
+//     #multiplayer {
+//       .sign-in {
+//         display: block;
+//       }
+//       .sign-off {
+//         display: none;
+//       }
+//     }
+//   }
+// }
+// body.signed-in {
+//   #table-dice {
+//     #sidebar {
+//       #multiplayer {
+//         .sign-in {
+//           display: none;
+//         }
+//         .sign-off {
+//           display: block;
+//         }
+//       }
+//     }
+//   }
+// }
+//
+// //----------------------------------
+
 @primaryColor: #00c0ff;
+
 html, body {
   height: 100%;
   min-height: 100%;
 }
 
 body {
-  font-family: sans-serif;
-  font-size: 11px;
+  background-image: url(img/background.jpg);
 }
 
-h3 {
-  font-size: 1.5em;
-}
-
-a {
-  color: @primaryColor;
-  text-decoration: underline;
-}
-
-input[type=text] {
-  width: 100%;
-  border: 0;
-  padding: 4px;
-  background: none;
-  color: white;
-  pointer-events: none;
-  box-sizing: border-box;
-  border-radius:3px;
-  &:focus {
-    outline:0;
-  }
-}
-
-.editOnly {
-  display: none;
-}
-#table-dice #sidebar.editing {
-  padding-bottom: 75px;
-  input[type=text] {
-    background: rgba(255,255,255,0.1);
-    pointer-events: all;
-    color: #EEE;
-    &:focus {
-      color: #FFF;
-    }
-  }
-  .editOnly {
-    display: unset;
-  }
-  li {
-    border-bottom: 1px solid #505050!important;
-  }
-  #multiplayer {
-    display: none;
-  }
-}
-
-body.sheetLoaded {
-  #custom_rolls_loader {
-    display: none;
-  }
-}
-
-#svg *, .svg * {
-    -moz-user-select: none;
-    -webkit-user-select: none;
-    -khtml-user-select: none;
-    -o-user-select: none;
-    user-select: none;
-}
-
-#waitform {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    z-index: 10000;
-    cursor: wait;
-}
-
-em {
-    border: 1px rgba(0, 0, 0, 0.2) solid;
-    font-style: normal;
-    padding: 0px 3px;
-    background-color: rgba(0, 0, 0, 0.08);
-    border-radius: 3px;
-}
-
-h6 {
-    font-size: 100%;
-    font-weight: normal;
-    margin: 0px;
-}
-
-p {
-    font-size: 80%;
-    margin-top: 5px;
-    margin-bottom: 0px;
-}
-
-.control_panel {
-    padding: 15px;
-    padding-bottom: 0px;
-    position: absolute;
-    z-index: 10;
-}
-
-@sidebarWidth: 300px;
-
-#table-dice {
-  height: 100%;
-  position: relative;
-  padding-left: @sidebarWidth;
-
-  #sidebar {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: @sidebarWidth;
-    height: 100%;
-    padding: 20px;
-    box-sizing: border-box;
-    padding-bottom: 135px;
-
-    background: #333;
-    color: white;
-
-    #custom_rolls {
-      height: 100%;
-      box-sizing: border-box;
-      overflow-y: scroll;
-    }
-  }
-
-  #dicebox {
-    width: 100%;
-    height: 100%;
-
-    #canvas {
-      height: 100%;
-      canvas {
-        width: 100%;
-        height: 100%;
-      }
-    }
-  }
-
-}
-
-#selector_div, #control_panel h6 {
-  display: none!important;
-}
-
-
-
-body.show_custom_rolls {
-  padding-left: 300px;
-}
-
-#info_div {
-  position: relative;
-  display: block!important;
-}
-.center_field {
-    position: absolute;
-    top: 20px;
-    left: 50%;
-    text-align: center;
-    height: auto!important;
-    width: auto!important;
-    transform: translateX(-50%);
-}
-
-#label {
-    white-space: nowrap;
-    font-size: 30px!important;
-    word-spacing: 0!important;
-}
-
-#custom_rolls ul {
-  list-style: none;
-  padding: 0;
-  margin: 0 0 20px 0;
-}
-#custom_rolls ul {
-  list-style: none;
-}
-#custom_rolls ul li {
-  overflow: hidden;
-  border-bottom: 1px solid #555;
-  padding: 5px 0;
-  cursor: pointer;
-}
-#custom_rolls ul li.title {
-  input {
-    font-size: 1.5em;
-  }
-}
-#custom_rolls .roll_label {
-  float: left;
-  width:70%;
-  box-sizing: border-box;
-  padding-right: 2px;
-  overflow: hidden;
-  input {
-  }
-}
-#custom_rolls .roll_set {
-  float: left;
-  width: 30%;
-  text-align: right;
-  font-weight: lighter;
-  box-sizing: border-box;
-  padding-left: 2px;
-  overflow: hidden;
-  input {
-    text-align: right;
-    text-transform: uppercase;
-  }
-}
-input.fileUpload {
-  font-size: 100px;
-  position: absolute;
-  top: 0;
-  left: 0;
-  height: 100%;
-  width: 100%;
-  opacity: 0;
-  cursor: pointer;
-  -webkit-appearance: button;
-  -moz-appearance: button;
-  appearance: button;
-}
 input.squareButton {
   background-color: #505e69;
   border: none;
   color: white;
-  padding: 16px 32px;
+  padding: 16px 0px;
   text-decoration: none;
   cursor: pointer;
   width: 100%;
@@ -258,126 +407,10 @@ input.squareButton.primary {
   background-color: @primaryColor;
   font-weight: bold;
 }
-#custom_rolls_save {
-  position: fixed;
-  bottom: 0px;
-  left: 15px;
-  width: 270px;
-  background: #333;
-  box-shadow: 0 -10px 10px #333;
-  box-sizing: border-box;
-  padding: 0 5px 20px 5px;
-  overflow: hidden;
-  z-index: 9999;
-}
-#multiplayer {
-  position: fixed;
-  bottom: 0px;
-  left: 15px;
-  width: 270px;
-  background: #333;
-  box-shadow: 0 -10px 10px #333;
-  box-sizing: border-box;
-  padding: 0 5px 20px 5px;
-  overflow: hidden;
-  z-index: 9999;
-  h4 {
-  }
-  .squareButton {
-    margin-top: 8px;
-  }
-  .sign-in {
-    input {
-      width: 50%;
-      float: left;
-      border-left: 4px solid #333;
-      &:first-child {
-        width: 50%;
-        float: left;
-        border-left: 0;
-        border-right: 4px solid #333;
-      }
-    }
-  }
-  #multiplayerID {
-    border: 1px solid #eee;
-    height: 45px;
-    line-height: 45px;
-    text-align: left;
-    box-sizing: border-box;
-    margin: 4px 0px;
-    font-size: 11px;
-    padding: 0 20px;
-    position: relative;
-    cursor: pointer;
-    &::before {
-      content: 'Room: ';
-    }
-    &::after {
-      content: 'copy';
-      display: inline-block;
-      background: #505e69;
-      position: absolute;
-      top: 4px;
-      right: 4px;
-      width: 50px;
-      height: 35px;
-      line-height: 36px;
-      text-align: center;
-      font-size: 9px;
-      font-weight: 100;
-      text-transform: uppercase;
-    }
-  }
-}
 
-#custom_rolls_loader {
-  div {
-    position: relative;
-    overflow: hidden;
-    margin-bottom: 5px;
-  }
-  a {
-    cursor: pointer;
-  }
-}
-
-body {
-  #sidebar {
-    #multiplayer {
-      .sign-in {
-        display: block;
-      }
-      .sign-off {
-        display: none;
-      }
-    }
-  }
-}
-body.signed-in {
-  #table-dice {
-    #sidebar {
-      #multiplayer {
-        .sign-in {
-          display: none;
-        }
-        .sign-off {
-          display: block;
-        }
-      }
-    }
-  }
-}
-
-//----------------------------------
-body {
-  background-image: url(img/background.jpg);
-  //background-repeat: no-repeat;
-  //background-size: cover;
-}
 #table-top {
-  margin: 50px;
   position: relative;
+  height: 100%;
   .card {
     display: inline-block;
     background-image: url('img/fate_deck.jpg');
@@ -389,8 +422,8 @@ body {
   }
   #deck-pile {
     position: absolute;
-    top: 0;
-    left: 0;
+    top: 50px;
+    left: 50px;
     display: inline-block;
     border-radius: 15px;
     box-shadow: 5px 5px 30px rgba(0,0,0,0.75);
@@ -409,10 +442,44 @@ body {
   }
   #play-area {
     text-align: center;
-    padding-left: 200px;
+    padding: 50px 50px 0 250px;
     .card {
       margin: 5px;
       box-shadow: 1px 1px 5px rgba(0,0,0,0.5);
+    }
+  }
+  #player-hand {
+    position: absolute;
+    left: 50%;
+    bottom: 0;
+    transform: translateX(-50%);
+    white-space: nowrap;
+    overflow: hidden;
+    .card {
+      margin: 5px;
+      box-shadow: 1px 1px 5px rgba(0,0,0,0.5);
+      transform: translateY(70%);
+      transition: transform 200ms ease-out;
+      &:hover {
+        transform: translateY(0);
+      }
+    }
+  }
+  #player-turn {
+    width: 100px;
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    #player-turn-end {
+      display: none;
+    }
+    &.playing {
+      #player-turn-begin {
+        display: none;
+      }
+      #player-turn-end {
+        display: block;
+      }
     }
   }
 }

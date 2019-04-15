@@ -169,3 +169,4 @@ function createNewSheet() {
 }
 
 const deck = new Deck('#play-area', '#deck-pile', '#deck-graveyard', 150);
+const player = new Player(deck, 4, '#player-hand');
