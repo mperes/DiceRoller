@@ -153,6 +153,7 @@ class Deck {
       amount--;
     }
     this.setShadowSize(this._container.pile);
+    this.shuffleGraveyardIntoPile();
   }
   draw(hand, view, amount) {
     if(isNaN(amount)) amount = 1;
@@ -168,6 +169,7 @@ class Deck {
       amount--;
     }
     this.setShadowSize(this._container.pile);
+    this.shuffleGraveyardIntoPile();
   }
   getBack(player, card)  {
     let cardIndex = this.getCardIndex(this._table, card._id);
@@ -192,6 +194,25 @@ class Deck {
       this._container.graveyard.append(card._view);
     }
     this.setShadowSize(this._container.graveyard);
+  }
+  shuffleGraveyardIntoPile() {
+    if(this._graveyard.length === 0 || this._pile.length > 0) return;
+    let top = 0;
+    let left = 0;
+    while (this._graveyard.length > 0) {
+      let ramdomCardIndex = Math.round(Math.random() * (this._graveyard.length-1));
+      let randomCard = this._graveyard[ramdomCardIndex];
+      this._graveyard.splice(ramdomCardIndex, 1);
+      randomCard._state = ON_PILE;
+      this._pile.push(randomCard);
+      top -= Math.random()/2 * this._cardRatio;
+      left -= Math.random()/2 * this._cardRatio;
+      randomCard._view.css({ top: top, left: left});
+      randomCard.flip(randomCard._view);
+      this._container.pile.append(randomCard._view);
+      this.setShadowSize(this._container.pile);
+      this.setShadowSize(this._container.graveyard);
+    }
   }
   renderPile() {
     this._container.pile.width(this._cardWidth)
