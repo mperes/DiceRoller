@@ -1,5 +1,6 @@
 //"out": true, "compress": true
 
+@primaryColor: #00c0ff;
 html, body {
   height: 100%;
   min-height: 100%;
@@ -7,6 +8,16 @@ html, body {
 
 body {
   font-family: sans-serif;
+  font-size: 11px;
+}
+
+h3 {
+  font-size: 1.5em;
+}
+
+a {
+  color: @primaryColor;
+  text-decoration: underline;
 }
 
 input[type=text] {
@@ -26,7 +37,8 @@ input[type=text] {
 .editOnly {
   display: none;
 }
-.editing {
+#table-dice #sidebar.editing {
+  padding-bottom: 75px;
   input[type=text] {
     background: rgba(255,255,255,0.1);
     pointer-events: all;
@@ -37,6 +49,18 @@ input[type=text] {
   }
   .editOnly {
     display: unset;
+  }
+  li {
+    border-bottom: 1px solid #505050!important;
+  }
+  #multiplayer {
+    display: none;
+  }
+}
+
+body.sheetLoaded {
+  #custom_rolls_loader {
+    display: none;
   }
 }
 
@@ -54,10 +78,6 @@ input[type=text] {
     height: 100%;
     z-index: 10000;
     cursor: wait;
-}
-
-a {
-    color: gray;
 }
 
 em {
@@ -221,12 +241,34 @@ input.squareButton {
   text-decoration: none;
   cursor: pointer;
   width: 100%;
+  &.small {
+    padding: 6px 12px;
+    background-color: transparent;
+    color: @primaryColor;
+  }
   &:focus {
     outline:0;
   }
+  &.dashed {
+    background-color: transparent;
+    border: 1px dashed #7b7b7b;
+  }
 }
 input.squareButton.primary {
-  background-color: #4CAF50;
+  background-color: @primaryColor;
+  font-weight: bold;
+}
+#custom_rolls_save {
+  position: fixed;
+  bottom: 0px;
+  left: 15px;
+  width: 270px;
+  background: #333;
+  box-shadow: 0 -10px 10px #333;
+  box-sizing: border-box;
+  padding: 0 5px 20px 5px;
+  overflow: hidden;
+  z-index: 9999;
 }
 #multiplayer {
   position: fixed;
@@ -290,8 +332,14 @@ input.squareButton.primary {
 }
 
 #custom_rolls_loader {
-  position: relative;
-  overflow: hidden;
+  div {
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 5px;
+  }
+  a {
+    cursor: pointer;
+  }
 }
 
 body {
@@ -317,6 +365,54 @@ body.signed-in {
           display: block;
         }
       }
+    }
+  }
+}
+
+//----------------------------------
+body {
+  background-image: url(img/background.jpg);
+  //background-repeat: no-repeat;
+  //background-size: cover;
+}
+#table-top {
+  margin: 50px;
+  position: relative;
+  .card {
+    display: inline-block;
+    background-image: url('img/fate_deck.jpg');
+    background-repeat: no-repeat;
+    cursor: pointer;
+    &.flipped {
+      background-position: right top!important;
+    }
+  }
+  #deck-pile {
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: inline-block;
+    border-radius: 15px;
+    box-shadow: 5px 5px 30px rgba(0,0,0,0.75);
+    .card{
+      position: absolute;
+      border-right: 1px solid #422719;
+      border-bottom: 1px solid #2f1b11;
+      &:first-child {
+        box-shadow: 1px 1px 5px rgba(0,0,0,0.5);
+      }
+      &.even {
+        border-bottom: 1px solid #422719;
+        border-right: 1px solid #2f1b11;
+      }
+    }
+  }
+  #play-area {
+    text-align: center;
+    padding-left: 200px;
+    .card {
+      margin: 5px;
+      box-shadow: 1px 1px 5px rgba(0,0,0,0.5);
     }
   }
 }

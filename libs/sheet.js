@@ -37,7 +37,7 @@ class Sheet {
     this._rollGroups.forEach((group) => {
       this._container.append(group.render());
     });
-    let addButtonGroup = jQuery('<input type="button" />').addClass('squareButton').addClass('dashed').addClass('editOnly').val('Add Group');
+    let addButtonGroup = jQuery('<input type="button" />').addClass('squareButton').addClass('dashed').addClass('editOnly').val('New Group');
     addButtonGroup.click((e) => {
       let newGroup = this.addGroup("");
       newGroup.addRoll("","");
@@ -47,11 +47,11 @@ class Sheet {
     this._container.append(addButtonGroup);
   }
   edit() {
-    this._container.addClass('editing');
+    this._container.parent().addClass('editing');
   }
   save() {
     this.deleteEmptyGroups()
-    this._container.removeClass('editing');
+    this._container.parent().removeClass('editing');
   }
   download() {
     let fileName = (this._characterName.trim() === '') ? 'sheet.txt' : this._characterName+'.txt';
@@ -108,10 +108,10 @@ class RollGroup {
     });
 
     let addRollButtonContainer = jQuery('<li />').addClass('editOnly');
-    let addRollButton = jQuery('<input type="button" />').addClass('squareButton').addClass('small').val('Add Roll');
+    let addRollButton = jQuery('<input type="button" />').addClass('squareButton').addClass('small').val('Add roll');
     addRollButton.click((e) => {
       let newRoll = this.addRoll("", "");
-      jQuery(e.target).before(newRoll.render());
+      jQuery(e.target).parent().before(newRoll.render());
     });
     addRollButtonContainer.append(addRollButton);
     container.append(addRollButtonContainer);
@@ -162,6 +162,12 @@ class Roll {
       ]
       if ( !(keyCode >= 48 && keyCode <= 57) && !allowedChars.includes(keyCode))
         e.preventDefault();
+    });
+    setInput.keydown((e) => {
+      if (e.keyCode == 9) { //Tab
+        let event = new CustomEvent('tabbedToNextField');
+        e.dispatchEvent(event);
+      }
     });
     set.append(setInput);
     container.append(label).append(set);
