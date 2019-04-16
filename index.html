@@ -8,7 +8,7 @@
   <title>TableTop: An Online Dragonlance 5th Age Saga Fate Deck</title>
 
   <script>
-  const timeStamp = Date.now();
+  const apppVersion = Date.now();
   const externalFiles = [
     {file: 'reset.css', cacheBurst: false},
     {file: 'main.css', cacheBurst: true},
@@ -20,7 +20,7 @@
   ];
   function appendFile(filename, cacheBurst) {
     cacheBurst = (typeof variable === 'boolean') ? cacheBurst : false;
-    filename = (cacheBurst) ? filename + '?v=' + timeStamp : filename;
+    filename = (cacheBurst) ? filename + '?v=' + apppVersion : filename;
     filetype = filename.split('.')[filename.split('.').length-1];
     if (filetype=='js'){
         var fileref=document.createElement('script')
