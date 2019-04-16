@@ -138,9 +138,8 @@ class Deck {
     this._table.push(card);
     this._container.table.append(card._view);
   }
-  trump(amount) {
-    if(isNaN(amount)) amount = 1;
-    while(amount > 0) {
+  trump() {
+    if(this._table.length <= 1 || this._table[this._table.length-1]._suit === this._table[this._table.length-2]._suit) {
       let card = this._pile[this._pile.length-1];
       this._pile.pop();
       card._state = ON_TABLE;
@@ -150,10 +149,9 @@ class Deck {
       this._container.table.append(card._view);
       card._view.css({ top: 0, left: 0});
       card._view.removeClass('even');
-      amount--;
+      this.setShadowSize(this._container.pile);
+      this.shuffleGraveyardIntoPile();
     }
-    this.setShadowSize(this._container.pile);
-    this.shuffleGraveyardIntoPile();
   }
   draw(hand, view, amount) {
     if(isNaN(amount)) amount = 1;
@@ -336,6 +334,7 @@ class Player {
     this._handSize = (isNaN(handSize)) ? 1 : handSize;
     this._playing = false;
     this._trumped = false;
+    this._numberOfCardsUsed = 0;
 
     const context = this;
     document.addEventListener('cardClickCallback', function (event) {
@@ -344,12 +343,13 @@ class Player {
       let view = event.detail.view;
       switch(card._state) {
         case ON_PILE:
-          if(context.getNumberOfCardsUsed() === 0) return;
+          if(context._numberOfCardsUsed === 0) return;
           context._deck.trump();
           this._trumped = true;
           break;
         case ON_HAND:
           context._deck.play(context, card);
+          context._numberOfCardsUsed++;
           break;
         case ON_TABLE:
           if(!this._trumped)
@@ -376,18 +376,15 @@ class Player {
       this.endTurn();
     });
   }
-  getNumberOfCardsUsed() {
-    let numberOfCardsUsed = this._handSize - this._hand.length;
-    return numberOfCardsUsed;
-  }
   beginTurn() {
     this._playing = true;
   }
   endTurn() {
-    this._deck.draw(this._hand, this._container.hand, this.getNumberOfCardsUsed());
+    this._deck.draw(this._hand, this._container.hand, this._numberOfCardsUsed);
     this._deck.sendCardFromTableToGraveyard();
     this._playing = false;
     this._trumped = false;
+    this._numberOfCardsUsed = 0;
   }
   renderHand() {
     this._hand.forEach((card) => {
