@@ -36,7 +36,7 @@ class Deck {
   constructor(table, pile, graveyard, cardWidth) {
     this._container = {table: $(table), pile: $(pile), graveyard: $(graveyard)};
     this._cardWidth = (isNaN(cardWidth)) ? DEFAULT_CARD_WIDTH : cardWidth;
-    this._cardHeight = DEFAULT_CARD_HEIGHT * (this._cardWidth / DEFAULT_CARD_WIDTH);
+    this._cardHeight = Math.round(DEFAULT_CARD_HEIGHT * (this._cardWidth / DEFAULT_CARD_WIDTH));
     this._cardRatio = this._cardWidth / DEFAULT_CARD_WIDTH;
     this._graveyard = [];
     this._table = [];
@@ -190,7 +190,7 @@ class Deck {
       if(even) card._view.addClass('even');
       top -= Math.random()/2 * this._cardRatio;
       left -= Math.random()/2 * this._cardRatio;
-      card._view.css({ top: top, left: left});
+      card._view.css({ top: Math.round(top), left: Math.round(left)});
       this._container.graveyard.append(card._view);
     }
     this.setShadowSize(this._container.graveyard);
@@ -207,7 +207,7 @@ class Deck {
       this._pile.push(randomCard);
       top -= Math.random()/2 * this._cardRatio;
       left -= Math.random()/2 * this._cardRatio;
-      randomCard._view.css({ top: top, left: left});
+      randomCard._view.css({ top: Math.round(top), left: Math.round(left)});
       randomCard.flip(randomCard._view);
       this._container.pile.append(randomCard._view);
       this.setShadowSize(this._container.pile);
@@ -226,7 +226,7 @@ class Deck {
       if(even) card.addClass('even');
       top -= Math.random()/2 * this._cardRatio;
       left -= Math.random()/2 * this._cardRatio;
-      card.css({ top: top, left: left});
+      card.css({ top: Math.round(top), left: Math.round(left)});
       this._container.pile.append(card);
     }
     this.setShadowSize(this._container.pile);
@@ -260,7 +260,7 @@ class Card {
   constructor(id, suit, value, name, nature, behavior, color, background, width, flipped, deck) {
     this._width = (isNaN(width)) ? DEFAULT_CARD_WIDTH : width;
     this._flipped = (typeof flipped === 'boolean') ? flipped : true;
-    this._height = DEFAULT_CARD_HEIGHT * (this._width / DEFAULT_CARD_WIDTH);
+    this._height = Math.round(DEFAULT_CARD_HEIGHT * (this._width / DEFAULT_CARD_WIDTH));
     this._ratio = this._width / DEFAULT_CARD_WIDTH;
     this._id = id;
     this._suit = suit;
@@ -273,28 +273,41 @@ class Card {
     this._view = null;
     this._state = ON_PILE;
     this._deck = deck;
+
+    let context = this;
+    this.flip = function() {
+      context._view.toggleClass('flipped');
+      this._flipped = !this._flipped;
+    }
   }
   view() {
     const context = this;
     let card = $('<div/>');
     card.attr('id', 'card-'+this._id);
-    //card.attr('data-suit', CARD_SUITS[this._suit]);
-    //card.attr('data-value', this._value);
-    //card.attr('data-name', this._name);
-    //card.attr('data-nature', this._nature);
-    //card.attr('data-behavior', this._behavior);
-    //card.attr('data-color', CARD_COLORS[this._color]);
     card.addClass('card');
     if(this._flipped) card.addClass('flipped');
     let backgroundPositionX = -this._background[1] * this._width + 'px';
     let backgroundPositionY = -this._background[0] * this._height + 'px';
     let backgroundPosition = backgroundPositionX + ' ' + backgroundPositionY;
     let backgroundSize = this._width * 10 +'px ' + this._height * 9 + 'px';
-    card.css('background-position', backgroundPosition);
-    card.css('background-size', backgroundSize);
+
+    let front = $('<div />').addClass('front');
+    let back = $('<div />').addClass('back');
+    front.css('background-position', backgroundPosition);
+    front.css('background-size', backgroundSize);
+    front.css('border-radius', 15 * this._ratio + 'px');
+
+    //back.css('background-position', 'right top');
+    back.css('background-size', backgroundSize);
+    back.css('border-radius', 15 * this._ratio + 'px');
+
     card.css('border-radius', 15 * this._ratio + 'px');
     card.width(this._width);
     card.height(this._height);
+
+    card.append(front);
+    card.append(back);
+
     this._view = $(card);
     this._view.click((e) => {
       let view = $(e.target);
@@ -304,10 +317,6 @@ class Card {
       document.dispatchEvent(dblClickEvent);
     });
     return this._view;
-  }
-  flip(view) {
-    view.toggleClass('flipped');
-    this._flipped = !this._flipped;
   }
 }
 
