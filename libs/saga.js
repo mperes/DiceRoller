@@ -300,11 +300,11 @@ class Card {
 
     let front = $('<div />').addClass('front');
     let back = $('<div />').addClass('back');
+
     front.css('background-position', backgroundPosition);
     front.css('background-size', backgroundSize);
     front.css('border-radius', 15 * this._ratio + 'px');
 
-    //back.css('background-position', 'right top');
     back.css('background-size', backgroundSize);
     back.css('border-radius', 15 * this._ratio + 'px');
 

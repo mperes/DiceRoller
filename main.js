@@ -168,4 +168,15 @@ function createNewSheet() {
   $('#custom_rolls_save input').click((e) => sheet.save());
 }
 
-const gameSession = new GameSession(false, 6);
+var gameSession;
+preLoadAndStart();
+
+function preLoadAndStart() {
+  $(document).ready(function() {
+    var tmpImg = new Image() ;
+    tmpImg.src = 'img/fate_deck.jpg';
+    tmpImg.onload = function() {
+      gameSession = new GameSession(false, 6);
+    };
+  });
+}
