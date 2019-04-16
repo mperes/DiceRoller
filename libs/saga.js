@@ -144,12 +144,12 @@ class Deck {
       let card = this._pile[this._pile.length-1];
       this._pile.pop();
       card._state = ON_TABLE;
-      card.flip(card._view);
-      this._table.push(card);
-      card._view.addClass('trump');
       this._container.table.append(card._view);
       card._view.css({ top: 0, left: 0});
       card._view.removeClass('even');
+      card._view.addClass('trump');
+      this._table.push(card);
+      card.flip(500);
       amount--;
     }
     this.setShadowSize(this._container.pile);
@@ -161,7 +161,7 @@ class Deck {
       let card = this._pile[this._pile.length-1];
       this._pile.pop();
       card._state = ON_HAND;
-      card.flip(card._view);
+      card.flip();
       hand.push(card);
       view.append(card._view);
       card._view.css({ top: 0, left: 0});
@@ -208,7 +208,7 @@ class Deck {
       top -= Math.random()/2 * this._cardRatio;
       left -= Math.random()/2 * this._cardRatio;
       randomCard._view.css({ top: Math.round(top), left: Math.round(left)});
-      randomCard.flip(randomCard._view);
+      randomCard.flip();
       this._container.pile.append(randomCard._view);
       this.setShadowSize(this._container.pile);
       this.setShadowSize(this._container.graveyard);
@@ -275,9 +275,16 @@ class Card {
     this._deck = deck;
 
     let context = this;
-    this.flip = function() {
-      context._view.toggleClass('flipped');
-      this._flipped = !this._flipped;
+    this.flip = function(delay) {
+      if(isNaN(delay)){
+        context._view.toggleClass('flipped');
+        this._flipped = !this._flipped;
+      } else {
+        setTimeout(function(){
+          context._view.toggleClass('flipped');
+          this._flipped = !this._flipped;
+        }, delay);
+      }
     }
   }
   view() {
