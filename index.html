@@ -7,8 +7,48 @@
   <meta name="description" content="Lost your Fate Deck? No problem, just use our TableTop. We also support online multiplayer to run remote RPG sessions."/>
   <title>TableTop: An Online Dragonlance 5th Age Saga Fate Deck</title>
 
-  <link rel="stylesheet" type="text/css" href="reset.css" />
-  <link rel="stylesheet" type="text/css" href="main.css" />
+  <script>
+  const timeStamp = Date.now();
+  const externalFiles = [
+    {file: 'reset.css', cacheBurst: false},
+    {file: 'main.css', cacheBurst: true},
+    {file: 'libs/jquery-3.3.1.min.js', cacheBurst: false},
+    {file: 'libs/saga.js', cacheBurst: true},
+    {file: 'libs/FileSaver.js', cacheBurst: false},
+    {file: 'libs/sheet.js', cacheBurst: false},
+    {file: 'main.js', cacheBurst: true}
+  ];
+  function appendFile(filename, cacheBurst) {
+    cacheBurst = (typeof variable === 'boolean') ? cacheBurst : false;
+    filename = (cacheBurst) ? filename + '?v=' + timeStamp : filename;
+    filetype = filename.split('.')[filename.split('.').length-1];
+    if (filetype=='js'){
+        var fileref=document.createElement('script')
+        fileref.setAttribute('type','text/javascript')
+        fileref.setAttribute('src', filename)
+    }
+    else if (filetype=='css') {
+        var fileref=document.createElement('link')
+        fileref.setAttribute('rel', 'stylesheet')
+        fileref.setAttribute('type', 'text/css')
+        fileref.setAttribute('href', filename)
+    }
+    if (typeof fileref!='undefined')
+        fileref.onload = function() {
+          appendNext();
+        }
+        document.getElementsByTagName('head')[0].appendChild(fileref)
+  }
+  function appendNext() {
+    if(externalFiles.length === 0) return;
+    let nextFile = externalFiles[0];
+    appendFile(nextFile.file, nextFile.cacheBurst);
+    externalFiles.splice(0, 1);
+  }
+
+  appendNext();
+  </script>
+
 </head>
 
 <body class="loading">
@@ -22,10 +62,5 @@
         <input id="player-turn-end" type="button" class="squareButton" value="End Turn"/>
       </div>
     </div>
-    <script src="libs/jquery-3.3.1.min.js"></script>
-    <script src="libs/saga.js"></script>
-    <script type="text/javascript" src="main.js"></script>
-    <script type="text/javascript" src="libs/FileSaver.js"></script>
-    <script type="text/javascript" src="libs/sheet.js"></script>
 </body>
 </html>
