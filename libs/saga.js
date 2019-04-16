@@ -335,23 +335,29 @@ class Player {
     this._playing = false;
     this._trumped = false;
     this._numberOfCardsUsed = 0;
+    this._maxNumberOfCardsPerAction = 1;
 
     const context = this;
     document.addEventListener('cardClickCallback', function (event) {
-      if(!context._playing) return;
       let card = event.detail.card;
       let view = event.detail.view;
       switch(card._state) {
         case ON_PILE:
+          if(!context._playing) return;
           if(context._numberOfCardsUsed === 0) return;
           context._deck.trump();
           this._trumped = true;
           break;
         case ON_HAND:
-          context._deck.play(context, card);
-          context._numberOfCardsUsed++;
+          if(context._numberOfCardsUsed < context._maxNumberOfCardsPerAction && context._playing) {
+            context._deck.play(context, card);
+            context._numberOfCardsUsed++;
+          } else {
+            card.flip();
+          }
           break;
         case ON_TABLE:
+          if(!context._playing) return;
           if(!this._trumped)
             context._deck.getBack(context, card);
           else
