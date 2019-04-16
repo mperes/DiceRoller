@@ -176,7 +176,7 @@ function preLoadAndStart() {
     var tmpImg = new Image() ;
     tmpImg.src = 'img/fate_deck.jpg';
     tmpImg.onload = function() {
-      $('body').addClass('ready');
+      $('body').removeClass('loading');
       gameSession = new GameSession(false, 6);
     };
   });
