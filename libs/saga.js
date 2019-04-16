@@ -144,12 +144,12 @@ class Deck {
       let card = this._pile[this._pile.length-1];
       this._pile.pop();
       card._state = ON_TABLE;
+      card.flip(500);
+      this._table.push(card);
+      card._view.addClass('trump');
       this._container.table.append(card._view);
       card._view.css({ top: 0, left: 0});
       card._view.removeClass('even');
-      card._view.addClass('trump');
-      this._table.push(card);
-      card.flip(500);
       amount--;
     }
     this.setShadowSize(this._container.pile);
