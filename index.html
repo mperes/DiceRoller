@@ -9,16 +9,11 @@
 
   <script>
   const apppVersion = Date.now();
-  const externalFiles = [
+  const externalFiles1 = [
     {file: 'reset.css', cacheBurst: false},
-    {file: 'main.css', cacheBurst: true},
-    {file: 'libs/jquery-3.3.1.min.js', cacheBurst: false},
-    {file: 'libs/saga.js', cacheBurst: true},
-    {file: 'libs/FileSaver.js', cacheBurst: false},
-    {file: 'libs/sheet.js', cacheBurst: false},
-    {file: 'main.js', cacheBurst: true}
+    {file: 'main.css', cacheBurst: true}
   ];
-  function appendFile(filename, cacheBurst) {
+  function appendFile(filename, cacheBurst, fileList) {
     cacheBurst = (typeof variable === 'boolean') ? cacheBurst : false;
     filename = (cacheBurst) ? filename + '?v=' + apppVersion : filename;
     filetype = filename.split('.')[filename.split('.').length-1];
@@ -35,18 +30,19 @@
     }
     if (typeof fileref!='undefined')
         fileref.onload = function() {
-          appendNext();
+          if(Array.isArray(fileList))
+            appendNext(fileList);
         }
         document.getElementsByTagName('head')[0].appendChild(fileref)
   }
-  function appendNext() {
-    if(externalFiles.length === 0) return;
-    let nextFile = externalFiles[0];
-    appendFile(nextFile.file, nextFile.cacheBurst);
-    externalFiles.splice(0, 1);
+  function appendNext(fileList) {
+    if(fileList.length === 0) return;
+    let nextFile = fileList[0];
+    appendFile(nextFile.file, nextFile.cacheBurst, fileList);
+    fileList.splice(0, 1);
   }
 
-  appendNext();
+  appendNext(externalFiles1);
   </script>
 
 </head>
@@ -62,5 +58,15 @@
         <input id="player-turn-end" type="button" class="squareButton" value="End Turn"/>
       </div>
     </div>
+    <script>
+    const externalFiles2 = [
+      {file: 'libs/jquery-3.3.1.min.js', cacheBurst: false},
+      {file: 'libs/saga.js', cacheBurst: true},
+      {file: 'libs/FileSaver.js', cacheBurst: false},
+      {file: 'libs/sheet.js', cacheBurst: false},
+      {file: 'main.js', cacheBurst: true}
+    ];
+    appendNext(externalFiles2);
+    </script>
 </body>
 </html>
