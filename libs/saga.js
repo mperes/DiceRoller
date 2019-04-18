@@ -7,8 +7,9 @@ const DECK_SIZE = 82;
 const DEFAULT_CARD_WIDTH = 262;
 const DEFAULT_CARD_HEIGHT = 375;
 
-const ACTION_PLAYER_JOIN = 0
-const ACTION_DM_JOIN = 1
+const ACTION_PLAYER_JOIN = 0;
+const ACTION_DM_JOIN = 1;
+const ACTION_PLAYER_SETUP = 2;
 
 class GameSession {
   constructor(displayName, handSize) {
@@ -17,6 +18,29 @@ class GameSession {
     this._sessionID = null;
     this._roomID = null;
     this._displayName = this.setDefaultIfEmpty(displayName, 'Jonh Doe');
+    this._container = {
+      playerList: $("#player-list")
+    }
+    this._dmSessionID = null;
+    this._handSize = handSize;
+
+    this._deck = null;
+    this._player = null;
+
+    const context = this;
+
+    document.addEventListener('playerListEvent', function (event) {
+      switch (event.detail.action) {
+        case ACTION_PLAYER_SETUP:
+          let deckOrder = context._deck.getOrder();
+          context.sendMultiplayerAction(ACTION_PLAYER_SETUP, deckOrder)
+          break;
+        default:
+
+      }
+    });
+
+    this._playerList = new PlayerList('#table-top');
   }
   loading(state) {
     if(state) {
@@ -35,6 +59,7 @@ class GameSession {
   createMultiPlayer(isDM) {
     this.loading(true);
     this._isDM = (typeof isDM === 'boolean') ? isDM : false;
+    if(isDM) this._handSize = 0;
     let multiplayerID = this.uuid();
     this.connect(multiplayerID);
     console.log('Session ID: ' + multiplayerID);
@@ -58,15 +83,17 @@ class GameSession {
         let action = (context._isDM) ? ACTION_DM_JOIN : ACTION_PLAYER_JOIN;
         context.sendMultiplayerAction(action);
         context.loading(false);
+        let isSelf = (parseInt(message.SID) === parseInt(context._sessionID)) ? true : false;
+        context._playerList.addPlayer(context._displayName, context._sessionID, context._handSize, context._isDM, isSelf);
       }
       else {
         if(parseInt(message.sID) === parseInt(context._sessionID)) return;
         switch (message.action) {
           case ACTION_PLAYER_JOIN:
-            console.log('Player ' + message.player + '(' + message.sID + ') has joined.');
+            context._playerList.addPlayer(message.displayName, message.sID, context._handSize, false, false);
             break;
           case ACTION_DM_JOIN:
-            console.log('DM ' + message.player + '(' + message.sID + ') has joined.');
+            context._playerList.addPlayer(message.displayName, message.sID, 0, false, false);
             break;
           default:
 
@@ -93,7 +120,7 @@ class GameSession {
     if(this._ws) {
       let command = {
           to: this._roomID,
-          player: this._displayName,
+          displayName: this._displayName,
           fromDM: this._isDM,
           action: action,
           details:  this.setDefaultIfEmpty(details, ''),
@@ -145,6 +172,13 @@ class Deck {
       copy.push(card);
     });
     return copy;
+  }
+  getOrder() {
+    let order = [];
+    this._pile.forEach((card) => {
+      order.push(card._id);
+    });
+    return order.join(',');
   }
   play(player, card) {
     let cardIndex = this.getCardIndex(player._hand, card._id);
@@ -426,5 +460,37 @@ class Player {
     this._playing = false;
     this._trumped = false;
     this._numberOfCardsUsed = 0;
+  }
+}
+
+class PlayerList {
+  constructor(container) {
+    this._view = $('<div id="player-list" />');
+    this._list = [];
+    $(container).prepend(this._view);
+  }
+  addPlayer(displayName, sessionID, handSize, isDM, isSelf) {
+    let context = this;
+    this._list.push({displayName: displayName, sessionID: sessionID, handSize: handSize, isDM: isDM, isSelf: isSelf});
+    let thumbnail = $('<div class="thumbnail" />').text(displayName);
+    let actions = $('<div class="actions" />');
+    let setupAction = $('<div class="setup" data-id="" />').click((e) => {
+      let view = $(e.target);
+      let setupPlayerEvent = new CustomEvent('playerListEvent',{
+        detail: { action: ACTION_PLAYER_SETUP, displayName, sessionID: sessionID, handSize: handSize }
+      });
+      document.dispatchEvent(setupPlayerEvent);
+    });
+    actions.append(setupAction);
+    let newPlayer = $('<div class="player"/>').append(thumbnail).append(actions);
+    if(isSelf) newPlayer.addClass('self');
+    if(isDM) {
+      this._dmSessionID = sessionID;
+      newPlayer.addClass('isDM');
+      this._list.push(newPlayer);
+      this._view.prepend(newPlayer);
+    } else {
+      this._view.append(newPlayer);
+    }
   }
 }
