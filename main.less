@@ -390,7 +390,7 @@ html, body {
 }
 
 body {
-  background-image: url(img/background.jpg);
+  font-family: 'Quicksand', sans-serif;
 }
 
 input.squareButton {
@@ -423,6 +423,7 @@ input.squareButton.primary {
   position: relative;
   height: 100%;
   overflow: hidden;
+  background-image: url(img/background.jpg);
   .card {
     cursor: pointer;
     display: inline-block;
@@ -557,5 +558,39 @@ input.squareButton.primary {
         display: block;
       }
     }
+  }
+}
+
+#tabletop-loading-blocker {
+  background: rgba(0,0,0,0.35);
+  cursor: default;
+  position:fixed;
+  height: 100%;
+  width: 100%;
+  top: 0;
+  left: 0;
+  z-index: 10;
+}
+#tabletop-loading-spinner {
+  position:fixed;
+  height: 100%;
+  width: 100%;
+  top: 0;
+  left: 0;
+  background-image: url('img/orb.gif');
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-size: auto 20%;
+  mix-blend-mode: screen;
+  z-index: 15;
+  &:after {
+    content: 'Please wait...';
+    color: white;
+    position: absolute;
+    left: 50%;
+    top: 60%;
+    font-size: 3rem;
+    font-weight: 100;
+    transform: translateX(-50%) translateY(20px);
   }
 }

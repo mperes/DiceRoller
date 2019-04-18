@@ -7,9 +7,109 @@ const DECK_SIZE = 82;
 const DEFAULT_CARD_WIDTH = 262;
 const DEFAULT_CARD_HEIGHT = 375;
 
+const ACTION_PLAYER_JOIN = 0
+const ACTION_DM_JOIN = 1
+
 class GameSession {
-  constructor(isDM, handSize) {
-    this._flipped = (typeof isDM === 'boolean') ? isDM : false;
+  constructor(displayName, handSize) {
+    this._isDM = (typeof isDM === 'boolean') ? isDM : false;
+    this._ws = null;
+    this._sessionID = null;
+    this._roomID = null;
+    this._displayName = this.setDefaultIfEmpty(displayName, 'Jonh Doe');
+  }
+  loading(state) {
+    if(state) {
+      var loadingBlocker = $('<div id="tabletop-loading-blocker" />').click(function() {});
+      var loadingSpinner = $('<div id="tabletop-loading-spinner" />');
+      $('body').append(loadingBlocker).append(loadingSpinner);
+    } else {
+      $('#tabletop-loading-blocker, #tabletop-loading-spinner').remove();
+    }
+  }
+  setDefaultIfEmpty(value, defaultValue) {
+    if(!(typeof displayName === 'string')) return defaultValue;
+    if(value.trim() === '') return defaultValue;
+    return value;
+  }
+  createMultiPlayer(isDM) {
+    this.loading(true);
+    this._isDM = (typeof isDM === 'boolean') ? isDM : false;
+    let multiplayerID = this.uuid();
+    this.connect(multiplayerID);
+    console.log('Session ID: ' + multiplayerID);
+  }
+  joinMultiPlayer(isDM) {
+    this._isDM = (typeof isDM === 'boolean') ? isDM : false;
+    let multiplayerID = prompt("Please enter your Session ID", "");
+    if(multiplayerID === '') return;
+    this.loading(true);
+    this.connect(multiplayerID);
+  }
+  connect(multiplayerID) {
+    let context = this;
+    context._ws = new WebSocket('ws://achex.ca:4010');
+    context._ws.onmessage = function(evt){
+      let message = JSON.parse(evt.data);
+      if(message.hasOwnProperty('SID') && !message.hasOwnProperty('action')) {
+        //Player has signed-up
+        context._sessionID = message['SID'];
+        if(context._isDM) context.setupDM();
+        let action = (context._isDM) ? ACTION_DM_JOIN : ACTION_PLAYER_JOIN;
+        context.sendMultiplayerAction(action);
+        context.loading(false);
+      }
+      else {
+        if(parseInt(message.sID) === parseInt(context._sessionID)) return;
+        switch (message.action) {
+          case ACTION_PLAYER_JOIN:
+            console.log('Player ' + message.player + '(' + message.sID + ') has joined.');
+            break;
+          case ACTION_DM_JOIN:
+            console.log('DM ' + message.player + '(' + message.sID + ') has joined.');
+            break;
+          default:
+
+        }
+      }
+    };
+    context._ws.onclose= function(evt){
+      console.log('log: Diconnected');
+      jQuery('body').removeClass('signed-in');
+    };
+    context._ws.onerror= function(evt){
+      console.log('log: Error');
+    };
+    context._ws.onopen= function(evt){
+      console.log('log: Connected');
+      let id = 'TableTop_' + multiplayerID;
+      this.send('{"setID":"'+id+'", "passwd":"none"}');
+      context._roomID = id;
+      $('#multiplayer .sign-off p').text(multiplayerID);
+      jQuery('body').addClass('signed-in');
+    };
+  }
+  sendMultiplayerAction(action, details, callback) {
+    if(this._ws) {
+      let command = {
+          to: this._roomID,
+          player: this._displayName,
+          fromDM: this._isDM,
+          action: action,
+          details:  this.setDefaultIfEmpty(details, ''),
+          callback: this.setDefaultIfEmpty(callback, '')
+      };
+      this._ws.send(JSON.stringify(command));
+    }
+  }
+  uuid() {
+    return Math.floor(Math.random()*1E16);
+  }
+  setupDM() {
+    this._deck = new Deck('#play-area', '#deck-pile', '#deck-graveyard', 150);
+    this._player = new Player(true, this._deck, 0, '#player-hand');
+  }
+  setupPlayer() {
     this._deck = new Deck('#play-area', '#deck-pile', '#deck-graveyard', 150);
     this._player = new Player(isDM, this._deck, handSize, '#player-hand');
   }
@@ -326,10 +426,5 @@ class Player {
     this._playing = false;
     this._trumped = false;
     this._numberOfCardsUsed = 0;
-  }
-  renderHand() {
-    this._hand.forEach((card) => {
-      console.log(card);
-    });
   }
 }
