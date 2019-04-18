@@ -136,16 +136,22 @@ class Deck {
     player._hand.splice(cardIndex, 1);
     card._state = ON_TABLE;
     this._table.push(card);
+    card._view.removeClass('ready');
     this._container.table.append(card._view);
+    setTimeout(function(){
+      card._view.addClass('ready');
+      if(card._flipped) setTimeout(function() { card.flip(false); }, 700);
+    }, 100 );
   }
   trump() {
     if(this._table.length <= 1 || this._table[this._table.length-1]._suit === this._table[this._table.length-2]._suit) {
       let card = this._pile[this._pile.length-1];
       this._pile.pop();
       card._state = ON_TABLE;
-      card.flip(500);
+      setTimeout(card.flip, 500);
       this._table.push(card);
       card._view.addClass('trump');
+      card._view.addClass('ready');
       this._container.table.append(card._view);
       card._view.css({ top: 0, left: 0});
       card._view.removeClass('even');
@@ -164,6 +170,9 @@ class Deck {
       view.append(card._view);
       card._view.css({ top: 0, left: 0});
       card._view.removeClass('even');
+      setTimeout(function(){
+        card._view.addClass('ready');
+      }, amount * 100);
       amount--;
     }
     this.setShadowSize(this._container.pile);
@@ -174,7 +183,13 @@ class Deck {
     this._table.splice(cardIndex, 1);
     card._state = ON_HAND;
     player._hand.push(card);
-    player._container.hand.append(card._view);
+    card._view.removeClass('ready');
+    setTimeout(function(){
+      player._container.hand.append(card._view);
+    }, 500);
+    setTimeout(function(){
+      card._view.addClass('ready');
+    }, 700);
   }
   sendCardFromTableToGraveyard() {
     let top = (this._graveyard.length > 0) ? this._container.graveyard.children().last().position().top : 0;
@@ -190,6 +205,8 @@ class Deck {
       left -= Math.random()/2 * this._cardRatio;
       card._view.css({ top: Math.round(top), left: Math.round(left)});
       this._container.graveyard.append(card._view);
+      card._view.removeClass('trump');
+      card._view.removeClass('ready');
     }
     this.setShadowSize(this._container.graveyard);
   }
@@ -273,15 +290,18 @@ class Card {
     this._deck = deck;
 
     let context = this;
-    this.flip = function(delay) {
-      if(isNaN(delay)){
+    this.flip = function(state) {
+      if (typeof state === 'boolean') {
+        if(state) {
+          context._view.addClass('flipped');
+          this._flipped = true;
+        } else {
+          context._view.removeClass('flipped');
+          this._flipped = false;
+        }
+      } else {
         context._view.toggleClass('flipped');
         this._flipped = !this._flipped;
-      } else {
-        setTimeout(function(){
-          context._view.toggleClass('flipped');
-          this._flipped = !this._flipped;
-        }, delay);
       }
     }
   }
@@ -346,7 +366,7 @@ class Player {
           if(!context._playing) return;
           if(context._numberOfCardsUsed === 0) return;
           context._deck.trump();
-          this._trumped = true;
+          context._trumped = true;
           break;
         case ON_HAND:
           if(context._numberOfCardsUsed < context._maxNumberOfCardsPerAction && context._playing) {
@@ -358,10 +378,10 @@ class Player {
           break;
         case ON_TABLE:
           if(!context._playing) return;
-          if(!this._trumped)
+          if(!context._trumped) {
             context._deck.getBack(context, card);
-          else
-            card.flip(view);
+            context._numberOfCardsUsed--;
+          }
           break;
         default:
       }
