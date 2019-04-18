@@ -8,15 +8,20 @@
   <title>TableTop: An Online Dragonlance 5th Age Saga Fate Deck</title>
 
   <script>
-  const apppVersion = Date.now();
+  const appVersion = Date.now();
   const externalFiles1 = [
     {file: 'reset.css', cacheBurst: false},
-    {file: 'main.css', cacheBurst: true}
+    {file: 'main.css', cacheBurst: true},
+    {file: 'libs/jquery-3.3.1.min.js', cacheBurst: false},
+    {file: 'libs/saga.js', cacheBurst: true},
+    {file: 'libs/FileSaver.js', cacheBurst: false},
+    {file: 'libs/sheet.js', cacheBurst: false},
+    {file: 'main.js', cacheBurst: true}
   ];
   function appendFile(filename, cacheBurst, fileList) {
-    cacheBurst = (typeof variable === 'boolean') ? cacheBurst : false;
-    filename = (cacheBurst) ? filename + '?v=' + apppVersion : filename;
+    cacheBurst = (typeof cacheBurst === 'boolean') ? cacheBurst : false;
     filetype = filename.split('.')[filename.split('.').length-1];
+    filename = (cacheBurst) ? filename + '?v=' + appVersion : filename;
     if (filetype=='js'){
         var fileref=document.createElement('script')
         fileref.setAttribute('type','text/javascript')
@@ -58,15 +63,5 @@
         <input id="player-turn-end" type="button" class="squareButton" value="End Turn"/>
       </div>
     </div>
-    <script>
-    const externalFiles2 = [
-      {file: 'libs/jquery-3.3.1.min.js', cacheBurst: false},
-      {file: 'libs/saga.js', cacheBurst: true},
-      {file: 'libs/FileSaver.js', cacheBurst: false},
-      {file: 'libs/sheet.js', cacheBurst: false},
-      {file: 'main.js', cacheBurst: true}
-    ];
-    appendNext(externalFiles2);
-    </script>
 </body>
 </html>
