@@ -112,9 +112,16 @@ class GameSession {
             break;
           case ACTION_PLAYER_SETUP:
             context.setupPlayer(message.details);
+            context.sendSingleplayerAction(message.sID, ACTION_OK, ACTION_PLAYER_SETUP.toString());
             break;
           case ACTION_OK:
-            context._playerList.addPlayer(message.displayName, message.sID, 0, false, false);
+            switch (parseInt(message.details)) {
+              case ACTION_PLAYER_SETUP:
+                //Do something with player ready
+                break;
+              default:
+                console.log(message.displayName +' ('+ message.sID +') - '+message.details);
+            }
             break;
           default:
 
