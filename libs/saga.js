@@ -68,18 +68,18 @@ class GameSession {
     return value;
   }
   createMultiPlayer(isDM) {
-    this.setupDM();
-    // this.loading(true);
-    // this._isDM = (typeof isDM === 'boolean') ? isDM : false;
-    // if(isDM) this._handSize = 0;
-    // let multiplayerID = this.uuid();
-    // this.connect(multiplayerID);
-    // console.log('Session ID: ' + multiplayerID);
+    //this.setupDM();
+    this.loading(true);
+    this._isDM = (typeof isDM === 'boolean') ? isDM : false;
+    if(isDM) this._handSize = 0;
+    let multiplayerID = this.uuid();
+    this.connect(multiplayerID);
+    console.log('Session ID: ' + multiplayerID);
   }
   joinMultiPlayer(isDM) {
     this._isDM = (typeof isDM === 'boolean') ? isDM : false;
     let multiplayerID = prompt("Please enter your Session ID", "");
-    if(multiplayerID === '') return;
+    if(multiplayerID.trim() === '') return;
     this.loading(true);
     this.connect(multiplayerID);
   }
@@ -141,9 +141,11 @@ class GameSession {
     context._ws.onclose= function(evt){
       console.log('log: Diconnected');
       $('#container').addClass('logged-off');
+      context.loading(false);
     };
     context._ws.onerror= function(evt){
       console.log('log: Error');
+      context.loading(false);
     };
     context._ws.onopen= function(evt){
       console.log('log: Connected');
