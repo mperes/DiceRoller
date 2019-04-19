@@ -14,6 +14,7 @@ const ACTION_OK = 3;
 const ACTION_ADD_DM = 4;
 const ACTION_ADD_PLAYER = 5;
 const ACTION_DRAW_TO_TABLE = 6;
+const ACTION_SEND_TABLE_TO_GRAVEYARD = 7;
 
 
 //*---------------------------------------------------------------------
@@ -70,6 +71,7 @@ class GameSession {
   }
   createMultiPlayer(isDM) {
     //this.setupDM();
+    //$('#container').removeClass('logged-off');
     this.loading(true);
     this._isDM = (typeof isDM === 'boolean') ? isDM : false;
     if(isDM) this._handSize = 0;
@@ -117,7 +119,12 @@ class GameSession {
             break;
           case ACTION_DRAW_TO_TABLE:
             let amount = parseInt(message.details);
-            context.drawToTable(amount, false);
+            context._deck.drawToTable(amount, false);
+            context.sendSingleplayerAction(message.sID, ACTION_OK, 'ACTION_DRAW_TO_TABLE');
+            break;
+          case ACTION_SEND_TABLE_TO_GRAVEYARD:
+            context._deck.sendCardFromTableToGraveyard(false);
+            context.sendSingleplayerAction(message.sID, ACTION_OK, 'ACTION_SEND_TABLE_TO_GRAVEYARD');
             break;
           case ACTION_ADD_PLAYER:
             context._playerList.addPlayer(message.displayName, message.sID, context._handSize, false, false);
@@ -127,16 +134,10 @@ class GameSession {
             break;
           case ACTION_PLAYER_SETUP:
             context.setupPlayer(message.details);
-            context.sendSingleplayerAction(message.sID, ACTION_OK, ACTION_PLAYER_SETUP.toString());
+            context.sendSingleplayerAction(message.sID, ACTION_OK, 'ACTION_PLAYER_SETUP');
             break;
           case ACTION_OK:
-            switch (parseInt(message.details)) {
-              case ACTION_PLAYER_SETUP:
-                //Do something with player ready
-                break;
-              default:
-                console.log(message.displayName +' ('+ message.sID +') - '+message.details);
-            }
+            console.log(message.displayName +' ('+ message.sID +') - '+message.details);
             break;
           default:
 
@@ -286,12 +287,15 @@ class Deck {
   dmPlay() {
     let amount = prompt("How many card would you like to draw?", "");
     if(amount.trim() === '') return;
-    this.drawToTable(parseInt(amount));
+    this.drawToTable(parseInt(amount), true);
   }
   drawToTable(amount, propagate) {
-    propagate = (typeof propagate === 'undefined') ? false : propagate;
     let total = amount;
     if(isNaN(amount)) amount = 1;
+    propagate = (typeof propagate === 'undefined') ? false : propagate;
+    if(propagate) {
+      this._gameSession.sendMultiplayerAction(ACTION_DRAW_TO_TABLE, total.toString());
+    }
     while(amount > 0) {
       let card = this._pile[this._pile.length-1];
       this._pile.pop();
@@ -309,9 +313,6 @@ class Deck {
     }
     this.setShadowSize(this._container.pile);
     this.shuffleGraveyardIntoPile();
-    if(propagate) {
-      this._gameSession.sendMultiplayerAction(action, total);
-    }
   }
   draw(hand, view, amount) {
     if(isNaN(amount)) amount = 1;
@@ -345,7 +346,11 @@ class Deck {
       card._view.addClass('ready');
     }, 700);
   }
-  sendCardFromTableToGraveyard() {
+  sendCardFromTableToGraveyard(propagate) {
+    propagate = (typeof propagate === 'undefined') ? false : propagate;
+    if(propagate) {
+      this._gameSession.sendMultiplayerAction(ACTION_SEND_TABLE_TO_GRAVEYARD);
+    }
     let top = (this._graveyard.length > 0) ? this._container.graveyard.children().last().position().top : 0;
     let left = (this._graveyard.length > 0) ? this._container.graveyard.children().last().position().left : 0;
     for(let i=this._table.length-1; i>=0; i--) {
@@ -680,7 +685,7 @@ class DmToolbar {
     this._deck = deck;
 
     this.discardTable = function() {
-      context._deck.sendCardFromTableToGraveyard();
+      context._deck.sendCardFromTableToGraveyard(true);
     }
 
     this.draw = function() {
