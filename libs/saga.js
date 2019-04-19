@@ -88,7 +88,7 @@ class GameSession {
   }
   connect(multiplayerID) {
     let context = this;
-    context._ws = new WebSocket('ws://achex.ca:4010');
+    context._ws = new WebSocket('wss://cloud.achex.ca/tabletop');
     context._ws.onmessage = function(evt){
       let message = JSON.parse(evt.data);
       if(message.hasOwnProperty('SID') && !message.hasOwnProperty('action')) {
