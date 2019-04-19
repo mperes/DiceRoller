@@ -13,6 +13,7 @@ const ACTION_PLAYER_SETUP = 2;
 const ACTION_OK = 3;
 const ACTION_ADD_DM = 4;
 const ACTION_ADD_PLAYER = 5;
+const ACTION_DRAW_TO_TABLE = 6;
 
 
 //*---------------------------------------------------------------------
@@ -114,6 +115,10 @@ class GameSession {
             context._playerList.addPlayer(message.displayName, message.sID, 0, true, false);
             context.sendSingleplayerAction(message.sID, ACTION_ADD_PLAYER);
             break;
+          case ACTION_DRAW_TO_TABLE:
+            let amount = parseInt(message.details);
+            context.drawToTable(amount, false);
+            break;
           case ACTION_ADD_PLAYER:
             context._playerList.addPlayer(message.displayName, message.sID, context._handSize, false, false);
             break;
@@ -186,11 +191,11 @@ class GameSession {
     return Math.floor(Math.random()*1E16);
   }
   setupDM() {
-    this._deck = new Deck('#play-area', '#deck-pile', '#deck-graveyard', 150, []);
+    this._deck = new Deck(this, '#play-area', '#deck-pile', '#deck-graveyard', 150, []);
     this._player = new DungeonMaster(this._deck);
   }
   setupPlayer(deckOrder) {
-    this._deck = new Deck('#play-area', '#deck-pile', '#deck-graveyard', 150, deckOrder.split(','));
+    this._deck = new Deck(this, '#play-area', '#deck-pile', '#deck-graveyard', 150, deckOrder.split(','));
     this._player = new Player(false, this._deck, this._handSize, '#player-hand');
   }
 }
@@ -201,7 +206,8 @@ class GameSession {
 //* By Miguel Peres (m.peres@gmail.com)
 //*---------------------------------------------------------------------
 class Deck {
-  constructor(table, pile, graveyard, cardWidth, deckOrder) {
+  constructor(gameSession, table, pile, graveyard, cardWidth, deckOrder) {
+    this._gameSession = gameSession;
     this._container = {table: $(table), pile: $(pile), graveyard: $(graveyard)};
     this._cardWidth = (isNaN(cardWidth)) ? DEFAULT_CARD_WIDTH : cardWidth;
     this._cardHeight = Math.round(DEFAULT_CARD_HEIGHT * (this._cardWidth / DEFAULT_CARD_WIDTH));
@@ -282,7 +288,8 @@ class Deck {
     if(amount.trim() === '') return;
     this.drawToTable(parseInt(amount));
   }
-  drawToTable(amount) {
+  drawToTable(amount, propagate) {
+    propagate = (typeof propagate === 'undefined') ? false : propagate;
     let total = amount;
     if(isNaN(amount)) amount = 1;
     while(amount > 0) {
@@ -302,6 +309,9 @@ class Deck {
     }
     this.setShadowSize(this._container.pile);
     this.shuffleGraveyardIntoPile();
+    if(propagate) {
+      this._gameSession.sendMultiplayerAction(action, total);
+    }
   }
   draw(hand, view, amount) {
     if(isNaN(amount)) amount = 1;
