@@ -187,7 +187,6 @@ function preLoadAndStart() {
         gameSession.joinMultiPlayer(isDM());
       });
       $('#multiplayer-create').click((e)=> {
-        debugger;
         gameSession.createMultiPlayer(isDM());
       });
     };
