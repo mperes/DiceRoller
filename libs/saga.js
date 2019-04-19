@@ -14,6 +14,11 @@ const ACTION_OK = 3;
 const ACTION_ADD_DM = 4;
 const ACTION_ADD_PLAYER = 5;
 
+
+//*---------------------------------------------------------------------
+//* Game Session Class
+//* By Miguel Peres (m.peres@gmail.com)
+//*---------------------------------------------------------------------
 class GameSession {
   constructor(displayName, handSize) {
     this._isDM = (typeof isDM === 'boolean') ? isDM : false;
@@ -45,6 +50,9 @@ class GameSession {
 
     this._playerList = new PlayerList('#table-top');
   }
+  setName(name) {
+    this._displayName = this.setDefaultIfEmpty(name, 'Jonh Doe');
+  }
   loading(state) {
     if(state) {
       var loadingBlocker = $('<div id="tabletop-loading-blocker" />').click(function() {});
@@ -60,12 +68,13 @@ class GameSession {
     return value;
   }
   createMultiPlayer(isDM) {
-    this.loading(true);
-    this._isDM = (typeof isDM === 'boolean') ? isDM : false;
-    if(isDM) this._handSize = 0;
-    let multiplayerID = this.uuid();
-    this.connect(multiplayerID);
-    console.log('Session ID: ' + multiplayerID);
+    this.setupDM();
+    // this.loading(true);
+    // this._isDM = (typeof isDM === 'boolean') ? isDM : false;
+    // if(isDM) this._handSize = 0;
+    // let multiplayerID = this.uuid();
+    // this.connect(multiplayerID);
+    // console.log('Session ID: ' + multiplayerID);
   }
   joinMultiPlayer(isDM) {
     this._isDM = (typeof isDM === 'boolean') ? isDM : false;
@@ -88,6 +97,7 @@ class GameSession {
         context.loading(false);
         let isSelf = (parseInt(message.SID) === parseInt(context._sessionID)) ? true : false;
         context._playerList.addPlayer(context._displayName, context._sessionID, context._handSize, context._isDM, isSelf);
+        $('#container').removeClass('logged-off');
       }
       else {
         if(parseInt(message.sID) === parseInt(context._sessionID)) return;
@@ -130,7 +140,7 @@ class GameSession {
     };
     context._ws.onclose= function(evt){
       console.log('log: Diconnected');
-      jQuery('body').removeClass('signed-in');
+      $('#container').addClass('logged-off');
     };
     context._ws.onerror= function(evt){
       console.log('log: Error');
@@ -175,7 +185,7 @@ class GameSession {
   }
   setupDM() {
     this._deck = new Deck('#play-area', '#deck-pile', '#deck-graveyard', 150, []);
-    this._player = new Player(true, this._deck, 0, '#player-hand');
+    this._player = new DungeonMaster(this._deck);
   }
   setupPlayer(deckOrder) {
     this._deck = new Deck('#play-area', '#deck-pile', '#deck-graveyard', 150, deckOrder.split(','));
@@ -183,6 +193,11 @@ class GameSession {
   }
 }
 
+
+//*---------------------------------------------------------------------
+//* Deck Class
+//* By Miguel Peres (m.peres@gmail.com)
+//*---------------------------------------------------------------------
 class Deck {
   constructor(table, pile, graveyard, cardWidth, deckOrder) {
     this._container = {table: $(table), pile: $(pile), graveyard: $(graveyard)};
@@ -259,6 +274,32 @@ class Deck {
       this.setShadowSize(this._container.pile);
       this.shuffleGraveyardIntoPile();
     }
+  }
+  dmPlay() {
+    let amount = prompt("How many card would you like to draw?", "");
+    if(amount.trim() === '') return;
+    this.drawToTable(parseInt(amount));
+  }
+  drawToTable(amount) {
+    let total = amount;
+    if(isNaN(amount)) amount = 1;
+    while(amount > 0) {
+      let card = this._pile[this._pile.length-1];
+      this._pile.pop();
+      card._state = ON_TABLE;
+      setTimeout(card.flip, (total-amount)*500 + 500);
+      this._table.push(card);
+      card._view.addClass('dmPlay');
+      card._view.addClass('ready');
+      this._container.table.append(card._view);
+      card._view.css({ top: 0, left: 0});
+      card._view.removeClass('even');
+      this.setShadowSize(this._container.pile);
+      this.shuffleGraveyardIntoPile();
+      amount--;
+    }
+    this.setShadowSize(this._container.pile);
+    this.shuffleGraveyardIntoPile();
   }
   draw(hand, view, amount) {
     if(isNaN(amount)) amount = 1;
@@ -372,6 +413,11 @@ class Deck {
   }
 }
 
+
+//*---------------------------------------------------------------------
+//* Single card
+//* By Miguel Peres (m.peres@gmail.com)
+//*---------------------------------------------------------------------
 class Card {
   constructor(id, suit, value, name, nature, behavior, color, background, width, flipped, deck) {
     this._width = (isNaN(width)) ? DEFAULT_CARD_WIDTH : width;
@@ -446,6 +492,11 @@ class Card {
   }
 }
 
+
+//*---------------------------------------------------------------------
+//* Player
+//* By Miguel Peres (m.peres@gmail.com)
+//*---------------------------------------------------------------------
 class Player {
   constructor(isDM, deck, handSize, handContainer) {
     this.isDM = isDM;
@@ -515,6 +566,62 @@ class Player {
   }
 }
 
+
+//*---------------------------------------------------------------------
+//* Narrator
+//* By Miguel Peres (m.peres@gmail.com)
+//*---------------------------------------------------------------------
+class DungeonMaster {
+  constructor(deck) {
+    this.isDM = true;
+    this._deck = deck;
+    this._toolbar = new DmToolbar(this._deck, '#table-top');
+
+    const context = this;
+    document.addEventListener('cardClickCallback', function (event) {
+      let card = event.detail.card;
+      let view = event.detail.view;
+      switch(card._state) {
+        case ON_PILE:
+          context._deck.dmPlay();
+          break;
+        case ON_GRAVEYARD:
+          break;
+        case ON_TABLE:
+          break;
+        default:
+      }
+    }, false);
+
+    this.setupTurnButton();
+  }
+  setupTurnButton() {
+    const context = this;
+    $('#player-turn-begin').click((e) => {
+      $('#player-turn').toggleClass('playing');
+      this.beginTurn();
+    });
+    $('#player-turn-end').click((e) => {
+      $('#player-turn').toggleClass('playing');
+      this.endTurn();
+    });
+  }
+  beginTurn() {
+    this._playing = true;
+  }
+  endTurn() {
+    this._deck.draw(this._hand, this._container.hand, this._numberOfCardsUsed);
+    this._deck.sendCardFromTableToGraveyard();
+    this._playing = false;
+    this._trumped = false;
+    this._numberOfCardsUsed = 0;
+  }
+}
+
+//*---------------------------------------------------------------------
+//* Player List
+//* By Miguel Peres (m.peres@gmail.com)
+//*---------------------------------------------------------------------
 class PlayerList {
   constructor(container) {
     this._view = $('<div id="player-list" />');
@@ -548,5 +655,32 @@ class PlayerList {
   index(sessionID) {
     let index = this._list.findIndex(player => parseInt(player.sessionID) === parseInt(sessionID));
     return index;
+  }
+}
+
+//*---------------------------------------------------------------------
+//* Dungeon Master Toolbar
+//* By Miguel Peres (m.peres@gmail.com)
+//*---------------------------------------------------------------------
+class DmToolbar {
+  constructor(deck, container) {
+    const context = this;
+    this._deck = deck;
+
+    this.discardTable = function() {
+      context._deck.sendCardFromTableToGraveyard();
+    }
+
+    this.draw = function() {
+      context._deck.dmPlay();
+    }
+
+    this._view = $('<div id="dm-toolbar" />');
+    this._view.append(this._getActionButton('dm-draw', 'Draw Card', this.draw));
+    this._view.append(this._getActionButton('dm-table-clear', 'Discard Table', this.discardTable));
+    $(container).prepend(this._view);
+  }
+  _getActionButton(id, label, action) {
+    return $('<div id="'+id+'" class="action"><span class="label">'+label+'</span></div>').click(action);
   }
 }

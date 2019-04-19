@@ -173,11 +173,27 @@ preLoadAndStart();
 
 function preLoadAndStart() {
   $(document).ready(function() {
+
     var tmpImg = new Image() ;
     tmpImg.src = 'img/fate_deck.jpg';
     tmpImg.onload = function() {
       $('body').removeClass('loading');
+      $('#container').show();
       gameSession = new GameSession(false, 6);
+      $('#multiplayer-player').change((e)=> {
+        gameSession.setName($(e.target).val());
+      });
+      $('#multiplayer-join').click((e)=> {
+        gameSession.joinMultiPlayer(isDM());
+      });
+      $('#multiplayer-create').click((e)=> {
+        debugger;
+        gameSession.createMultiPlayer(isDM());
+      });
     };
   });
+}
+
+function isDM() {
+  return $('#multiplayer-isdm input').is(':checked');
 }

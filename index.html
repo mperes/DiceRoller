@@ -55,6 +55,19 @@
 </head>
 
 <body class="loading">
+  <div id="container" class="logged-off" style="display:none;">
+    <div id="welcome">
+      <div id="appTitle">
+        <h1>TableTop</h1>
+        <h2>An Online Dragonlance 5th Age Saga Fate Deck</h2>
+      </div>
+      <div id="multiplayer">
+        <input type="text" id="multiplayer-player" value="Jonh Doe" />
+        <input id="multiplayer-join" type="button"class="squareButton primary" value="Join" />
+        <input id="multiplayer-create" type="button"class="squareButton" value="Create" />
+        <div id="multiplayer-isdm"><input type="checkbox" />Dungeon Master?</div>
+      </div>
+    </div>
     <div id="table-top">
       <div id="play-area"></div>
       <div id="deck-pile"></div>
@@ -65,5 +78,6 @@
         <input id="player-turn-end" type="button" class="squareButton" value="End Turn"/>
       </div>
     </div>
+  </div>
 </body>
 </html>

@@ -384,13 +384,28 @@
   .deck-shadow-loop(@i - 1);
 }
 
-html, body {
+html, body, #container {
   height: 100%;
   min-height: 100%;
 }
 
 body {
   font-family: 'Quicksand', sans-serif;
+  overflow: hidden;
+}
+
+body.loading {
+  position: relative;
+  &:before {
+    position: absolute;
+    content: 'Loading... Please wait';
+    display: inline-block;
+    top:50%;
+    left: 50%;
+    font-size: 1.5em;
+    white-space: nowrap;
+    transform: translateX(-50%) translateY(-50%);
+  }
 }
 
 input.squareButton {
@@ -418,6 +433,66 @@ input.squareButton {
 input.squareButton.primary {
   background-color: @primaryColor;
   font-weight: bold;
+}
+
+
+#container {
+  position: relative;
+  top: -100%;
+  transition: top 500ms ease-out;
+  transform: translateZ(0);
+}
+#container.logged-off {
+  top: 0;
+}
+
+
+#welcome {
+  position: relative;
+  height: 100%;
+  overflow: hidden;
+  background: #b3b4b7;
+  #appTitle {
+    position: absolute;
+    left: 50%;
+    top: 30%;
+    transform: translateX(-50%);
+    text-align: center;
+    opacity: 0.8;
+    h1 {
+      font-size: 8em;
+    }
+    h2 {
+      margin-top: -5px;
+    }
+  }
+  #multiplayer {
+    position: absolute;
+    white-space: nowrap;
+    left: 50%;
+    top: 30%;
+    transform: translateX(-50%) translateY(230px);
+    #multiplayer-isdm {
+      margin-top: 10px;
+      font-size: 11px;
+      input {
+        margin: 0 5px 0 0
+      }
+    }
+    #multiplayer-player {
+      width: 100%;
+      display: block;
+      margin-bottom: 10px;
+      box-sizing: border-box;
+      border: 0;
+      padding: 10px;
+      font-size: 16px;
+      border-radius: 5px;
+    }
+    .squareButton {
+      width: 150px;
+    }
+  }
 }
 
 #table-top {
@@ -449,6 +524,40 @@ input.squareButton.primary {
       }
       .back {
         transform: translateZ(0) rotateY(360deg);
+      }
+    }
+  }
+  #dm-toolbar {
+    @color: #a2a2a2;
+    position: absolute;
+    left: 50%;
+    bottom: 10px;
+    background: @color;
+    padding: 10px 5px 10px 5px;
+    border-radius: 5px;
+    transform: translateX(-50%);
+    white-space: nowrap;
+    .action {
+      @size: 80px;
+      display: inline-block;
+      position: relative;
+      margin-right: 5px;
+      background: darken(@color, 10%);
+      border-radius: 3px;
+      height: @size;
+      width: @size;
+      text-align: center;
+      white-space: normal;
+      cursor: pointer;
+      .label {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translateX(-50%) translateY(-50%);
+        pointer-events: none;
+      }
+      &:first-child {
+        margin-left: 5px;
       }
     }
   }
@@ -614,7 +723,7 @@ input.squareButton.primary {
   }
   #player-turn {
     width: 100px;
-    position: fixed;
+    position: absolute;
     bottom: 10px;
     right: 10px;
     #player-turn-end {
