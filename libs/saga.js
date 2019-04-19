@@ -10,6 +10,9 @@ const DEFAULT_CARD_HEIGHT = 375;
 const ACTION_PLAYER_JOIN = 0;
 const ACTION_DM_JOIN = 1;
 const ACTION_PLAYER_SETUP = 2;
+const ACTION_OK = 3;
+const ACTION_ADD_DM = 4;
+const ACTION_ADD_PLAYER = 5;
 
 class GameSession {
   constructor(displayName, handSize) {
@@ -52,7 +55,7 @@ class GameSession {
     }
   }
   setDefaultIfEmpty(value, defaultValue) {
-    if(!(typeof displayName === 'string')) return defaultValue;
+    if(!(typeof value === 'string')) return defaultValue;
     if(value.trim() === '') return defaultValue;
     return value;
   }
@@ -91,8 +94,26 @@ class GameSession {
         switch (message.action) {
           case ACTION_PLAYER_JOIN:
             context._playerList.addPlayer(message.displayName, message.sID, context._handSize, false, false);
+            if(context._isDM) {
+              context.sendSingleplayerAction(message.sID, ACTION_ADD_DM);
+            } else {
+              context.sendSingleplayerAction(message.sID, ACTION_ADD_PLAYER);
+            }
             break;
           case ACTION_DM_JOIN:
+            context._playerList.addPlayer(message.displayName, message.sID, 0, true, false);
+            context.sendSingleplayerAction(message.sID, ACTION_ADD_PLAYER);
+            break;
+          case ACTION_ADD_PLAYER:
+            context._playerList.addPlayer(message.displayName, message.sID, context._handSize, false, false);
+            break;
+          case ACTION_ADD_DM:
+            context._playerList.addPlayer(message.displayName, message.sID, 0, true, false);
+            break;
+          case ACTION_PLAYER_SETUP:
+            context.setupPlayer(message.details);
+            break;
+          case ACTION_OK:
             context._playerList.addPlayer(message.displayName, message.sID, 0, false, false);
             break;
           default:
@@ -129,21 +150,34 @@ class GameSession {
       this._ws.send(JSON.stringify(command));
     }
   }
+  sendSingleplayerAction(sessionID, action, details, callback) {
+    if(this._ws) {
+      let command = {
+          toS: parseInt(sessionID),
+          displayName: this._displayName,
+          fromDM: this._isDM,
+          action: action,
+          details:  this.setDefaultIfEmpty(details, ''),
+          callback: this.setDefaultIfEmpty(callback, '')
+      };
+      this._ws.send(JSON.stringify(command));
+    }
+  }
   uuid() {
     return Math.floor(Math.random()*1E16);
   }
   setupDM() {
-    this._deck = new Deck('#play-area', '#deck-pile', '#deck-graveyard', 150);
+    this._deck = new Deck('#play-area', '#deck-pile', '#deck-graveyard', 150, []);
     this._player = new Player(true, this._deck, 0, '#player-hand');
   }
-  setupPlayer() {
-    this._deck = new Deck('#play-area', '#deck-pile', '#deck-graveyard', 150);
-    this._player = new Player(isDM, this._deck, handSize, '#player-hand');
+  setupPlayer(deckOrder) {
+    this._deck = new Deck('#play-area', '#deck-pile', '#deck-graveyard', 150, deckOrder.split(','));
+    this._player = new Player(false, this._deck, this._handSize, '#player-hand');
   }
 }
 
 class Deck {
-  constructor(table, pile, graveyard, cardWidth) {
+  constructor(table, pile, graveyard, cardWidth, deckOrder) {
     this._container = {table: $(table), pile: $(pile), graveyard: $(graveyard)};
     this._cardWidth = (isNaN(cardWidth)) ? DEFAULT_CARD_WIDTH : cardWidth;
     this._cardHeight = Math.round(DEFAULT_CARD_HEIGHT * (this._cardWidth / DEFAULT_CARD_WIDTH));
@@ -152,9 +186,12 @@ class Deck {
     this._table = [];
 
     this._fateDeck = this.loadDeck(FATE_DECK);
-    this._pile = this.cloneDeck(this._fateDeck);
-
-    this.shuffle();
+    if(deckOrder.length > 0) {
+      this._pile = this.forceDeck(this._fateDeck, deckOrder);
+    } else {
+      this._pile = this.cloneDeck(this._fateDeck);
+      this.shuffle();
+    }
     this.renderPile();
     this.renderGraveyeard();
   }
@@ -172,6 +209,14 @@ class Deck {
       copy.push(card);
     });
     return copy;
+  }
+  forceDeck(deck, deckOrder) {
+    let forced = [];
+    for(let i=0; i<deckOrder.length; i++) {
+      let card = deck[parseInt(deckOrder[i])];
+      forced.push(card);
+    }
+    return forced;
   }
   getOrder() {
     let order = [];
@@ -305,7 +350,7 @@ class Deck {
       this._container.table.append(card.view());
     });
   }
-  shuffle() {
+  shuffle(deckOrder) {
     for (let i = this._pile.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [this._pile[i], this._pile[j]] = [this._pile[j], this._pile[i]];
@@ -436,7 +481,7 @@ class Player {
       }
     }, false);
 
-    this._deck.draw(this._hand, this._container.hand, this._handSize);
+    //this._deck.draw(this._hand, this._container.hand, this._handSize);
 
     this.setupTurnButton();
   }
@@ -492,5 +537,9 @@ class PlayerList {
     } else {
       this._view.append(newPlayer);
     }
+  }
+  index(sessionID) {
+    let index = this._list.findIndex(player => parseInt(player.sessionID) === parseInt(sessionID));
+    return index;
   }
 }
