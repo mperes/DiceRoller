@@ -15,6 +15,12 @@ const ACTION_ADD_DM = 4;
 const ACTION_ADD_PLAYER = 5;
 const ACTION_DRAW_TO_TABLE = 6;
 const ACTION_SEND_TABLE_TO_GRAVEYARD = 7;
+const ACTION_GIVE_INITIAL_HAND = 8;
+const ACTION_DRAW_TO_POOL = 9;
+const ACTION_GIVE_TURN = 10;
+const ACTION_PUT_BACK_IN_POOL = 11;
+const ACTION_PLAY_FROM_POOL = 12;
+const ACTION_SHUFFLE_GRAVEYARD_INTO_PILE = 13;
 
 
 //*---------------------------------------------------------------------
@@ -43,14 +49,14 @@ class GameSession {
       switch (event.detail.action) {
         case ACTION_PLAYER_SETUP:
           let deckOrder = context._deck.getOrder();
-          context.sendMultiplayerAction(ACTION_PLAYER_SETUP, deckOrder)
+          context.sendSingleplayerAction(parseInt(event.detail.sessionID), ACTION_PLAYER_SETUP, deckOrder);
           break;
         default:
 
       }
     });
 
-    this._playerList = new PlayerList('#table-top');
+    this._playerList = new PlayerList('#table-top', this);
   }
   setName(name) {
     this._displayName = this.setDefaultIfEmpty(name, 'Jonh Doe');
@@ -82,6 +88,7 @@ class GameSession {
   joinMultiPlayer(isDM) {
     this._isDM = (typeof isDM === 'boolean') ? isDM : false;
     let multiplayerID = prompt("Please enter your Session ID", "");
+    if(multiplayerID === null) return;
     if(multiplayerID.trim() === '') return;
     this.loading(true);
     this.connect(multiplayerID);
@@ -120,11 +127,13 @@ class GameSession {
           case ACTION_DRAW_TO_TABLE:
             let amount = parseInt(message.details);
             context._deck.drawToTable(amount, false);
-            context.sendSingleplayerAction(message.sID, ACTION_OK, 'ACTION_DRAW_TO_TABLE');
+            if(message.fromDM)
+              context.sendSingleplayerAction(message.sID, ACTION_OK, 'ACTION_DRAW_TO_TABLE');
             break;
           case ACTION_SEND_TABLE_TO_GRAVEYARD:
             context._deck.sendCardFromTableToGraveyard(false);
-            context.sendSingleplayerAction(message.sID, ACTION_OK, 'ACTION_SEND_TABLE_TO_GRAVEYARD');
+            if(message.fromDM)
+              context.sendSingleplayerAction(message.sID, ACTION_OK, 'ACTION_SEND_TABLE_TO_GRAVEYARD');
             break;
           case ACTION_ADD_PLAYER:
             context._playerList.addPlayer(message.displayName, message.sID, context._handSize, false, false);
@@ -134,7 +143,35 @@ class GameSession {
             break;
           case ACTION_PLAYER_SETUP:
             context.setupPlayer(message.details);
-            context.sendSingleplayerAction(message.sID, ACTION_OK, 'ACTION_PLAYER_SETUP');
+            if(message.fromDM)
+              context.sendSingleplayerAction(message.sID, ACTION_OK, 'ACTION_PLAYER_SETUP');
+            break;
+          case ACTION_GIVE_INITIAL_HAND:
+            context._player.giveInitialHand();
+            if(message.fromDM)
+              context.sendSingleplayerAction(message.sID, ACTION_OK, 'ACTION_GIVE_INITIAL_HAND');
+            break;
+          case ACTION_DRAW_TO_POOL:
+            if(context._deck !== null)
+              context._deck.drawToPool(parseInt(message.details));
+            if(message.fromDM)
+              context.sendSingleplayerAction(message.sID, ACTION_OK, 'ACTION_DRAW_TO_POOL');
+            break;
+          case ACTION_GIVE_TURN:
+              context._playerList.toggleTurn(message.details);
+            if(message.fromDM && parseInt(message.details) === parseInt(context._sessionID))
+              context.sendSingleplayerAction(message.sID, ACTION_OK, 'ACTION_GIVE_TURN');
+            break;
+          case ACTION_PUT_BACK_IN_POOL:
+            context._deck.putBackInPool(message.details);
+            break;
+          case ACTION_PLAY_FROM_POOL:
+            context._deck.playFromPool(message.details);
+            break;
+          case ACTION_SHUFFLE_GRAVEYARD_INTO_PILE:
+              context._deck.shuffleGraveyardIntoPile(message.details);
+            if(message.fromDM && parseInt(message.details) === parseInt(context._sessionID))
+              context.sendSingleplayerAction(message.sID, ACTION_OK, 'ACTION_SHUFFLE_GRAVEYARD_INTO_PILE');
             break;
           case ACTION_OK:
             console.log(message.displayName +' ('+ message.sID +') - '+message.details);
@@ -192,11 +229,11 @@ class GameSession {
     return Math.floor(Math.random()*1E16);
   }
   setupDM() {
-    this._deck = new Deck(this, '#play-area', '#deck-pile', '#deck-graveyard', 150, []);
+    this._deck = new Deck(this, '#play-area', '#deck-pile', '#pool','#deck-graveyard', 150, []);
     this._player = new DungeonMaster(this._deck);
   }
   setupPlayer(deckOrder) {
-    this._deck = new Deck(this, '#play-area', '#deck-pile', '#deck-graveyard', 150, deckOrder.split(','));
+    this._deck = new Deck(this, '#play-area', '#deck-pile', '#pool', '#deck-graveyard', 150, deckOrder.split(','));
     this._player = new Player(false, this._deck, this._handSize, '#player-hand');
   }
 }
@@ -207,14 +244,15 @@ class GameSession {
 //* By Miguel Peres (m.peres@gmail.com)
 //*---------------------------------------------------------------------
 class Deck {
-  constructor(gameSession, table, pile, graveyard, cardWidth, deckOrder) {
+  constructor(gameSession, table, pile, pool, graveyard, cardWidth, deckOrder) {
     this._gameSession = gameSession;
-    this._container = {table: $(table), pile: $(pile), graveyard: $(graveyard)};
+    this._container = {table: $(table), pile: $(pile), pool: $(pool), graveyard: $(graveyard)};
     this._cardWidth = (isNaN(cardWidth)) ? DEFAULT_CARD_WIDTH : cardWidth;
     this._cardHeight = Math.round(DEFAULT_CARD_HEIGHT * (this._cardWidth / DEFAULT_CARD_WIDTH));
     this._cardRatio = this._cardWidth / DEFAULT_CARD_WIDTH;
     this._graveyard = [];
     this._table = [];
+    this._pool = [];
 
     this._fateDeck = this.loadDeck(FATE_DECK);
     if(deckOrder.length > 0) {
@@ -267,6 +305,20 @@ class Deck {
       card._view.addClass('ready');
       if(card._flipped) setTimeout(function() { card.flip(false); }, 700);
     }, 100 );
+    this._gameSession.sendMultiplayerAction(ACTION_PLAY_FROM_POOL, card._id.toString());
+  }
+  playFromPool(cardID) {
+    let cardIndex = this.getCardIndex(this._pool, cardID);
+    let card = this._pool[cardIndex];
+    this._pool.splice(cardIndex, 1);
+    card._state = ON_TABLE;
+    this._table.push(card);
+    card._view.removeClass('ready');
+    this._container.table.append(card._view);
+    setTimeout(function(){
+      card._view.addClass('ready');
+      if(card._flipped) setTimeout(function() { card.flip(false); }, 700);
+    }, 100 );
   }
   trump() {
     if(this._table.length <= 1 || this._table[this._table.length-1]._suit === this._table[this._table.length-2]._suit) {
@@ -282,10 +334,12 @@ class Deck {
       card._view.removeClass('even');
       this.setShadowSize(this._container.pile);
       this.shuffleGraveyardIntoPile();
+      this._gameSession.sendMultiplayerAction(ACTION_DRAW_TO_TABLE, '1');
     }
   }
   dmPlay() {
     let amount = prompt("How many card would you like to draw?", "");
+    if(amount === null) return;
     if(amount.trim() === '') return;
     this.drawToTable(parseInt(amount), true);
   }
@@ -314,8 +368,36 @@ class Deck {
     this.setShadowSize(this._container.pile);
     this.shuffleGraveyardIntoPile();
   }
-  draw(hand, view, amount) {
+  drawToPool(amount, propagate) {
+    let total = amount;
+    if(isNaN(amount)) amount = 0;
+    propagate = (typeof propagate === 'undefined') ? false : propagate;
+    if(propagate) {
+      this._gameSession.sendMultiplayerAction(ACTION_DRAW_TO_TABLE, total.toString());
+    }
+    while(amount > 0) {
+      let card = this._pile[this._pile.length-1];
+      this._pile.pop();
+      card._state = ON_HAND;
+      this._pool.push(card);
+      this._container.pool.append(card._view);
+      card.flip();
+      card._view.css({ top: 0, left: 0});
+      card._view.removeClass('even');
+      this.setShadowSize(this._container.pile);
+      this.shuffleGraveyardIntoPile();
+      amount--;
+    }
+    this.setShadowSize(this._container.pile);
+    this.shuffleGraveyardIntoPile();
+  }
+  draw(hand, view, amount, propagate) {
     if(isNaN(amount)) amount = 1;
+    let total = amount;
+    propagate = (typeof propagate === 'undefined') ? false : propagate;
+    if(propagate) {
+      this._gameSession.sendMultiplayerAction(ACTION_DRAW_TO_POOL, total.toString());
+    }
     while(amount > 0) {
       let card = this._pile[this._pile.length-1];
       this._pile.pop();
@@ -345,6 +427,17 @@ class Deck {
     setTimeout(function(){
       card._view.addClass('ready');
     }, 700);
+    this._gameSession.sendMultiplayerAction(ACTION_PUT_BACK_IN_POOL, card._id.toString());
+  }
+  putBackInPool(cardID)  {
+    let cardIndex = this.getCardIndex(this._table, cardID);
+    let card = this._table[cardIndex];
+    this._table.splice(cardIndex, 1);
+    card._state = ON_HAND;
+    this._pool.push(card);
+    card._view.removeClass('ready');
+    this._container.pool.append(card._view);
+    card._view.addClass('ready');
   }
   sendCardFromTableToGraveyard(propagate) {
     propagate = (typeof propagate === 'undefined') ? false : propagate;
@@ -369,23 +462,50 @@ class Deck {
     }
     this.setShadowSize(this._container.graveyard);
   }
-  shuffleGraveyardIntoPile() {
+  shuffleGraveyardIntoPile(deckOrder) {
     if(this._graveyard.length === 0 || this._pile.length > 0) return;
-    let top = 0;
-    let left = 0;
-    while (this._graveyard.length > 0) {
-      let ramdomCardIndex = Math.round(Math.random() * (this._graveyard.length-1));
-      let randomCard = this._graveyard[ramdomCardIndex];
-      this._graveyard.splice(ramdomCardIndex, 1);
-      randomCard._state = ON_PILE;
-      this._pile.push(randomCard);
-      top -= Math.random()/2 * this._cardRatio;
-      left -= Math.random()/2 * this._cardRatio;
-      randomCard._view.css({ top: Math.round(top), left: Math.round(left)});
-      randomCard.flip();
-      this._container.pile.append(randomCard._view);
-      this.setShadowSize(this._container.pile);
-      this.setShadowSize(this._container.graveyard);
+
+    let forceDeck = true;
+    if(typeof deckOrder === 'undefined') forceDeck = false;
+    if(Array.isArray(deckOrder) && deckOrder.length === 0) forceDeck = false;
+
+    if(forceDeck) {
+      let top = 0;
+      let left = 0;
+      let order = deckOrder.split(',');
+      for(let i=0; i<order.length; i++) {
+        let ramdomCardIndex = parseInt(order[i]);
+        let randomCard = this._graveyard[this.getCardIndex(this._graveyard, ramdomCardIndex)];
+        randomCard._state = ON_PILE;
+        this._pile.push(randomCard);
+        top -= Math.random()/2 * this._cardRatio;
+        left -= Math.random()/2 * this._cardRatio;
+        randomCard._view.css({ top: Math.round(top), left: Math.round(left)});
+        randomCard.flip();
+        this._container.pile.append(randomCard._view);
+        this.setShadowSize(this._container.pile);
+        this.setShadowSize(this._container.graveyard);
+      }
+      this._graveyard = [];
+    } else {
+      if(this._gameSession._isDM !== true) return;
+      let top = 0;
+      let left = 0;
+      while (this._graveyard.length > 0) {
+        let ramdomCardIndex = Math.round(Math.random() * (this._graveyard.length-1));
+        let randomCard = this._graveyard[ramdomCardIndex];
+        this._graveyard.splice(ramdomCardIndex, 1);
+        randomCard._state = ON_PILE;
+        this._pile.push(randomCard);
+        top -= Math.random()/2 * this._cardRatio;
+        left -= Math.random()/2 * this._cardRatio;
+        randomCard._view.css({ top: Math.round(top), left: Math.round(left)});
+        randomCard.flip();
+        this._container.pile.append(randomCard._view);
+        this.setShadowSize(this._container.pile);
+        this.setShadowSize(this._container.graveyard);
+      }
+      this._gameSession.sendMultiplayerAction(ACTION_SHUFFLE_GRAVEYARD_INTO_PILE, this.getOrder());
     }
   }
   renderPile() {
@@ -422,7 +542,7 @@ class Deck {
     }
   }
   getCardIndex(cardArray, id) {
-    let index = cardArray.findIndex(card => card._id === id);
+    let index = cardArray.findIndex(card => parseInt(card._id) === parseInt(id));
     return index;
   }
   setShadowSize(pile) {
@@ -571,12 +691,27 @@ class Player {
       this.endTurn();
     });
   }
+  toggleTurn() {
+    if(this._playing) {
+      console.log('Your turn has finished');
+      this.endTurn();
+    } else {
+      console.log('It is your turn!');
+      this.beginTurn();
+    }
+  }
   beginTurn() {
     this._playing = true;
   }
+  draw(hand, view, amount, propagate) {
+    this._deck.draw(this._hand, this._container.hand, amount, true);
+  }
+  giveInitialHand() {
+    this.draw(this._hand, this._container.hand, this._handSize, true);
+  }
   endTurn() {
-    this._deck.draw(this._hand, this._container.hand, this._numberOfCardsUsed);
-    this._deck.sendCardFromTableToGraveyard();
+    this._deck.draw(this._hand, this._container.hand, this._numberOfCardsUsed, true);
+    this._deck.sendCardFromTableToGraveyard(true);
     this._playing = false;
     this._trumped = false;
     this._numberOfCardsUsed = 0;
@@ -627,11 +762,11 @@ class DungeonMaster {
     this._playing = true;
   }
   endTurn() {
-    this._deck.draw(this._hand, this._container.hand, this._numberOfCardsUsed);
-    this._deck.sendCardFromTableToGraveyard();
-    this._playing = false;
-    this._trumped = false;
-    this._numberOfCardsUsed = 0;
+    // this._deck.draw(this._hand, this._container.hand, this._numberOfCardsUsed);
+    // this._deck.sendCardFromTableToGraveyard(true);
+    // this._playing = false;
+    // this._trumped = false;
+    // this._numberOfCardsUsed = 0;
   }
 }
 
@@ -640,15 +775,21 @@ class DungeonMaster {
 //* By Miguel Peres (m.peres@gmail.com)
 //*---------------------------------------------------------------------
 class PlayerList {
-  constructor(container) {
+  constructor(container, gameSession) {
     this._view = $('<div id="player-list" />');
     this._list = [];
     $(container).prepend(this._view);
+    this._gameSession = gameSession;
   }
   addPlayer(displayName, sessionID, handSize, isDM, isSelf) {
     let context = this;
     this._list.push({displayName: displayName, sessionID: sessionID, handSize: handSize, isDM: isDM, isSelf: isSelf});
     let thumbnail = $('<div class="thumbnail" />').text(displayName);
+    thumbnail.attr('id', 'player-'+sessionID);
+    thumbnail.click(function() {
+      context.toggleTurn(sessionID);
+      context._gameSession.sendMultiplayerAction(ACTION_GIVE_TURN, sessionID.toString());
+    })
     let actions = $('<div class="actions" />');
     let setupAction = $('<div class="setup" data-id="" />').click((e) => {
       let view = $(e.target);
@@ -657,6 +798,10 @@ class PlayerList {
       });
       document.dispatchEvent(setupPlayerEvent);
     });
+    let giveInitialHand = this._getActionButton('give-hand', 'Give initial hand', function() {
+      context._gameSession.sendSingleplayerAction(parseInt(sessionID), ACTION_GIVE_INITIAL_HAND);
+    });
+    actions.append(giveInitialHand);
     actions.append(setupAction);
     let newPlayer = $('<div class="player"/>').append(thumbnail).append(actions);
     if(isSelf) newPlayer.addClass('self');
@@ -669,9 +814,19 @@ class PlayerList {
       this._view.append(newPlayer);
     }
   }
+  _getActionButton(cssClass, label, action) {
+    return $('<div class="'+cssClass+'" title="'+label+'" />').click(action);
+  }
   index(sessionID) {
     let index = this._list.findIndex(player => parseInt(player.sessionID) === parseInt(sessionID));
     return index;
+  }
+  toggleTurn(sessionID) {
+    let player = $('#player-'+sessionID);
+    if(player.length === 0) return;
+    player.toggleClass('hasTurn');
+    if(parseInt(sessionID) === parseInt(this._gameSession._sessionID) && this._gameSession._player !== null)
+      this._gameSession._player.toggleTurn();
   }
 }
 

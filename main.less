@@ -582,7 +582,12 @@ input.squareButton.primary {
         padding: 5px;
         box-sizing: border-box;
       }
+      .hasTurn {
+        box-shadow: 0 0 10px #5be1ff;
+        border: 1px solid #40ffca;
+      }
       &.isDM {
+        pointer-events: none;
         .thumbnail {
         }
       }
@@ -599,6 +604,7 @@ input.squareButton.primary {
         padding: 5px;
         background: @color;
         border-radius: 5px 0 0 5px;
+        white-space: nowrap;
         div {
           width: 50px;
           height: 50px;
@@ -607,6 +613,11 @@ input.squareButton.primary {
           cursor: pointer;
           padding: 10px;
           box-sizing: border-box;
+          display: inline-block;
+          margin-left: 5px;
+          &:first-child {
+            margin-left: 0;
+          }
           &:after {
             content: '';
             display: inline-block;
@@ -621,11 +632,16 @@ input.squareButton.primary {
               background-image: url('img/icon-setup.svg');
             }
           }
+          &.give-hand {
+            &:after {
+              background-image: url('img/icon-give-initial-hand.svg');
+            }
+          }
         }
       }
       &:hover {
         .actions {
-          display: inline-block;
+          //display: inline-block;
         }
       }
     }
@@ -698,6 +714,9 @@ input.squareButton.primary {
         box-shadow: 1px 1px 5px rgba(0,0,0,0.5);
       }
     }
+  }
+  #pool {
+    display: none;
   }
   #player-hand {
     position: absolute;
@@ -772,5 +791,12 @@ input.squareButton.primary {
     font-size: 3rem;
     font-weight: 100;
     transform: translateX(-50%) translateY(20px);
+  }
+}
+
+
+.isDM {
+  #player-list .player:hover .actions {
+    display: inline-block!important;
   }
 }
