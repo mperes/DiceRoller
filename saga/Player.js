@@ -8,7 +8,8 @@ class Player {
     this._container = {hand: $(handContainer)};
     this._hand = [];
     this._deck = deck;
-    this._handSize = (isNaN(handSize)) ? 1 : handSize;
+    this._maxHandSize = (isNaN(handSize)) ? 1 : handSize;
+    this._handSize = this._maxHandSize;
     this._playing = false;
     this._trumped = false;
     this._numberOfCardsUsed = 0;
@@ -30,7 +31,7 @@ class Player {
         case ON_HAND:
           if(context._resolvingDamage) {
             context._deck.play(context, card);
-            this._handSize--;
+            context._handSize--;
           } else {
             if(context._numberOfCardsUsed < context._maxNumberOfCardsPerAction && context._playing) {
               context._deck.play(context, card);
@@ -45,7 +46,7 @@ class Player {
             let index = context._deck.getCardIndex(context._deck._table, card._id);
             if(index >= context._damageCountStartAt) {
               context._deck.getBack(context, card);
-              this._handSize++;
+              context._handSize++;
             }
           } else {
             if(!context._playing) return;
@@ -98,6 +99,12 @@ class Player {
     this._playing = false;
     this._trumped = false;
     this._numberOfCardsUsed = 0;
+    if(this._resolvingDamage && this._handSize < this._maxHandSize) {
+      this._resolvingDamage = false;
+      let percentage = this._handSize / this._maxHandSize * 100;
+      this._deck._gameSession.sendMultiplayerAction(ACTION_NOTIFY_HEALTH, percentage.toString());
+      this._deck._gameSession._playerList.updateHealth(this._deck._gameSession._sessionID, percentage);
+    }
   }
   receiveDamage() {
     this._damageCountStartAt = this._deck._table.length;

@@ -160,9 +160,12 @@ class GameSession {
             context._deck.playFromPool(message.details);
             break;
           case ACTION_SHUFFLE_GRAVEYARD_INTO_PILE:
-              context._deck.shuffleGraveyardIntoPile(message.details);
+            context._deck.shuffleGraveyardIntoPile(message.details);
             if(message.fromDM && parseInt(message.details) === parseInt(context._sessionID))
               context.sendSingleplayerAction(message.sID, ACTION_OK, 'ACTION_SHUFFLE_GRAVEYARD_INTO_PILE');
+            break;
+          case ACTION_NOTIFY_HEALTH:
+            context._playerList.updateHealth(message.sID, message.details);
             break;
           case ACTION_OK:
             context._chatBox.addMessage(message.displayName +' ('+ message.sID +') - '+message.details);

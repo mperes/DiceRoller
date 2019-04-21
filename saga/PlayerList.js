@@ -13,6 +13,8 @@ class PlayerList {
     let context = this;
     this._list.push({displayName: displayName, sessionID: sessionID, handSize: handSize, isDM: isDM, isSelf: isSelf});
     let thumbnail = $('<div class="thumbnail" />').text(displayName);
+    let health = $('<div class="health"><div class="left"></div></div>');
+    thumbnail.append(health);
     thumbnail.attr('id', 'player-'+sessionID);
     thumbnail.click(function() {
       context.toggleTurn(sessionID);
@@ -59,5 +61,10 @@ class PlayerList {
     player.toggleClass('hasTurn');
     if(parseInt(sessionID) === parseInt(this._gameSession._sessionID) && this._gameSession._player !== null)
       this._gameSession._player.toggleTurn();
+  }
+  updateHealth(sessionID, health) {
+    let player = $('#player-'+sessionID).parent();
+    if(player.length === 0) return;
+    player.find('.health .left').css('width', health+'%');
   }
 }

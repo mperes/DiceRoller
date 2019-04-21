@@ -134,6 +134,7 @@ const ACTION_PLAY_FROM_POOL = 12;
 const ACTION_SHUFFLE_GRAVEYARD_INTO_PILE = 13;
 const ACTION_CHAT = 14;
 const ACTION_GIVE_DAMAGE = 15;
+const ACTION_NOTIFY_HEALTH = 16;
 //*---------------------------------------------------------------------
 //* Deck Class
 //* By Miguel Peres (m.peres@gmail.com)
@@ -682,9 +683,12 @@ class GameSession {
             context._deck.playFromPool(message.details);
             break;
           case ACTION_SHUFFLE_GRAVEYARD_INTO_PILE:
-              context._deck.shuffleGraveyardIntoPile(message.details);
+            context._deck.shuffleGraveyardIntoPile(message.details);
             if(message.fromDM && parseInt(message.details) === parseInt(context._sessionID))
               context.sendSingleplayerAction(message.sID, ACTION_OK, 'ACTION_SHUFFLE_GRAVEYARD_INTO_PILE');
+            break;
+          case ACTION_NOTIFY_HEALTH:
+            context._playerList.updateHealth(message.sID, message.details);
             break;
           case ACTION_OK:
             context._chatBox.addMessage(message.displayName +' ('+ message.sID +') - '+message.details);
@@ -764,7 +768,8 @@ class Player {
     this._container = {hand: $(handContainer)};
     this._hand = [];
     this._deck = deck;
-    this._handSize = (isNaN(handSize)) ? 1 : handSize;
+    this._maxHandSize = (isNaN(handSize)) ? 1 : handSize;
+    this._handSize = this._maxHandSize;
     this._playing = false;
     this._trumped = false;
     this._numberOfCardsUsed = 0;
@@ -786,7 +791,7 @@ class Player {
         case ON_HAND:
           if(context._resolvingDamage) {
             context._deck.play(context, card);
-            this._handSize--;
+            context._handSize--;
           } else {
             if(context._numberOfCardsUsed < context._maxNumberOfCardsPerAction && context._playing) {
               context._deck.play(context, card);
@@ -801,7 +806,7 @@ class Player {
             let index = context._deck.getCardIndex(context._deck._table, card._id);
             if(index >= context._damageCountStartAt) {
               context._deck.getBack(context, card);
-              this._handSize++;
+              context._handSize++;
             }
           } else {
             if(!context._playing) return;
@@ -854,6 +859,12 @@ class Player {
     this._playing = false;
     this._trumped = false;
     this._numberOfCardsUsed = 0;
+    if(this._resolvingDamage && this._handSize < this._maxHandSize) {
+      this._resolvingDamage = false;
+      let percentage = this._handSize / this._maxHandSize * 100;
+      this._deck._gameSession.sendMultiplayerAction(ACTION_NOTIFY_HEALTH, percentage.toString());
+      this._deck._gameSession._playerList.updateHealth(this._deck._gameSession._sessionID, percentage);
+    }
   }
   receiveDamage() {
     this._damageCountStartAt = this._deck._table.length;
@@ -875,6 +886,8 @@ class PlayerList {
     let context = this;
     this._list.push({displayName: displayName, sessionID: sessionID, handSize: handSize, isDM: isDM, isSelf: isSelf});
     let thumbnail = $('<div class="thumbnail" />').text(displayName);
+    let health = $('<div class="health"><div class="left"></div></div>');
+    thumbnail.append(health);
     thumbnail.attr('id', 'player-'+sessionID);
     thumbnail.click(function() {
       context.toggleTurn(sessionID);
@@ -921,5 +934,10 @@ class PlayerList {
     player.toggleClass('hasTurn');
     if(parseInt(sessionID) === parseInt(this._gameSession._sessionID) && this._gameSession._player !== null)
       this._gameSession._player.toggleTurn();
+  }
+  updateHealth(sessionID, health) {
+    let player = $('#player-'+sessionID).parent();
+    if(player.length === 0) return;
+    player.find('.health .left').css('width', health+'%');
   }
 }
