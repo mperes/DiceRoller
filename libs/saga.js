@@ -608,6 +608,8 @@ class GameSession {
         let isSelf = (parseInt(message.SID) === parseInt(context._sessionID)) ? true : false;
         context._playerList.addPlayer(context._displayName, context._sessionID, context._handSize, context._isDM, isSelf);
         $('#container').removeClass('logged-off');
+        context._chatBox = new ChatBox(context, '#table-top');
+        context._chatBox.setTitle('Session ID: '+multiplayerID);
       }
       else {
         if(parseInt(message.sID) === parseInt(context._sessionID)) return;
@@ -734,14 +736,10 @@ class GameSession {
   setupDM() {
     this._deck = new Deck(this, '#play-area', '#deck-pile', '#pool','#deck-graveyard', 150, []);
     this._player = new DungeonMaster(this._deck);
-    this._chatBox = new ChatBox(this, '#table-top');
-    this._chatBox.setTitle('Session ID: '+this._roomID.split('_')[1]);
   }
   setupPlayer(deckOrder) {
     this._deck = new Deck(this, '#play-area', '#deck-pile', '#pool', '#deck-graveyard', 150, deckOrder.split(','));
     this._player = new Player(false, this._deck, this._handSize, '#player-hand');
-    this._chatBox = new ChatBox(this, '#table-top');
-    this._chatBox.setTitle('Session ID: '+this._roomID.split('_')[1]);
   }
 }
 //*---------------------------------------------------------------------
