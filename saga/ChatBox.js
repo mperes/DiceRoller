@@ -1,12 +1,23 @@
 class ChatBox {
-  constructor(container) {
+  constructor(gameSession, container) {
+    this._gameSession = gameSession;
     const self = this;
     this._title = 'ChatBox';
     this._view = $('<div id="chatbox" class="collapsed"><div class="title">'+this._title+'</div></div>');
     let messages = $('<ul class="messages"></div>').click((e) => {
       self.collapse();
     });
+    let sendMSG = $('<input type="text" class="new-message" placeholder="What do you want to say?"/>').keyup(function(e){
+      if(e.keyCode == 13) {
+        let field = $(e.target);
+        let msg = field.val();
+        self.addMessage('You: '+ msg);
+        self._gameSession.sendMultiplayerAction(ACTION_CHAT, msg);
+        field.val('');
+      }
+    });
     this._view.append(messages);
+    this._view.append(sendMSG);
     $(container).append(this._view);
   }
   collapse() {

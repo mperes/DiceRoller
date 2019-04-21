@@ -562,7 +562,7 @@ input.squareButton.primary {
       border-bottom: 1px solid rgba(255,255,255,0.25);
     }
     .messages {
-      min-height: 100px;
+      min-height: 10em;
       max-height: 10em;
       overflow-y: scroll;
       cursor: pointer;
@@ -571,10 +571,20 @@ input.squareButton.primary {
         padding: 0.25em 0;
       }
     }
+    .new-message {
+      width: 100%;
+      box-sizing: border-box;
+      border-radius: 3px;
+      margin-top: 10px;
+      border: 0;
+      padding: 5px;
+    }
     &.collapsed {
       .title {
         padding-bottom: 0;
         border-bottom: none;
+      }
+      .new-message {
       }
       .messages {
         min-height: unset;

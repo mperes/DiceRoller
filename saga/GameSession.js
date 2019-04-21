@@ -155,6 +155,9 @@ class GameSession {
           case ACTION_OK:
             context._chatBox.addMessage(message.displayName +' ('+ message.sID +') - '+message.details);
             break;
+          case ACTION_CHAT:
+            context._chatBox.addMessage(message.displayName +': '+ message.details);
+            break;
           default:
 
         }
@@ -210,11 +213,13 @@ class GameSession {
   setupDM() {
     this._deck = new Deck(this, '#play-area', '#deck-pile', '#pool','#deck-graveyard', 150, []);
     this._player = new DungeonMaster(this._deck);
-    this._chatBox = new ChatBox('#table-top');
+    this._chatBox = new ChatBox(this, '#table-top');
     this._chatBox.setTitle('Session ID: '+this._roomID.split('_')[1]);
   }
   setupPlayer(deckOrder) {
     this._deck = new Deck(this, '#play-area', '#deck-pile', '#pool', '#deck-graveyard', 150, deckOrder.split(','));
     this._player = new Player(false, this._deck, this._handSize, '#player-hand');
+    this._chatBox = new ChatBox(this, '#table-top');
+    this._chatBox.setTitle('Session ID: '+this._roomID.split('_')[1]);
   }
 }

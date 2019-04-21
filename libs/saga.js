@@ -76,14 +76,25 @@ class Card {
   }
 }
 class ChatBox {
-  constructor(container) {
+  constructor(gameSession, container) {
+    this._gameSession = gameSession;
     const self = this;
     this._title = 'ChatBox';
     this._view = $('<div id="chatbox" class="collapsed"><div class="title">'+this._title+'</div></div>');
     let messages = $('<ul class="messages"></div>').click((e) => {
       self.collapse();
     });
+    let sendMSG = $('<input type="text" class="new-message" placeholder="What do you want to say?"/>').keyup(function(e){
+      if(e.keyCode == 13) {
+        let field = $(e.target);
+        let msg = field.val();
+        self.addMessage('You: '+ msg);
+        self._gameSession.sendMultiplayerAction(ACTION_CHAT, msg);
+        field.val('');
+      }
+    });
     this._view.append(messages);
+    this._view.append(sendMSG);
     $(container).append(this._view);
   }
   collapse() {
@@ -121,6 +132,7 @@ const ACTION_GIVE_TURN = 10;
 const ACTION_PUT_BACK_IN_POOL = 11;
 const ACTION_PLAY_FROM_POOL = 12;
 const ACTION_SHUFFLE_GRAVEYARD_INTO_PILE = 13;
+const ACTION_CHAT = 14;
 //*---------------------------------------------------------------------
 //* Deck Class
 //* By Miguel Peres (m.peres@gmail.com)
@@ -664,6 +676,9 @@ class GameSession {
           case ACTION_OK:
             context._chatBox.addMessage(message.displayName +' ('+ message.sID +') - '+message.details);
             break;
+          case ACTION_CHAT:
+            context._chatBox.addMessage(message.displayName +': '+ message.details);
+            break;
           default:
 
         }
@@ -719,12 +734,14 @@ class GameSession {
   setupDM() {
     this._deck = new Deck(this, '#play-area', '#deck-pile', '#pool','#deck-graveyard', 150, []);
     this._player = new DungeonMaster(this._deck);
-    this._chatBox = new ChatBox('#table-top');
+    this._chatBox = new ChatBox(this, '#table-top');
     this._chatBox.setTitle('Session ID: '+this._roomID.split('_')[1]);
   }
   setupPlayer(deckOrder) {
     this._deck = new Deck(this, '#play-area', '#deck-pile', '#pool', '#deck-graveyard', 150, deckOrder.split(','));
     this._player = new Player(false, this._deck, this._handSize, '#player-hand');
+    this._chatBox = new ChatBox(this, '#table-top');
+    this._chatBox.setTitle('Session ID: '+this._roomID.split('_')[1]);
   }
 }
 //*---------------------------------------------------------------------
