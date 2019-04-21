@@ -558,8 +558,7 @@ input.squareButton.primary {
     font-weight: bold;
     .title {
       font-weight: bold;
-      padding-bottom: 5px;
-      border-bottom: 1px solid rgba(255,255,255,0.25);
+      padding-bottom: 10px;
     }
     .messages {
       min-height: 10em;
@@ -569,6 +568,9 @@ input.squareButton.primary {
       li {
         font-size: 0.8em;
         padding: 0.25em 0;
+        &:first-child {
+          border-top: 1px solid rgba(255,255,255,0.25);
+        }
       }
     }
     .new-message {
@@ -582,7 +584,6 @@ input.squareButton.primary {
     &.collapsed {
       .title {
         padding-bottom: 0;
-        border-bottom: none;
       }
       .new-message {
       }
