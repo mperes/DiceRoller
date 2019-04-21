@@ -133,6 +133,7 @@ const ACTION_PUT_BACK_IN_POOL = 11;
 const ACTION_PLAY_FROM_POOL = 12;
 const ACTION_SHUFFLE_GRAVEYARD_INTO_PILE = 13;
 const ACTION_CHAT = 14;
+const ACTION_GIVE_DAMAGE = 15;
 //*---------------------------------------------------------------------
 //* Deck Class
 //* By Miguel Peres (m.peres@gmail.com)
@@ -657,6 +658,12 @@ class GameSession {
             if(message.fromDM)
               context.sendSingleplayerAction(message.sID, ACTION_OK, 'ACTION_GIVE_INITIAL_HAND');
             break;
+          case ACTION_GIVE_DAMAGE:
+            if(context._deck !== null)
+              context._player.receiveDamage((message.details));
+            if(message.fromDM)
+              context.sendSingleplayerAction(message.sID, ACTION_OK, 'ACTION_GIVE_DAMAGE');
+            break;
           case ACTION_DRAW_TO_POOL:
             if(context._deck !== null)
               context._deck.drawToPool(parseInt(message.details));
@@ -762,6 +769,8 @@ class Player {
     this._trumped = false;
     this._numberOfCardsUsed = 0;
     this._maxNumberOfCardsPerAction = 1;
+    this._resolvingDamage = false;
+    this._damageCountStartAt = 0;
 
     const context = this;
     document.addEventListener('cardClickCallback', function (event) {
@@ -775,18 +784,31 @@ class Player {
           context._trumped = true;
           break;
         case ON_HAND:
-          if(context._numberOfCardsUsed < context._maxNumberOfCardsPerAction && context._playing) {
+          if(context._resolvingDamage) {
             context._deck.play(context, card);
-            context._numberOfCardsUsed++;
+            this._handSize--;
           } else {
-            card.flip();
+            if(context._numberOfCardsUsed < context._maxNumberOfCardsPerAction && context._playing) {
+              context._deck.play(context, card);
+              context._numberOfCardsUsed++;
+            } else {
+              card.flip();
+            }
           }
           break;
         case ON_TABLE:
-          if(!context._playing) return;
-          if(!context._trumped) {
-            context._deck.getBack(context, card);
-            context._numberOfCardsUsed--;
+          if(context._resolvingDamage) {
+            let index = context._deck.getCardIndex(context._deck._table, card._id);
+            if(index >= context._damageCountStartAt) {
+              context._deck.getBack(context, card);
+              this._handSize++;
+            }
+          } else {
+            if(!context._playing) return;
+            if(!context._trumped) {
+              context._deck.getBack(context, card);
+              context._numberOfCardsUsed--;
+            }
           }
           break;
         default:
@@ -833,6 +855,10 @@ class Player {
     this._trumped = false;
     this._numberOfCardsUsed = 0;
   }
+  receiveDamage() {
+    this._damageCountStartAt = this._deck._table.length;
+    this._resolvingDamage = true;
+  }
 }
 //*---------------------------------------------------------------------
 //* Player List
@@ -865,6 +891,10 @@ class PlayerList {
     let giveInitialHand = this._getActionButton('give-hand', 'Give initial hand', function() {
       context._gameSession.sendSingleplayerAction(parseInt(sessionID), ACTION_GIVE_INITIAL_HAND);
     });
+    let damage = this._getActionButton('give-damage', 'Damage', function() {
+      context._gameSession.sendSingleplayerAction(parseInt(sessionID), ACTION_GIVE_DAMAGE);
+    });
+    actions.append(damage);
     actions.append(giveInitialHand);
     actions.append(setupAction);
     let newPlayer = $('<div class="player"/>').append(thumbnail).append(actions);
@@ -886,7 +916,7 @@ class PlayerList {
     return index;
   }
   toggleTurn(sessionID) {
-    let player = $('#player-'+sessionID);
+    let player = $('#player-'+sessionID).parent();
     if(player.length === 0) return;
     player.toggleClass('hasTurn');
     if(parseInt(sessionID) === parseInt(this._gameSession._sessionID) && this._gameSession._player !== null)

@@ -429,6 +429,10 @@ input.squareButton {
     background-color: transparent;
     border: 1px dashed #7b7b7b;
   }
+  &.disabled {
+    pointer-events: none;
+    opacity: 0.35;
+  }
 }
 input.squareButton.primary {
   background-color: @primaryColor;
@@ -654,9 +658,17 @@ input.squareButton.primary {
         padding: 5px;
         box-sizing: border-box;
       }
-      .hasTurn {
-        box-shadow: 0 0 10px #5be1ff;
-        border: 1px solid #40ffca;
+      &.hasTurn {
+        .thumbnail {
+          box-shadow: 0 0 10px #5be1ff;
+          border: 1px solid #40ffca;
+        }
+        .actions {
+          .give-damage {
+            pointer-events: all;
+            opacity: 1;
+          }
+        }
       }
       &.isDM {
         pointer-events: none;
@@ -707,6 +719,13 @@ input.squareButton.primary {
           &.give-hand {
             &:after {
               background-image: url('img/icon-give-initial-hand.svg');
+            }
+          }
+          &.give-damage {
+            pointer-events: none;
+            opacity: 0.35;
+            &:after {
+              background-image: url('img/icon-give-damage.svg');
             }
           }
         }

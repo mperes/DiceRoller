@@ -136,6 +136,12 @@ class GameSession {
             if(message.fromDM)
               context.sendSingleplayerAction(message.sID, ACTION_OK, 'ACTION_GIVE_INITIAL_HAND');
             break;
+          case ACTION_GIVE_DAMAGE:
+            if(context._deck !== null)
+              context._player.receiveDamage((message.details));
+            if(message.fromDM)
+              context.sendSingleplayerAction(message.sID, ACTION_OK, 'ACTION_GIVE_DAMAGE');
+            break;
           case ACTION_DRAW_TO_POOL:
             if(context._deck !== null)
               context._deck.drawToPool(parseInt(message.details));

@@ -29,6 +29,10 @@ class PlayerList {
     let giveInitialHand = this._getActionButton('give-hand', 'Give initial hand', function() {
       context._gameSession.sendSingleplayerAction(parseInt(sessionID), ACTION_GIVE_INITIAL_HAND);
     });
+    let damage = this._getActionButton('give-damage', 'Damage', function() {
+      context._gameSession.sendSingleplayerAction(parseInt(sessionID), ACTION_GIVE_DAMAGE);
+    });
+    actions.append(damage);
     actions.append(giveInitialHand);
     actions.append(setupAction);
     let newPlayer = $('<div class="player"/>').append(thumbnail).append(actions);
@@ -50,7 +54,7 @@ class PlayerList {
     return index;
   }
   toggleTurn(sessionID) {
-    let player = $('#player-'+sessionID);
+    let player = $('#player-'+sessionID).parent();
     if(player.length === 0) return;
     player.toggleClass('hasTurn');
     if(parseInt(sessionID) === parseInt(this._gameSession._sessionID) && this._gameSession._player !== null)

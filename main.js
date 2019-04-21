@@ -195,6 +195,7 @@ function preLoadAndStart() {
       $('#multiplayer-isdm input').click((e)=> {
         $('#table-top').toggleClass('isDM');
         $('#multiplayer-hand').toggleClass('disabled');
+        $('#multiplayer-create').toggleClass('disabled');
       });
     };
   });

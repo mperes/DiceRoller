@@ -13,6 +13,8 @@ class Player {
     this._trumped = false;
     this._numberOfCardsUsed = 0;
     this._maxNumberOfCardsPerAction = 1;
+    this._resolvingDamage = false;
+    this._damageCountStartAt = 0;
 
     const context = this;
     document.addEventListener('cardClickCallback', function (event) {
@@ -26,18 +28,31 @@ class Player {
           context._trumped = true;
           break;
         case ON_HAND:
-          if(context._numberOfCardsUsed < context._maxNumberOfCardsPerAction && context._playing) {
+          if(context._resolvingDamage) {
             context._deck.play(context, card);
-            context._numberOfCardsUsed++;
+            this._handSize--;
           } else {
-            card.flip();
+            if(context._numberOfCardsUsed < context._maxNumberOfCardsPerAction && context._playing) {
+              context._deck.play(context, card);
+              context._numberOfCardsUsed++;
+            } else {
+              card.flip();
+            }
           }
           break;
         case ON_TABLE:
-          if(!context._playing) return;
-          if(!context._trumped) {
-            context._deck.getBack(context, card);
-            context._numberOfCardsUsed--;
+          if(context._resolvingDamage) {
+            let index = context._deck.getCardIndex(context._deck._table, card._id);
+            if(index >= context._damageCountStartAt) {
+              context._deck.getBack(context, card);
+              this._handSize++;
+            }
+          } else {
+            if(!context._playing) return;
+            if(!context._trumped) {
+              context._deck.getBack(context, card);
+              context._numberOfCardsUsed--;
+            }
           }
           break;
         default:
@@ -83,5 +98,9 @@ class Player {
     this._playing = false;
     this._trumped = false;
     this._numberOfCardsUsed = 0;
+  }
+  receiveDamage() {
+    this._damageCountStartAt = this._deck._table.length;
+    this._resolvingDamage = true;
   }
 }
