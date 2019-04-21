@@ -59,7 +59,10 @@ class GameSession {
     this._playerList = new PlayerList('#table-top', this);
   }
   setName(name) {
-    this._displayName = this.setDefaultIfEmpty(name, 'Jonh Doe');
+    this._displayName = this.setDefaultIfEmpty(name, 'John Doe');
+  }
+  setHand(size) {
+    this._handSize = parseInt(size);
   }
   loading(state) {
     if(state) {

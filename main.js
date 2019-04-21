@@ -183,12 +183,18 @@ function preLoadAndStart() {
       $('#multiplayer-player').change((e)=> {
         gameSession.setName($(e.target).val());
       });
+      $('#multiplayer-hand').change((e)=> {
+        gameSession.setHand($(e.target).val());
+      });
       $('#multiplayer-join').click((e)=> {
         gameSession.joinMultiPlayer(isDM());
       });
       $('#multiplayer-create').click((e)=> {
-        $('#table-top').toggleClass('isDM');
         gameSession.createMultiPlayer(isDM());
+      });
+      $('#multiplayer-isdm input').click((e)=> {
+        $('#table-top').toggleClass('isDM');
+        $('#multiplayer-hand').toggleClass('disabled');
       });
     };
   });
