@@ -546,6 +546,48 @@ input.squareButton.primary {
       }
     }
   }
+  #chatbox {
+    position: absolute;
+    bottom: 0;
+    right: 10px;
+    width: 300px;
+    background-color: rgba(0,0,0,0.35);
+    color: white;
+    padding: 10px;
+    border-radius: 10px 10px 0 0;
+    font-weight: bold;
+    .title {
+      font-weight: bold;
+      padding-bottom: 5px;
+      border-bottom: 1px solid rgba(255,255,255,0.25);
+    }
+    .messages {
+      min-height: 100px;
+      max-height: 10em;
+      overflow-y: scroll;
+      cursor: pointer;
+      li {
+        font-size: 0.8em;
+        padding: 0.25em 0;
+      }
+    }
+    &.collapsed {
+      .title {
+        padding-bottom: 0;
+        border-bottom: none;
+      }
+      .messages {
+        min-height: unset;
+        overflow-y: hidden;
+        li {
+          display: none;
+          &:first-child {
+            display: block;
+          }
+        }
+      }
+    }
+  }
   #dm-toolbar {
     @color: #a2a2a2;
     position: absolute;

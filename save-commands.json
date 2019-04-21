@@ -1,0 +1,5 @@
+{
+	"commands": [
+    "saga/*.js: saga\\build.bat"
+	]
+}

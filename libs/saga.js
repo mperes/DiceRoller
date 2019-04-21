@@ -1,3 +1,103 @@
+//*---------------------------------------------------------------------
+//* Single card
+//* By Miguel Peres (m.peres@gmail.com)
+//*---------------------------------------------------------------------
+class Card {
+  constructor(id, suit, value, name, nature, behavior, color, background, width, flipped, deck) {
+    this._width = (isNaN(width)) ? DEFAULT_CARD_WIDTH : width;
+    this._flipped = (typeof flipped === 'boolean') ? flipped : true;
+    this._height = Math.round(DEFAULT_CARD_HEIGHT * (this._width / DEFAULT_CARD_WIDTH));
+    this._ratio = this._width / DEFAULT_CARD_WIDTH;
+    this._id = id;
+    this._suit = suit;
+    this._value = value;
+    this._name = name;
+    this._nature = nature;
+    this._behavior = behavior;
+    this._color = color;
+    this._background = background;
+    this._view = null;
+    this._state = ON_PILE;
+    this._deck = deck;
+
+    let context = this;
+    this.flip = function(state) {
+      if (typeof state === 'boolean') {
+        if(state) {
+          context._view.addClass('flipped');
+          this._flipped = true;
+        } else {
+          context._view.removeClass('flipped');
+          this._flipped = false;
+        }
+      } else {
+        context._view.toggleClass('flipped');
+        this._flipped = !this._flipped;
+      }
+    }
+  }
+  view() {
+    const context = this;
+    let card = $('<div/>');
+    card.attr('id', 'card-'+this._id);
+    card.addClass('card');
+    if(this._flipped) card.addClass('flipped');
+    let backgroundPositionX = -this._background[1] * this._width + 'px';
+    let backgroundPositionY = -this._background[0] * this._height + 'px';
+    let backgroundPosition = backgroundPositionX + ' ' + backgroundPositionY;
+    let backgroundSize = this._width * 10 +'px ' + this._height * 9 + 'px';
+
+    let front = $('<div />').addClass('front');
+    let back = $('<div />').addClass('back');
+
+    front.css('background-position', backgroundPosition);
+    front.css('background-size', backgroundSize);
+    front.css('border-radius', 15 * this._ratio + 'px');
+
+    back.css('background-size', backgroundSize);
+    back.css('border-radius', 15 * this._ratio + 'px');
+
+    card.css('border-radius', 15 * this._ratio + 'px');
+    card.width(this._width);
+    card.height(this._height);
+
+    card.append(front);
+    card.append(back);
+
+    this._view = $(card);
+    this._view.click((e) => {
+      let view = $(e.target);
+      let dblClickEvent = new CustomEvent('cardClickCallback',{
+        detail: { card: context, view: view }
+      });
+      document.dispatchEvent(dblClickEvent);
+    });
+    return this._view;
+  }
+}
+class ChatBox {
+  constructor(container) {
+    const self = this;
+    this._title = 'ChatBox';
+    this._view = $('<div id="chatbox" class="collapsed"><div class="title">'+this._title+'</div></div>');
+    let messages = $('<ul class="messages"></div>').click((e) => {
+      self.collapse();
+    });
+    this._view.append(messages);
+    $(container).append(this._view);
+  }
+  collapse() {
+    this._view.toggleClass('collapsed');
+  }
+  addMessage(msg) {
+    if(this._view.find('.messages').children().length === 0) this._view.removeClass('collapsed');
+    this._view.find('.messages').append('<li>'+msg+'</li>');
+    this._view.find('.messages').scrollTop(this._view.find('.messages')[0].scrollHeight);
+  }
+  setTitle(title) {
+    this._view.find('.title').text(title);
+  }
+}
 const ON_PILE = 0;
 const ON_TABLE = 1;
 const ON_HAND = 2;
@@ -21,227 +121,6 @@ const ACTION_GIVE_TURN = 10;
 const ACTION_PUT_BACK_IN_POOL = 11;
 const ACTION_PLAY_FROM_POOL = 12;
 const ACTION_SHUFFLE_GRAVEYARD_INTO_PILE = 13;
-
-
-//*---------------------------------------------------------------------
-//* Game Session Class
-//* By Miguel Peres (m.peres@gmail.com)
-//*---------------------------------------------------------------------
-class GameSession {
-  constructor(displayName, handSize) {
-    this._isDM = (typeof isDM === 'boolean') ? isDM : false;
-    this._ws = null;
-    this._sessionID = null;
-    this._roomID = null;
-    this._displayName = this.setDefaultIfEmpty(displayName, 'Jonh Doe');
-    this._container = {
-      playerList: $("#player-list")
-    }
-    this._dmSessionID = null;
-    this._handSize = handSize;
-
-    this._deck = null;
-    this._player = null;
-
-    const context = this;
-
-    document.addEventListener('playerListEvent', function (event) {
-      switch (event.detail.action) {
-        case ACTION_PLAYER_SETUP:
-          let deckOrder = context._deck.getOrder();
-          context.sendSingleplayerAction(parseInt(event.detail.sessionID), ACTION_PLAYER_SETUP, deckOrder);
-          break;
-        default:
-
-      }
-    });
-
-    this._playerList = new PlayerList('#table-top', this);
-  }
-  setName(name) {
-    this._displayName = this.setDefaultIfEmpty(name, 'John Doe');
-  }
-  setHand(size) {
-    this._handSize = parseInt(size);
-  }
-  loading(state) {
-    if(state) {
-      var loadingBlocker = $('<div id="tabletop-loading-blocker" />').click(function() {});
-      var loadingSpinner = $('<div id="tabletop-loading-spinner" />');
-      $('body').append(loadingBlocker).append(loadingSpinner);
-    } else {
-      $('#tabletop-loading-blocker, #tabletop-loading-spinner').remove();
-    }
-  }
-  setDefaultIfEmpty(value, defaultValue) {
-    if(!(typeof value === 'string')) return defaultValue;
-    if(value.trim() === '') return defaultValue;
-    return value;
-  }
-  createMultiPlayer(isDM) {
-    //this.setupDM();
-    //$('#container').removeClass('logged-off');
-    this.loading(true);
-    this._isDM = (typeof isDM === 'boolean') ? isDM : false;
-    if(isDM) this._handSize = 0;
-    let multiplayerID = this.uuid();
-    this.connect(multiplayerID);
-    console.log('Session ID: ' + multiplayerID);
-  }
-  joinMultiPlayer(isDM) {
-    this._isDM = (typeof isDM === 'boolean') ? isDM : false;
-    let multiplayerID = prompt("Please enter your Session ID", "");
-    if(multiplayerID === null) return;
-    if(multiplayerID.trim() === '') return;
-    this.loading(true);
-    this.connect(multiplayerID);
-  }
-  connect(multiplayerID) {
-    let context = this;
-    context._ws = new WebSocket('wss://cloud.achex.ca/tabletop');
-    context._ws.onmessage = function(evt){
-      let message = JSON.parse(evt.data);
-      if(message.hasOwnProperty('SID') && !message.hasOwnProperty('action')) {
-        //Player has signed-up
-        context._sessionID = message['SID'];
-        if(context._isDM) context.setupDM();
-        let action = (context._isDM) ? ACTION_DM_JOIN : ACTION_PLAYER_JOIN;
-        context.sendMultiplayerAction(action);
-        context.loading(false);
-        let isSelf = (parseInt(message.SID) === parseInt(context._sessionID)) ? true : false;
-        context._playerList.addPlayer(context._displayName, context._sessionID, context._handSize, context._isDM, isSelf);
-        $('#container').removeClass('logged-off');
-      }
-      else {
-        if(parseInt(message.sID) === parseInt(context._sessionID)) return;
-        switch (message.action) {
-          case ACTION_PLAYER_JOIN:
-            context._playerList.addPlayer(message.displayName, message.sID, context._handSize, false, false);
-            if(context._isDM) {
-              context.sendSingleplayerAction(message.sID, ACTION_ADD_DM);
-            } else {
-              context.sendSingleplayerAction(message.sID, ACTION_ADD_PLAYER);
-            }
-            break;
-          case ACTION_DM_JOIN:
-            context._playerList.addPlayer(message.displayName, message.sID, 0, true, false);
-            context.sendSingleplayerAction(message.sID, ACTION_ADD_PLAYER);
-            break;
-          case ACTION_DRAW_TO_TABLE:
-            let amount = parseInt(message.details);
-            context._deck.drawToTable(amount, false);
-            if(message.fromDM)
-              context.sendSingleplayerAction(message.sID, ACTION_OK, 'ACTION_DRAW_TO_TABLE');
-            break;
-          case ACTION_SEND_TABLE_TO_GRAVEYARD:
-            context._deck.sendCardFromTableToGraveyard(false);
-            if(message.fromDM)
-              context.sendSingleplayerAction(message.sID, ACTION_OK, 'ACTION_SEND_TABLE_TO_GRAVEYARD');
-            break;
-          case ACTION_ADD_PLAYER:
-            context._playerList.addPlayer(message.displayName, message.sID, context._handSize, false, false);
-            break;
-          case ACTION_ADD_DM:
-            context._playerList.addPlayer(message.displayName, message.sID, 0, true, false);
-            break;
-          case ACTION_PLAYER_SETUP:
-            context.setupPlayer(message.details);
-            if(message.fromDM)
-              context.sendSingleplayerAction(message.sID, ACTION_OK, 'ACTION_PLAYER_SETUP');
-            break;
-          case ACTION_GIVE_INITIAL_HAND:
-            context._player.giveInitialHand();
-            if(message.fromDM)
-              context.sendSingleplayerAction(message.sID, ACTION_OK, 'ACTION_GIVE_INITIAL_HAND');
-            break;
-          case ACTION_DRAW_TO_POOL:
-            if(context._deck !== null)
-              context._deck.drawToPool(parseInt(message.details));
-            if(message.fromDM)
-              context.sendSingleplayerAction(message.sID, ACTION_OK, 'ACTION_DRAW_TO_POOL');
-            break;
-          case ACTION_GIVE_TURN:
-              context._playerList.toggleTurn(message.details);
-            if(message.fromDM && parseInt(message.details) === parseInt(context._sessionID))
-              context.sendSingleplayerAction(message.sID, ACTION_OK, 'ACTION_GIVE_TURN');
-            break;
-          case ACTION_PUT_BACK_IN_POOL:
-            context._deck.putBackInPool(message.details);
-            break;
-          case ACTION_PLAY_FROM_POOL:
-            context._deck.playFromPool(message.details);
-            break;
-          case ACTION_SHUFFLE_GRAVEYARD_INTO_PILE:
-              context._deck.shuffleGraveyardIntoPile(message.details);
-            if(message.fromDM && parseInt(message.details) === parseInt(context._sessionID))
-              context.sendSingleplayerAction(message.sID, ACTION_OK, 'ACTION_SHUFFLE_GRAVEYARD_INTO_PILE');
-            break;
-          case ACTION_OK:
-            console.log(message.displayName +' ('+ message.sID +') - '+message.details);
-            break;
-          default:
-
-        }
-      }
-    };
-    context._ws.onclose= function(evt){
-      console.log('log: Diconnected');
-      $('#container').addClass('logged-off');
-      context.loading(false);
-    };
-    context._ws.onerror= function(evt){
-      console.log('log: Error');
-      context.loading(false);
-    };
-    context._ws.onopen= function(evt){
-      console.log('log: Connected');
-      let id = 'TableTop_' + multiplayerID;
-      this.send('{"setID":"'+id+'", "passwd":"none"}');
-      context._roomID = id;
-      $('#multiplayer .sign-off p').text(multiplayerID);
-      jQuery('body').addClass('signed-in');
-    };
-  }
-  sendMultiplayerAction(action, details, callback) {
-    if(this._ws) {
-      let command = {
-          to: this._roomID,
-          displayName: this._displayName,
-          fromDM: this._isDM,
-          action: action,
-          details:  this.setDefaultIfEmpty(details, ''),
-          callback: this.setDefaultIfEmpty(callback, '')
-      };
-      this._ws.send(JSON.stringify(command));
-    }
-  }
-  sendSingleplayerAction(sessionID, action, details, callback) {
-    if(this._ws) {
-      let command = {
-          toS: parseInt(sessionID),
-          displayName: this._displayName,
-          fromDM: this._isDM,
-          action: action,
-          details:  this.setDefaultIfEmpty(details, ''),
-          callback: this.setDefaultIfEmpty(callback, '')
-      };
-      this._ws.send(JSON.stringify(command));
-    }
-  }
-  uuid() {
-    return Math.floor(Math.random()*1E16);
-  }
-  setupDM() {
-    this._deck = new Deck(this, '#play-area', '#deck-pile', '#pool','#deck-graveyard', 150, []);
-    this._player = new DungeonMaster(this._deck);
-  }
-  setupPlayer(deckOrder) {
-    this._deck = new Deck(this, '#play-area', '#deck-pile', '#pool', '#deck-graveyard', 150, deckOrder.split(','));
-    this._player = new Player(false, this._deck, this._handSize, '#player-hand');
-  }
-}
-
-
 //*---------------------------------------------------------------------
 //* Deck Class
 //* By Miguel Peres (m.peres@gmail.com)
@@ -552,87 +431,302 @@ class Deck {
     pile.attr('data-amount', pile.children().length);
   }
 }
-
-
 //*---------------------------------------------------------------------
-//* Single card
+//* Dungeon Master Toolbar
 //* By Miguel Peres (m.peres@gmail.com)
 //*---------------------------------------------------------------------
-class Card {
-  constructor(id, suit, value, name, nature, behavior, color, background, width, flipped, deck) {
-    this._width = (isNaN(width)) ? DEFAULT_CARD_WIDTH : width;
-    this._flipped = (typeof flipped === 'boolean') ? flipped : true;
-    this._height = Math.round(DEFAULT_CARD_HEIGHT * (this._width / DEFAULT_CARD_WIDTH));
-    this._ratio = this._width / DEFAULT_CARD_WIDTH;
-    this._id = id;
-    this._suit = suit;
-    this._value = value;
-    this._name = name;
-    this._nature = nature;
-    this._behavior = behavior;
-    this._color = color;
-    this._background = background;
-    this._view = null;
-    this._state = ON_PILE;
+class DmToolbar {
+  constructor(deck, container) {
+    const context = this;
     this._deck = deck;
 
-    let context = this;
-    this.flip = function(state) {
-      if (typeof state === 'boolean') {
-        if(state) {
-          context._view.addClass('flipped');
-          this._flipped = true;
-        } else {
-          context._view.removeClass('flipped');
-          this._flipped = false;
-        }
-      } else {
-        context._view.toggleClass('flipped');
-        this._flipped = !this._flipped;
-      }
+    this.discardTable = function() {
+      context._deck.sendCardFromTableToGraveyard(true);
     }
+
+    this.draw = function() {
+      context._deck.dmPlay();
+    }
+
+    this._view = $('<div id="dm-toolbar" />');
+    this._view.append(this._getActionButton('dm-draw', 'Draw Card', this.draw));
+    this._view.append(this._getActionButton('dm-table-clear', 'Discard Table', this.discardTable));
+    $(container).prepend(this._view);
   }
-  view() {
-    const context = this;
-    let card = $('<div/>');
-    card.attr('id', 'card-'+this._id);
-    card.addClass('card');
-    if(this._flipped) card.addClass('flipped');
-    let backgroundPositionX = -this._background[1] * this._width + 'px';
-    let backgroundPositionY = -this._background[0] * this._height + 'px';
-    let backgroundPosition = backgroundPositionX + ' ' + backgroundPositionY;
-    let backgroundSize = this._width * 10 +'px ' + this._height * 9 + 'px';
-
-    let front = $('<div />').addClass('front');
-    let back = $('<div />').addClass('back');
-
-    front.css('background-position', backgroundPosition);
-    front.css('background-size', backgroundSize);
-    front.css('border-radius', 15 * this._ratio + 'px');
-
-    back.css('background-size', backgroundSize);
-    back.css('border-radius', 15 * this._ratio + 'px');
-
-    card.css('border-radius', 15 * this._ratio + 'px');
-    card.width(this._width);
-    card.height(this._height);
-
-    card.append(front);
-    card.append(back);
-
-    this._view = $(card);
-    this._view.click((e) => {
-      let view = $(e.target);
-      let dblClickEvent = new CustomEvent('cardClickCallback',{
-        detail: { card: context, view: view }
-      });
-      document.dispatchEvent(dblClickEvent);
-    });
-    return this._view;
+  _getActionButton(id, label, action) {
+    return $('<div id="'+id+'" class="action"><span class="label">'+label+'</span></div>').click(action);
   }
 }
+//*---------------------------------------------------------------------
+//* Dungeon Master
+//* By Miguel Peres (m.peres@gmail.com)
+//*---------------------------------------------------------------------
+class DungeonMaster {
+  constructor(deck) {
+    this.isDM = true;
+    this._deck = deck;
+    this._toolbar = new DmToolbar(this._deck, '#table-top');
 
+    const context = this;
+    document.addEventListener('cardClickCallback', function (event) {
+      let card = event.detail.card;
+      let view = event.detail.view;
+      switch(card._state) {
+        case ON_PILE:
+          context._deck.dmPlay();
+          break;
+        case ON_GRAVEYARD:
+          break;
+        case ON_TABLE:
+          break;
+        default:
+      }
+    }, false);
 
+    this.setupTurnButton();
+  }
+  setupTurnButton() {
+    const context = this;
+    $('#player-turn-begin').click((e) => {
+      $('#player-turn').toggleClass('playing');
+      this.beginTurn();
+    });
+    $('#player-turn-end').click((e) => {
+      $('#player-turn').toggleClass('playing');
+      this.endTurn();
+    });
+  }
+  beginTurn() {
+    this._playing = true;
+  }
+  endTurn() {
+    // this._deck.draw(this._hand, this._container.hand, this._numberOfCardsUsed);
+    // this._deck.sendCardFromTableToGraveyard(true);
+    // this._playing = false;
+    // this._trumped = false;
+    // this._numberOfCardsUsed = 0;
+  }
+}
+//*---------------------------------------------------------------------
+//* Game Session Class
+//* By Miguel Peres (m.peres@gmail.com)
+//*---------------------------------------------------------------------
+class GameSession {
+  constructor(displayName, handSize) {
+    this._isDM = (typeof isDM === 'boolean') ? isDM : false;
+    this._ws = null;
+    this._sessionID = null;
+    this._roomID = null;
+    this._displayName = this.setDefaultIfEmpty(displayName, 'Jonh Doe');
+    this._container = {
+      playerList: $("#player-list")
+    }
+    this._dmSessionID = null;
+    this._handSize = handSize;
+
+    this._deck = null;
+    this._player = null;
+    this._chatBox = null;
+
+    const context = this;
+
+    document.addEventListener('playerListEvent', function (event) {
+      switch (event.detail.action) {
+        case ACTION_PLAYER_SETUP:
+          let deckOrder = context._deck.getOrder();
+          context.sendSingleplayerAction(parseInt(event.detail.sessionID), ACTION_PLAYER_SETUP, deckOrder);
+          break;
+        default:
+
+      }
+    });
+
+    this._playerList = new PlayerList('#table-top', this);
+  }
+  setName(name) {
+    this._displayName = this.setDefaultIfEmpty(name, 'John Doe');
+  }
+  setHand(size) {
+    this._handSize = parseInt(size);
+  }
+  loading(state) {
+    if(state) {
+      var loadingBlocker = $('<div id="tabletop-loading-blocker" />').click(function() {});
+      var loadingSpinner = $('<div id="tabletop-loading-spinner" />');
+      $('body').append(loadingBlocker).append(loadingSpinner);
+    } else {
+      $('#tabletop-loading-blocker, #tabletop-loading-spinner').remove();
+    }
+  }
+  setDefaultIfEmpty(value, defaultValue) {
+    if(!(typeof value === 'string')) return defaultValue;
+    if(value.trim() === '') return defaultValue;
+    return value;
+  }
+  createMultiPlayer(isDM) {
+    //this.setupDM();
+    //$('#container').removeClass('logged-off');
+    this.loading(true);
+    this._isDM = (typeof isDM === 'boolean') ? isDM : false;
+    if(isDM) this._handSize = 0;
+    let multiplayerID = this.uuid();
+    this.connect(multiplayerID);
+    console.log('Session ID: ' + multiplayerID);
+  }
+  joinMultiPlayer(isDM) {
+    this._isDM = (typeof isDM === 'boolean') ? isDM : false;
+    let multiplayerID = prompt("Please enter your Session ID", "");
+    if(multiplayerID === null) return;
+    if(multiplayerID.trim() === '') return;
+    this.loading(true);
+    this.connect(multiplayerID);
+  }
+  connect(multiplayerID) {
+    let context = this;
+    context._ws = new WebSocket('wss://cloud.achex.ca/tabletop');
+    context._ws.onmessage = function(evt){
+      let message = JSON.parse(evt.data);
+      if(message.hasOwnProperty('SID') && !message.hasOwnProperty('action')) {
+        //Player has signed-up
+        context._sessionID = message['SID'];
+        if(context._isDM) context.setupDM();
+        let action = (context._isDM) ? ACTION_DM_JOIN : ACTION_PLAYER_JOIN;
+        context.sendMultiplayerAction(action);
+        context.loading(false);
+        let isSelf = (parseInt(message.SID) === parseInt(context._sessionID)) ? true : false;
+        context._playerList.addPlayer(context._displayName, context._sessionID, context._handSize, context._isDM, isSelf);
+        $('#container').removeClass('logged-off');
+      }
+      else {
+        if(parseInt(message.sID) === parseInt(context._sessionID)) return;
+        switch (message.action) {
+          case ACTION_PLAYER_JOIN:
+            context._playerList.addPlayer(message.displayName, message.sID, context._handSize, false, false);
+            if(context._isDM) {
+              context.sendSingleplayerAction(message.sID, ACTION_ADD_DM);
+            } else {
+              context.sendSingleplayerAction(message.sID, ACTION_ADD_PLAYER);
+            }
+            break;
+          case ACTION_DM_JOIN:
+            context._playerList.addPlayer(message.displayName, message.sID, 0, true, false);
+            context.sendSingleplayerAction(message.sID, ACTION_ADD_PLAYER);
+            break;
+          case ACTION_DRAW_TO_TABLE:
+            let amount = parseInt(message.details);
+            context._deck.drawToTable(amount, false);
+            if(message.fromDM)
+              context.sendSingleplayerAction(message.sID, ACTION_OK, 'ACTION_DRAW_TO_TABLE');
+            break;
+          case ACTION_SEND_TABLE_TO_GRAVEYARD:
+            context._deck.sendCardFromTableToGraveyard(false);
+            if(message.fromDM)
+              context.sendSingleplayerAction(message.sID, ACTION_OK, 'ACTION_SEND_TABLE_TO_GRAVEYARD');
+            break;
+          case ACTION_ADD_PLAYER:
+            context._playerList.addPlayer(message.displayName, message.sID, context._handSize, false, false);
+            break;
+          case ACTION_ADD_DM:
+            context._playerList.addPlayer(message.displayName, message.sID, 0, true, false);
+            break;
+          case ACTION_PLAYER_SETUP:
+            context.setupPlayer(message.details);
+            if(message.fromDM)
+              context.sendSingleplayerAction(message.sID, ACTION_OK, 'ACTION_PLAYER_SETUP');
+            break;
+          case ACTION_GIVE_INITIAL_HAND:
+            context._player.giveInitialHand();
+            if(message.fromDM)
+              context.sendSingleplayerAction(message.sID, ACTION_OK, 'ACTION_GIVE_INITIAL_HAND');
+            break;
+          case ACTION_DRAW_TO_POOL:
+            if(context._deck !== null)
+              context._deck.drawToPool(parseInt(message.details));
+            if(message.fromDM)
+              context.sendSingleplayerAction(message.sID, ACTION_OK, 'ACTION_DRAW_TO_POOL');
+            break;
+          case ACTION_GIVE_TURN:
+              context._playerList.toggleTurn(message.details);
+            if(message.fromDM && parseInt(message.details) === parseInt(context._sessionID))
+              context.sendSingleplayerAction(message.sID, ACTION_OK, 'ACTION_GIVE_TURN');
+            break;
+          case ACTION_PUT_BACK_IN_POOL:
+            context._deck.putBackInPool(message.details);
+            break;
+          case ACTION_PLAY_FROM_POOL:
+            context._deck.playFromPool(message.details);
+            break;
+          case ACTION_SHUFFLE_GRAVEYARD_INTO_PILE:
+              context._deck.shuffleGraveyardIntoPile(message.details);
+            if(message.fromDM && parseInt(message.details) === parseInt(context._sessionID))
+              context.sendSingleplayerAction(message.sID, ACTION_OK, 'ACTION_SHUFFLE_GRAVEYARD_INTO_PILE');
+            break;
+          case ACTION_OK:
+            context._chatBox.addMessage(message.displayName +' ('+ message.sID +') - '+message.details);
+            break;
+          default:
+
+        }
+      }
+    };
+    context._ws.onclose= function(evt){
+      console.log('log: Diconnected');
+      $('#container').addClass('logged-off');
+      context.loading(false);
+    };
+    context._ws.onerror= function(evt){
+      console.log('log: Error');
+      context.loading(false);
+    };
+    context._ws.onopen= function(evt){
+      console.log('log: Connected');
+      let id = 'TableTop_' + multiplayerID;
+      this.send('{"setID":"'+id+'", "passwd":"none"}');
+      context._roomID = id;
+      $('#multiplayer .sign-off p').text(multiplayerID);
+      jQuery('body').addClass('signed-in');
+    };
+  }
+  sendMultiplayerAction(action, details, callback) {
+    if(this._ws) {
+      let command = {
+          to: this._roomID,
+          displayName: this._displayName,
+          fromDM: this._isDM,
+          action: action,
+          details:  this.setDefaultIfEmpty(details, ''),
+          callback: this.setDefaultIfEmpty(callback, '')
+      };
+      this._ws.send(JSON.stringify(command));
+    }
+  }
+  sendSingleplayerAction(sessionID, action, details, callback) {
+    if(this._ws) {
+      let command = {
+          toS: parseInt(sessionID),
+          displayName: this._displayName,
+          fromDM: this._isDM,
+          action: action,
+          details:  this.setDefaultIfEmpty(details, ''),
+          callback: this.setDefaultIfEmpty(callback, '')
+      };
+      this._ws.send(JSON.stringify(command));
+    }
+  }
+  uuid() {
+    return Math.floor(Math.random()*1E16);
+  }
+  setupDM() {
+    this._deck = new Deck(this, '#play-area', '#deck-pile', '#pool','#deck-graveyard', 150, []);
+    this._player = new DungeonMaster(this._deck);
+    this._chatBox = new ChatBox('#table-top');
+    this._chatBox.setTitle('Session ID: '+this._roomID.split('_')[1]);
+  }
+  setupPlayer(deckOrder) {
+    this._deck = new Deck(this, '#play-area', '#deck-pile', '#pool', '#deck-graveyard', 150, deckOrder.split(','));
+    this._player = new Player(false, this._deck, this._handSize, '#player-hand');
+  }
+}
 //*---------------------------------------------------------------------
 //* Player
 //* By Miguel Peres (m.peres@gmail.com)
@@ -720,59 +814,6 @@ class Player {
     this._numberOfCardsUsed = 0;
   }
 }
-
-
-//*---------------------------------------------------------------------
-//* Narrator
-//* By Miguel Peres (m.peres@gmail.com)
-//*---------------------------------------------------------------------
-class DungeonMaster {
-  constructor(deck) {
-    this.isDM = true;
-    this._deck = deck;
-    this._toolbar = new DmToolbar(this._deck, '#table-top');
-
-    const context = this;
-    document.addEventListener('cardClickCallback', function (event) {
-      let card = event.detail.card;
-      let view = event.detail.view;
-      switch(card._state) {
-        case ON_PILE:
-          context._deck.dmPlay();
-          break;
-        case ON_GRAVEYARD:
-          break;
-        case ON_TABLE:
-          break;
-        default:
-      }
-    }, false);
-
-    this.setupTurnButton();
-  }
-  setupTurnButton() {
-    const context = this;
-    $('#player-turn-begin').click((e) => {
-      $('#player-turn').toggleClass('playing');
-      this.beginTurn();
-    });
-    $('#player-turn-end').click((e) => {
-      $('#player-turn').toggleClass('playing');
-      this.endTurn();
-    });
-  }
-  beginTurn() {
-    this._playing = true;
-  }
-  endTurn() {
-    // this._deck.draw(this._hand, this._container.hand, this._numberOfCardsUsed);
-    // this._deck.sendCardFromTableToGraveyard(true);
-    // this._playing = false;
-    // this._trumped = false;
-    // this._numberOfCardsUsed = 0;
-  }
-}
-
 //*---------------------------------------------------------------------
 //* Player List
 //* By Miguel Peres (m.peres@gmail.com)
@@ -830,32 +871,5 @@ class PlayerList {
     player.toggleClass('hasTurn');
     if(parseInt(sessionID) === parseInt(this._gameSession._sessionID) && this._gameSession._player !== null)
       this._gameSession._player.toggleTurn();
-  }
-}
-
-//*---------------------------------------------------------------------
-//* Dungeon Master Toolbar
-//* By Miguel Peres (m.peres@gmail.com)
-//*---------------------------------------------------------------------
-class DmToolbar {
-  constructor(deck, container) {
-    const context = this;
-    this._deck = deck;
-
-    this.discardTable = function() {
-      context._deck.sendCardFromTableToGraveyard(true);
-    }
-
-    this.draw = function() {
-      context._deck.dmPlay();
-    }
-
-    this._view = $('<div id="dm-toolbar" />');
-    this._view.append(this._getActionButton('dm-draw', 'Draw Card', this.draw));
-    this._view.append(this._getActionButton('dm-table-clear', 'Discard Table', this.discardTable));
-    $(container).prepend(this._view);
-  }
-  _getActionButton(id, label, action) {
-    return $('<div id="'+id+'" class="action"><span class="label">'+label+'</span></div>').click(action);
   }
 }
