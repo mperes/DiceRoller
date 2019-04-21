@@ -40,10 +40,11 @@ class GameSession {
   setHand(size) {
     this._handSize = parseInt(size);
   }
-  loading(state) {
+  loading(state, msg) {
+    let loadingMessage = (typeof msg === 'undefined') ? 'Please wait...' : msg;
     if(state) {
       var loadingBlocker = $('<div id="tabletop-loading-blocker" />').click(function() {});
-      var loadingSpinner = $('<div id="tabletop-loading-spinner" />');
+      var loadingSpinner = $('<div id="tabletop-loading-spinner"><span>'+loadingMessage+'<span/></div>');
       $('body').append(loadingBlocker).append(loadingSpinner);
     } else {
       $('#tabletop-loading-blocker, #tabletop-loading-spinner').remove();
@@ -89,6 +90,7 @@ class GameSession {
         $('#container').removeClass('logged-off');
         context._chatBox = new ChatBox(context, '#table-top');
         context._chatBox.setTitle('Session ID: '+multiplayerID);
+        if(!context._isDM) context.loading(true, 'Waiting for your lazy DM...');
       }
       else {
         if(parseInt(message.sID) === parseInt(context._sessionID)) return;
@@ -107,7 +109,8 @@ class GameSession {
             break;
           case ACTION_DRAW_TO_TABLE:
             let amount = parseInt(message.details);
-            context._deck.drawToTable(amount, false);
+            if(context._deck !== null)
+              context._deck.drawToTable(amount, false);
             if(message.fromDM)
               context.sendSingleplayerAction(message.sID, ACTION_OK, 'ACTION_DRAW_TO_TABLE');
             break;
@@ -128,7 +131,8 @@ class GameSession {
               context.sendSingleplayerAction(message.sID, ACTION_OK, 'ACTION_PLAYER_SETUP');
             break;
           case ACTION_GIVE_INITIAL_HAND:
-            context._player.giveInitialHand();
+            if(context._deck !== null)
+              context._player.giveInitialHand();
             if(message.fromDM)
               context.sendSingleplayerAction(message.sID, ACTION_OK, 'ACTION_GIVE_INITIAL_HAND');
             break;
@@ -139,7 +143,7 @@ class GameSession {
               context.sendSingleplayerAction(message.sID, ACTION_OK, 'ACTION_DRAW_TO_POOL');
             break;
           case ACTION_GIVE_TURN:
-              context._playerList.toggleTurn(message.details);
+            context._playerList.toggleTurn(message.details);
             if(message.fromDM && parseInt(message.details) === parseInt(context._sessionID))
               context.sendSingleplayerAction(message.sID, ACTION_OK, 'ACTION_GIVE_TURN');
             break;
@@ -219,5 +223,6 @@ class GameSession {
   setupPlayer(deckOrder) {
     this._deck = new Deck(this, '#play-area', '#deck-pile', '#pool', '#deck-graveyard', 150, deckOrder.split(','));
     this._player = new Player(false, this._deck, this._handSize, '#player-hand');
+    this.loading(false);
   }
 }

@@ -14,7 +14,7 @@ class DungeonMaster {
       let view = event.detail.view;
       switch(card._state) {
         case ON_PILE:
-          context._deck.dmPlay();
+          context._deck.drawToTable(1, true);
           break;
         case ON_GRAVEYARD:
           break;
