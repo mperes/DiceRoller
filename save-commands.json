@@ -1,5 +1,5 @@
 {
 	"commands": [
-    "saga/*.js: saga\\build.bat"
+    "saga/*.js: python {relPath}build.py"
 	]
 }
