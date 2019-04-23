@@ -153,12 +153,14 @@ class Deck {
     this._fateDeck = this.loadDeck(FATE_DECK);
     if(deckOrder.length > 0) {
       this._pile = this.forceDeck(this._fateDeck, deckOrder);
+      this._pool = this.getPool(this._fateDeck, deckOrder);
     } else {
       this._pile = this.cloneDeck(this._fateDeck);
       this.shuffle();
     }
     this.renderPile();
     this.renderGraveyeard();
+    this.renderPool();
   }
   loadDeck(deck) {
     let loadedDeck = [];
@@ -182,6 +184,20 @@ class Deck {
       forced.push(card);
     }
     return forced;
+  }
+  getPool(deck, deckOrder) {
+    if(deckOrder.length < deck.length) { //Cards in the pool
+      let pool = [];
+      for(let i=0; i<deck.length; i++) {
+        let card = deck[i];
+        let index = deckOrder.indexOf(card._id.toString());
+        if(index === -1) {
+          pool.push(card);
+        }
+      }
+      return pool;
+    }
+    return [];
   }
   getOrder() {
     let order = [];
@@ -420,6 +436,14 @@ class Deck {
       this._container.pile.append(card);
     }
     this.setShadowSize(this._container.pile);
+  }
+  renderPool() {
+    this._container.pool.html('');
+    for(let i=0; i<this._pool.length; i++) {
+      let card = this._pool[i].view();
+      card.removeClass('flipped');
+      this._container.pool.append(card);
+    }
   }
   renderGraveyeard() {
     this._container.graveyard.width(this._cardWidth)
