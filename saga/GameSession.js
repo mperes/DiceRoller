@@ -173,6 +173,17 @@ class GameSession {
           case ACTION_CHAT:
             context._chatBox.addMessage(message.displayName +': '+ message.details);
             break;
+          case ACTION_PING:
+            if(message.fromDM)
+              context.sendSingleplayerAction(message.sID, ACTION_PONG);
+            break;
+          case ACTION_PONG:
+            context._playerList.pong(message.sID);
+            break;
+          case ACTION_DISCONNECT:
+            if(message.fromDM)
+              context._playerList.disconnectPlayer(message.details);
+            break;
           default:
 
         }

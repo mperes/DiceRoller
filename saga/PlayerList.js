@@ -8,10 +8,11 @@ class PlayerList {
     this._list = [];
     $(container).prepend(this._view);
     this._gameSession = gameSession;
+    this._checkOnlinePlayers = setInterval(this.checkOnlinePlayers.bind(this), 10000);
   }
   addPlayer(displayName, sessionID, handSize, isDM, isSelf) {
     let context = this;
-    this._list.push({displayName: displayName, sessionID: sessionID, handSize: handSize, isDM: isDM, isSelf: isSelf});
+    this._list.push({displayName: displayName, sessionID: sessionID, handSize: handSize, isDM: isDM, isSelf: isSelf, ping: false, pong: false});
     let thumbnail = $('<div class="thumbnail" />').text(displayName);
     let health = $('<div class="health"><div class="left"></div></div>');
     thumbnail.append(health);
@@ -37,12 +38,11 @@ class PlayerList {
     actions.append(damage);
     actions.append(giveInitialHand);
     actions.append(setupAction);
-    let newPlayer = $('<div class="player"/>').append(thumbnail).append(actions);
+    let newPlayer = $('<div class="player" id="player-'+sessionID+'" />').append(thumbnail).append(actions);
     if(isSelf) newPlayer.addClass('self');
     if(isDM) {
       this._dmSessionID = sessionID;
       newPlayer.addClass('isDM');
-      this._list.push(newPlayer);
       this._view.prepend(newPlayer);
     } else {
       this._view.append(newPlayer);
@@ -66,5 +66,35 @@ class PlayerList {
     let player = $('#player-'+sessionID).parent();
     if(player.length === 0) return;
     player.find('.health .left').css('width', health+'%');
+  }
+  checkOnlinePlayers() {
+    if($('body').hasClass('signed-in') && this._list.length > 1 && this._gameSession._isDM) {
+      //Check for disconnection
+      for(let i=0; i<this._list.length; i++) {
+        let player = this._list[i];
+        if(player.ping && !player.pong && !player.isDM) {
+          this._gameSession.sendMultiplayerAction(ACTION_DISCONNECT, player.sessionID.toString());
+          this.disconnectPlayer(player.sessionID);
+        }
+      }
+      //Send ping
+      for(let i=0; i<this._list.length; i++) {
+        let player = this._list[i];
+        player.ping = true;
+        player.pong = (player.isDM) ? true : false;
+        this._gameSession.sendMultiplayerAction(ACTION_PING);
+      }
+    }
+  }
+  pong(sessionID) {
+    let index = this.index(sessionID);
+    if(index > -1) this._list[index].pong = true;
+  }
+  disconnectPlayer(sessionID) {
+    let index = this.index(sessionID);
+    if(index > -1) {
+      this._list.splice(index, 1);
+      $('#player-list').find('#player-'+sessionID).remove();
+    }
   }
 }
