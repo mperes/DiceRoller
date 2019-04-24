@@ -18,20 +18,9 @@ class GameSession {
     this._deck = null;
     this._player = null;
     this._chatBox = null;
+    this._imageLoader = null;
 
     const context = this;
-
-    // document.addEventListener('playerListEvent', function (event) {
-    //   switch (event.detail.action) {
-    //     case ACTION_PLAYER_SETUP:
-    //       let deckOrder = context._deck.getOrder();
-    //       context.sendSingleplayerAction(parseInt(event.detail.sessionID), ACTION_PLAYER_SETUP, deckOrder);
-    //       break;
-    //     default:
-    //
-    //   }
-    // });
-
     this._playerList = new PlayerList('#table-top', this);
   }
   setName(name) {
@@ -244,12 +233,14 @@ class GameSession {
     if (this._deck == null) {
       this._deck = new Deck(this, '#play-area', '#deck-pile', '#pool','#deck-graveyard', 150, []);
       this._player = new DungeonMaster(this._deck);
+      this._imageLoader = new ImageLoader(this, '#table-top');
     }
   }
   setupPlayer(deckOrder) {
     if (this._deck == null) {
       this._deck = new Deck(this, '#play-area', '#deck-pile', '#pool', '#deck-graveyard', 150, deckOrder.split(','));
       this._player = new Player(false, this._deck, this._handSize, '#player-hand');
+      this._imageLoader = new ImageLoader(this, '#table-top');
       this.loading(false);
     }
   }

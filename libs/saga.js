@@ -568,20 +568,9 @@ class GameSession {
     this._deck = null;
     this._player = null;
     this._chatBox = null;
+    this._imageLoader = null;
 
     const context = this;
-
-    // document.addEventListener('playerListEvent', function (event) {
-    //   switch (event.detail.action) {
-    //     case ACTION_PLAYER_SETUP:
-    //       let deckOrder = context._deck.getOrder();
-    //       context.sendSingleplayerAction(parseInt(event.detail.sessionID), ACTION_PLAYER_SETUP, deckOrder);
-    //       break;
-    //     default:
-    //
-    //   }
-    // });
-
     this._playerList = new PlayerList('#table-top', this);
   }
   setName(name) {
@@ -794,14 +783,43 @@ class GameSession {
     if (this._deck == null) {
       this._deck = new Deck(this, '#play-area', '#deck-pile', '#pool','#deck-graveyard', 150, []);
       this._player = new DungeonMaster(this._deck);
+      this._imageLoader = new ImageLoader(this, '#table-top');
     }
   }
   setupPlayer(deckOrder) {
     if (this._deck == null) {
       this._deck = new Deck(this, '#play-area', '#deck-pile', '#pool', '#deck-graveyard', 150, deckOrder.split(','));
       this._player = new Player(false, this._deck, this._handSize, '#player-hand');
+      this._imageLoader = new ImageLoader(this, '#table-top');
       this.loading(false);
     }
+  }
+}
+class ImageLoader {
+  constructor(gameSession, container) {
+    this._gameSession = gameSession;
+    this._validFormats = ['jpg', 'jpeg', 'gif', 'png', 'bmp'];
+    this._src = '';
+    this._view = $('<div id="image-loader" >/');
+    this._image = null;
+    this._width = 0;
+    this._height = 0;
+    this._originalWidth = 0;
+    this._originalHeight = 0;
+    this._zoom = 1;
+    this._viewer = null;
+    $(container).prepend(this._view);
+  }
+  load(src, alt) {
+    let self = this;
+    if(!this.isValid(src)) return;
+    this._src = src;
+    this._viewer = new ImageViewer(this._view[0]);
+    this._viewer.load(this._src);
+  }
+  isValid(src) {
+    let srcFormat = src.split('.')[src.split('.').length-1].toLowerCase();
+    return (this._validFormats.indexOf(srcFormat) > -1) ? true : false;
   }
 }
 //*---------------------------------------------------------------------
