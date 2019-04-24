@@ -557,8 +557,77 @@ input.squareButton.primary {
   }
 }
 
-#image-loader .iv-snap-view {
-  bottom: 25px;
-  left: 10px;
-  top: unset;
+#image-loader {
+  .iv-snap-view {
+    bottom: 25px;
+    left: 10px;
+    top: unset;
+  }
+  .image-marks {
+  }
+  &.hidden {
+    img {
+      visibility: hidden!important;
+    }
+    pointer-events: none;
+  }
+}
+
+.localfilereader-container {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  position: relative;
+  .localfilereader-button {
+    opacity: 0;
+    position: absolute;
+    top: 0;
+    left: 0;
+    font-size: 100px;
+  }
+  .localfilereader-fake {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+#audio-player {
+  display: inline-block;
+  margin: 0 5px;
+  height: 80px;
+  vertical-align: top;
+  background: rgb(137, 137, 137);
+  padding: 5px;
+  box-sizing: border-box;
+  border-radius: 5px;
+  select {
+    display: block;
+    width: 155px;
+    appearance: textfield;
+    -webkit-appearance: textfield;
+    border: 0;
+    padding: 5px;
+    border-radius: 3px;
+    margin-bottom: 5px;
+  }
+  #audio-player-play, #audio-player-pause {
+    width: 75px;
+    border: 0;
+    padding: 5px 10px;
+    box-sizing: border-box;
+    border-radius: 3px;
+    outline: none;
+  }
+  #audio-player-play {
+    margin-right: 5px;
+  }
+  #audio-player-pause.paused {
+    background-color: #42454c;
+    color: white;
+  }
+  #audio-player-volume {
+    display: block;
+    margin: 5px 0 0 0;
+    width: 100%;
+  }
 }

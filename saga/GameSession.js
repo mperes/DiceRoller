@@ -19,9 +19,25 @@ class GameSession {
     this._player = null;
     this._chatBox = null;
     this._imageLoader = null;
+    this._audioPlayer = null;
 
     const context = this;
     this._playerList = new PlayerList('#table-top', this);
+  }
+  playAudio(src) {
+    if(this._audioPlayer !== null) this._audioPlayer.stop();
+    this._audioPlayer = new Howl({
+      src: [src],
+      autoplay: true,
+      loop: true,
+      volume: 0.5,
+    });
+  }
+  pauseAudio() {
+    this._audioPlayer.pause();
+  }
+  adjustAudioVolume(volume) {
+    Howler.volume(volume);
   }
   setName(name) {
     this._displayName = this.setDefaultIfEmpty(name, 'John Doe');
@@ -176,6 +192,31 @@ class GameSession {
           case ACTION_DISCONNECT:
             if(message.fromDM)
               context._playerList.disconnectPlayer(message.details);
+            break;
+          case ACTION_SHOW_MAP:
+            context._imageLoader._view.toggleClass('hidden');
+            if(message.fromDM)
+              context.sendSingleplayerAction(message.sID, ACTION_OK, 'SHOW_MAP');
+            break;
+          case ACTION_AUDIO_PLAY:
+            context.playAudio(message.details);
+            if(message.fromDM)
+              context.sendSingleplayerAction(message.sID, ACTION_OK, 'ACTION_AUDIO_PLAY');
+            break;
+          case ACTION_AUDIO_PAUSE:
+            context.pauseAudio();
+            if(message.fromDM)
+              context.sendSingleplayerAction(message.sID, ACTION_OK, 'ACTION_AUDIO_PAUSE');
+            break;
+          case ACTION_AUDIO_CONTINUE:
+            context._audioPlayer.play();
+            if(message.fromDM)
+              context.sendSingleplayerAction(message.sID, ACTION_OK, 'ACTION_AUDIO_CONTINUE');
+            break;
+          case ACTION_AUDIO_VOLUME:
+            context.adjustAudioVolume(parseFloat(message.details));
+            if(message.fromDM)
+              context.sendSingleplayerAction(message.sID, ACTION_OK, 'ACTION_AUDIO_VOLUME');
             break;
           default:
 

@@ -21,13 +21,6 @@ class PlayerList {
       context._gameSession.sendMultiplayerAction(ACTION_GIVE_TURN, sessionID.toString());
     })
     let actions = $('<div class="actions" />');
-    // let setupAction = $('<div class="setup" data-id="" />').click((e) => {
-    //   let view = $(e.target);
-    //   let setupPlayerEvent = new CustomEvent('playerListEvent',{
-    //     detail: { action: ACTION_PLAYER_SETUP, displayName, sessionID: sessionID, handSize: handSize }
-    //   });
-    //   document.dispatchEvent(setupPlayerEvent);
-    // });
     let giveInitialHand = this._getActionButton('give-hand', 'Give initial hand', function() {
       let deckOrder = context._gameSession._deck.getOrder();
       context._gameSession.sendSingleplayerAction(parseInt(sessionID), ACTION_GIVE_INITIAL_HAND, deckOrder);

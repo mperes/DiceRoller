@@ -138,6 +138,11 @@ const ACTION_NOTIFY_HEALTH = 16;
 const ACTION_PING = 17;
 const ACTION_PONG = 18;
 const ACTION_DISCONNECT = 19;
+const ACTION_SHOW_MAP = 20;
+const ACTION_AUDIO_PLAY = 21;
+const ACTION_AUDIO_PAUSE = 22;
+const ACTION_AUDIO_CONTINUE = 23;
+const ACTION_AUDIO_VOLUME = 24;
 //*---------------------------------------------------------------------
 //* Deck Class
 //* By Miguel Peres (m.peres@gmail.com)
@@ -480,6 +485,7 @@ class DmToolbar {
   constructor(deck, container) {
     const context = this;
     this._deck = deck;
+    this._audioPlayer = null;
 
     this.discardTable = function() {
       context._deck.sendCardFromTableToGraveyard(true);
@@ -489,14 +495,67 @@ class DmToolbar {
       context._deck.dmPlay();
     }
 
+    this.createAudioPlayer = function(listFile) {
+      let playList = listFile.split(/\r?\n/);
+      for(let i = playList.length-1; i>=0; i--) {
+        if(playList[i].trim() === '') playList.pop();
+      }
+      context._audioPlayer = $('<div id="audio-player" />');
+      let list = $('<select />');
+      for(let i=0; i<playList.length; i++) {
+        list.append($('<option />').attr('value', playList[i]).text(context.getAudioName(playList[i])));
+      }
+      context._audioPlayer.append(list);
+      let playButton = $('<input type="button" id="audio-player-play" value="Play" />').click((e) => {
+        let file = $('#audio-player select').val();
+        context._deck._gameSession.playAudio(file)
+        context._deck._gameSession.sendMultiplayerAction(ACTION_AUDIO_PLAY, file);
+      });
+      let stopButton = $('<input type="button" id="audio-player-pause" value="Pause" />').click((e) => {
+        let button = $(e.target);
+        if(button.hasClass('paused')) {
+          context._deck._gameSession._audioPlayer.play();
+          button.removeClass('paused');
+          context._deck._gameSession.sendMultiplayerAction(ACTION_AUDIO_CONTINUE);
+        } else {
+          context._deck._gameSession.pauseAudio();
+          button.addClass('paused');
+          context._deck._gameSession.sendMultiplayerAction(ACTION_AUDIO_PAUSE);
+        }
+      });
+      let volume = $('<input type="range" id="audio-player-volume" min="0" max="100">').on('change', (e) => {
+        let v = parseInt($(e.target).val()) / 100;
+        context._deck._gameSession.adjustAudioVolume(v);
+        context._deck._gameSession.sendMultiplayerAction(ACTION_AUDIO_VOLUME, v.toString());
+      });
+      context._audioPlayer.append(playButton);
+      context._audioPlayer.append(stopButton);
+      context._audioPlayer.append(volume);
+      context._view.prepend(context._audioPlayer);
+    }
+
+    this.toggleMap = function() {
+      context._deck._gameSession._imageLoader._view.toggleClass('hidden');
+      context._deck._gameSession.sendMultiplayerAction(ACTION_SHOW_MAP);
+    }
+
     this._view = $('<div id="dm-toolbar" />');
+    this._view.append('<div id="load-audio" class="action"><span class="label">Audio Player</span></div>');
+    this._view.append(this._getActionButton('krynn-map', 'Krynn Map', this.toggleMap));
     this._view.append(this._getActionButton('dm-draw', 'Draw Card', this.draw));
     this._view.append(this._getActionButton('dm-table-clear', 'Discard Table', this.discardTable));
     $(container).prepend(this._view);
+    this._localFileReader = new LocalFileReader('#load-audio', '', this.createAudioPlayer);
   }
   _getActionButton(id, label, action) {
     return $('<div id="'+id+'" class="action"><span class="label">'+label+'</span></div>').click(action);
   }
+  getAudioName(name) {
+    let fileName = name.split('/')[name.split('/').length-1];
+    let fileWithoutType = fileName.split('.')[0].replace(/_/g, ' ');
+    return fileWithoutType;
+  }
+
 }
 //*---------------------------------------------------------------------
 //* Dungeon Master
@@ -569,9 +628,25 @@ class GameSession {
     this._player = null;
     this._chatBox = null;
     this._imageLoader = null;
+    this._audioPlayer = null;
 
     const context = this;
     this._playerList = new PlayerList('#table-top', this);
+  }
+  playAudio(src) {
+    if(this._audioPlayer !== null) this._audioPlayer.stop();
+    this._audioPlayer = new Howl({
+      src: [src],
+      autoplay: true,
+      loop: true,
+      volume: 0.5,
+    });
+  }
+  pauseAudio() {
+    this._audioPlayer.pause();
+  }
+  adjustAudioVolume(volume) {
+    Howler.volume(volume);
   }
   setName(name) {
     this._displayName = this.setDefaultIfEmpty(name, 'John Doe');
@@ -727,6 +802,31 @@ class GameSession {
             if(message.fromDM)
               context._playerList.disconnectPlayer(message.details);
             break;
+          case ACTION_SHOW_MAP:
+            context._imageLoader._view.toggleClass('hidden');
+            if(message.fromDM)
+              context.sendSingleplayerAction(message.sID, ACTION_OK, 'SHOW_MAP');
+            break;
+          case ACTION_AUDIO_PLAY:
+            context.playAudio(message.details);
+            if(message.fromDM)
+              context.sendSingleplayerAction(message.sID, ACTION_OK, 'ACTION_AUDIO_PLAY');
+            break;
+          case ACTION_AUDIO_PAUSE:
+            context.pauseAudio();
+            if(message.fromDM)
+              context.sendSingleplayerAction(message.sID, ACTION_OK, 'ACTION_AUDIO_PAUSE');
+            break;
+          case ACTION_AUDIO_CONTINUE:
+            context._audioPlayer.play();
+            if(message.fromDM)
+              context.sendSingleplayerAction(message.sID, ACTION_OK, 'ACTION_AUDIO_CONTINUE');
+            break;
+          case ACTION_AUDIO_VOLUME:
+            context.adjustAudioVolume(parseFloat(message.details));
+            if(message.fromDM)
+              context.sendSingleplayerAction(message.sID, ACTION_OK, 'ACTION_AUDIO_VOLUME');
+            break;
           default:
 
         }
@@ -800,7 +900,7 @@ class ImageLoader {
     this._gameSession = gameSession;
     this._validFormats = ['jpg', 'jpeg', 'gif', 'png', 'bmp'];
     this._src = '';
-    this._view = $('<div id="image-loader" >/');
+    this._view = $('<div id="image-loader" >/').addClass('hidden');
     this._image = null;
     this._width = 0;
     this._height = 0;
@@ -809,17 +909,42 @@ class ImageLoader {
     this._zoom = 1;
     this._viewer = null;
     $(container).prepend(this._view);
+    this.load('assets/image/krynn_map.jpg');
   }
-  load(src, alt) {
+  load(src) {
     let self = this;
     if(!this.isValid(src)) return;
+    if(this._viewer !== null) this._viewer = this._viewer.destroy();
     this._src = src;
     this._viewer = new ImageViewer(this._view[0]);
     this._viewer.load(this._src);
   }
+  destroy() {
+    this._viewer = this._viewer.destroy();
+  }
   isValid(src) {
     let srcFormat = src.split('.')[src.split('.').length-1].toLowerCase();
     return (this._validFormats.indexOf(srcFormat) > -1) ? true : false;
+  }
+}
+class LocalFileReader {
+  constructor(container, label, callback) {
+
+    this.load = function(event) {
+      let input = event.target;
+      let reader = new FileReader();
+      reader.onload = function(){
+        let text = reader.result;
+        if(typeof callback === 'function')
+          callback(text);
+      };
+      reader.readAsText(input.files[0]);
+    }
+
+    this._button = $('<input type="file" class="localfilereader-button" />').change(this.load);
+    this._container = $('<div class="localfilereader-container"><div class="localfilereader-fake">'+label+'</div></div>').prepend(this._button);
+    $(container).append(this._container);
+
   }
 }
 //*---------------------------------------------------------------------
@@ -958,13 +1083,6 @@ class PlayerList {
       context._gameSession.sendMultiplayerAction(ACTION_GIVE_TURN, sessionID.toString());
     })
     let actions = $('<div class="actions" />');
-    // let setupAction = $('<div class="setup" data-id="" />').click((e) => {
-    //   let view = $(e.target);
-    //   let setupPlayerEvent = new CustomEvent('playerListEvent',{
-    //     detail: { action: ACTION_PLAYER_SETUP, displayName, sessionID: sessionID, handSize: handSize }
-    //   });
-    //   document.dispatchEvent(setupPlayerEvent);
-    // });
     let giveInitialHand = this._getActionButton('give-hand', 'Give initial hand', function() {
       let deckOrder = context._gameSession._deck.getOrder();
       context._gameSession.sendSingleplayerAction(parseInt(sessionID), ACTION_GIVE_INITIAL_HAND, deckOrder);
