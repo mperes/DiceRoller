@@ -17,6 +17,7 @@ class PlayerList {
     let health = $('<div class="health"><div class="left"></div></div>');
     thumbnail.append(health);
     thumbnail.click(function() {
+      if(!context._gameSession._isDM) return;
       context.toggleTurn(sessionID);
       context._gameSession.sendMultiplayerAction(ACTION_GIVE_TURN, sessionID.toString());
     })

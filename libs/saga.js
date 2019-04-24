@@ -102,8 +102,10 @@ class ChatBox {
   }
   addMessage(msg) {
     if(this._view.find('.messages').children().length === 0) this._view.removeClass('collapsed');
+    let autoScroll = ((this._view.find('.messages').height() + this._view.find('.messages').scrollTop()) < this._view.find('.messages')[0].scrollHeight) ? false : true;
     this._view.find('.messages').append('<li>'+msg+'</li>');
-    this._view.find('.messages').scrollTop(this._view.find('.messages')[0].scrollHeight);
+    if(autoScroll)
+      this._view.find('.messages').scrollTop(this._view.find('.messages')[0].scrollHeight);
   }
   setTitle(title) {
     this._view.find('.title').text(title);
@@ -1079,6 +1081,7 @@ class PlayerList {
     let health = $('<div class="health"><div class="left"></div></div>');
     thumbnail.append(health);
     thumbnail.click(function() {
+      if(!context._gameSession._isDM) return;
       context.toggleTurn(sessionID);
       context._gameSession.sendMultiplayerAction(ACTION_GIVE_TURN, sessionID.toString());
     })
