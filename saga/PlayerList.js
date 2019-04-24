@@ -21,22 +21,23 @@ class PlayerList {
       context._gameSession.sendMultiplayerAction(ACTION_GIVE_TURN, sessionID.toString());
     })
     let actions = $('<div class="actions" />');
-    let setupAction = $('<div class="setup" data-id="" />').click((e) => {
-      let view = $(e.target);
-      let setupPlayerEvent = new CustomEvent('playerListEvent',{
-        detail: { action: ACTION_PLAYER_SETUP, displayName, sessionID: sessionID, handSize: handSize }
-      });
-      document.dispatchEvent(setupPlayerEvent);
-    });
+    // let setupAction = $('<div class="setup" data-id="" />').click((e) => {
+    //   let view = $(e.target);
+    //   let setupPlayerEvent = new CustomEvent('playerListEvent',{
+    //     detail: { action: ACTION_PLAYER_SETUP, displayName, sessionID: sessionID, handSize: handSize }
+    //   });
+    //   document.dispatchEvent(setupPlayerEvent);
+    // });
     let giveInitialHand = this._getActionButton('give-hand', 'Give initial hand', function() {
-      context._gameSession.sendSingleplayerAction(parseInt(sessionID), ACTION_GIVE_INITIAL_HAND);
+      let deckOrder = context._gameSession._deck.getOrder();
+      context._gameSession.sendSingleplayerAction(parseInt(sessionID), ACTION_GIVE_INITIAL_HAND, deckOrder);
     });
     let damage = this._getActionButton('give-damage', 'Damage', function() {
       context._gameSession.sendSingleplayerAction(parseInt(sessionID), ACTION_GIVE_DAMAGE);
     });
     actions.append(damage);
     actions.append(giveInitialHand);
-    actions.append(setupAction);
+    //actions.append(setupAction);
     let newPlayer = $('<div class="player" id="player-'+sessionID+'" />').append(thumbnail).append(actions);
     if(isSelf) newPlayer.addClass('self');
     if(isDM) {

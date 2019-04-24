@@ -21,16 +21,16 @@ class GameSession {
 
     const context = this;
 
-    document.addEventListener('playerListEvent', function (event) {
-      switch (event.detail.action) {
-        case ACTION_PLAYER_SETUP:
-          let deckOrder = context._deck.getOrder();
-          context.sendSingleplayerAction(parseInt(event.detail.sessionID), ACTION_PLAYER_SETUP, deckOrder);
-          break;
-        default:
-
-      }
-    });
+    // document.addEventListener('playerListEvent', function (event) {
+    //   switch (event.detail.action) {
+    //     case ACTION_PLAYER_SETUP:
+    //       let deckOrder = context._deck.getOrder();
+    //       context.sendSingleplayerAction(parseInt(event.detail.sessionID), ACTION_PLAYER_SETUP, deckOrder);
+    //       break;
+    //     default:
+    //
+    //   }
+    // });
 
     this._playerList = new PlayerList('#table-top', this);
   }
@@ -134,7 +134,8 @@ class GameSession {
               context.sendSingleplayerAction(message.sID, ACTION_OK, 'ACTION_PLAYER_SETUP');
             break;
           case ACTION_GIVE_INITIAL_HAND:
-            if(context._deck !== null)
+            //if(context._deck !== null)
+              context.setupPlayer(message.details);
               context._player.giveInitialHand();
             if(message.fromDM)
               context.sendSingleplayerAction(message.sID, ACTION_OK, 'ACTION_GIVE_INITIAL_HAND');
