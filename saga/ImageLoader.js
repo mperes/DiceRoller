@@ -13,6 +13,18 @@ class ImageLoader {
     this._viewer = null;
     $(container).prepend(this._view);
     this.load('assets/image/krynn_map.jpg');
+
+    const self = this;
+    this._view.on('click', '.iv-image-markers', function(e){
+      let offset = $(this).offset();
+      let relativeX = (e.pageX - offset.left);
+      let relativeY = (e.pageY - offset.top);
+      let percentX = relativeX / $(this).width() * 100;
+      let percentY = relativeY / $(this).height() * 100;
+      let marker = $('<div class="marker"><div class="dot"></div><div class="pulse"></div></div>').css('left', percentX+'%').css('top', percentY+'%');
+      $(this).append(marker);
+      self._view.removeClass('marking');
+    });
   }
   load(src) {
     let self = this;
