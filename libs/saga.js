@@ -636,11 +636,14 @@ class GameSession {
         context.sendMultiplayerAction(action);
         context.loading(false);
         let isSelf = (parseInt(message.SID) === parseInt(context._sessionID)) ? true : false;
+        context._playerList.reset();
         context._playerList.addPlayer(context._displayName, context._sessionID, context._handSize, context._isDM, isSelf);
         $('#container').removeClass('logged-off');
-        context._chatBox = new ChatBox(context, '#table-top');
-        context._chatBox.setTitle('Session ID: '+multiplayerID);
-        if(!context._isDM) context.loading(true, 'Waiting for your lazy DM...');
+        if (context._chatBox == null) {
+          context._chatBox = new ChatBox(context, '#table-top');
+          context._chatBox.setTitle('Session ID: '+multiplayerID);
+          if(!context._isDM) context.loading(true, 'Waiting for your lazy DM...');
+        }
       }
       else {
         if(parseInt(message.sID) === parseInt(context._sessionID)) return;
@@ -787,13 +790,17 @@ class GameSession {
     return Math.floor(Math.random()*1E16);
   }
   setupDM() {
-    this._deck = new Deck(this, '#play-area', '#deck-pile', '#pool','#deck-graveyard', 150, []);
-    this._player = new DungeonMaster(this._deck);
+    if (this._deck == null) {
+      this._deck = new Deck(this, '#play-area', '#deck-pile', '#pool','#deck-graveyard', 150, []);
+      this._player = new DungeonMaster(this._deck);
+    }
   }
   setupPlayer(deckOrder) {
-    this._deck = new Deck(this, '#play-area', '#deck-pile', '#pool', '#deck-graveyard', 150, deckOrder.split(','));
-    this._player = new Player(false, this._deck, this._handSize, '#player-hand');
-    this.loading(false);
+    if (this._deck == null) {
+      this._deck = new Deck(this, '#play-area', '#deck-pile', '#pool', '#deck-graveyard', 150, deckOrder.split(','));
+      this._player = new Player(false, this._deck, this._handSize, '#player-hand');
+      this.loading(false);
+    }
   }
 }
 //*---------------------------------------------------------------------
@@ -927,7 +934,6 @@ class PlayerList {
     let thumbnail = $('<div class="thumbnail" />').text(displayName);
     let health = $('<div class="health"><div class="left"></div></div>');
     thumbnail.append(health);
-    thumbnail.attr('id', 'player-'+sessionID);
     thumbnail.click(function() {
       context.toggleTurn(sessionID);
       context._gameSession.sendMultiplayerAction(ACTION_GIVE_TURN, sessionID.toString());
@@ -967,14 +973,14 @@ class PlayerList {
     return index;
   }
   toggleTurn(sessionID) {
-    let player = $('#player-'+sessionID).parent();
+    let player = $('#player-'+sessionID);
     if(player.length === 0) return;
     player.toggleClass('hasTurn');
     if(parseInt(sessionID) === parseInt(this._gameSession._sessionID) && this._gameSession._player !== null)
       this._gameSession._player.toggleTurn();
   }
   updateHealth(sessionID, health) {
-    let player = $('#player-'+sessionID).parent();
+    let player = $('#player-'+sessionID);
     if(player.length === 0) return;
     player.find('.health .left').css('width', health+'%');
   }
@@ -1007,5 +1013,9 @@ class PlayerList {
       this._list.splice(index, 1);
       $('#player-list').find('#player-'+sessionID).remove();
     }
+  }
+  reset() {
+    this._list = [];
+    this._view.html('');
   }
 }
