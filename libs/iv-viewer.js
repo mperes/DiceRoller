@@ -431,7 +431,7 @@
     return Slider;
   }();
 
-  var imageViewHtml = "\n  <div class=\"iv-loader\"></div>\n  <div class=\"iv-snap-view\">\n    <div class=\"iv-snap-image-wrap\">\n      <div class=\"iv-snap-handle\"></div>\n    </div>\n    <div class=\"iv-zoom-slider\">\n      <div class=\"iv-zoom-handle\"></div>\n    </div>\n  </div>\n  <div class=\"iv-image-view\" >\n    <div class=\"iv-image-wrap\" ></div>\n  </div>\n";
+  var imageViewHtml = "\n  <div class=\"iv-loader\"></div>\n  <div class=\"iv-snap-view\">\n    <div class=\"iv-snap-image-wrap\">\n      <div class=\"iv-snap-handle\"></div>\n    </div>\n    <div class=\"iv-zoom-slider\">\n      <div class=\"iv-zoom-handle\"></div>\n    </div>\n  </div>\n  <div class=\"iv-image-view\" >\n    <div class=\"iv-image-wrap\" >\n  <div class=\"iv-image-markers\" ></div>\n</div>\n  </div>\n";
 
   var ImageViewer =
   /*#__PURE__*/
@@ -449,11 +449,13 @@
             _state = _this._state;
         var curPerc = _state.zoomValue,
             imageDim = _state.imageDim,
-            containerDim = _state.containerDim,
+              containerDim = _state.containerDim,
             zoomSliderLength = _state.zoomSliderLength;
         var image = _elements.image,
+            markers = _elements.markers,
             zoomHandle = _elements.zoomHandle;
         var maxZoom = _options.maxZoom;
+
         perc = Math.round(Math.max(100, perc));
         perc = Math.min(maxZoom, perc);
         point = point || {
@@ -497,6 +499,12 @@
           }
 
           css(image, {
+            height: "".concat(imgHeight, "px"),
+            width: "".concat(imgWidth, "px"),
+            left: "".concat(newLeft, "px"),
+            top: "".concat(newTop, "px")
+          });
+          css(markers, {
             height: "".concat(imgHeight, "px"),
             width: "".concat(imgWidth, "px"),
             left: "".concat(newLeft, "px"),
@@ -723,7 +731,8 @@
           snapImageWrap: container.querySelector('.iv-snap-image-wrap'),
           imageWrap: container.querySelector('.iv-image-wrap'),
           snapHandle: container.querySelector('.iv-snap-handle'),
-          zoomHandle: container.querySelector('.iv-zoom-handle')
+          zoomHandle: container.querySelector('.iv-zoom-handle'),
+          markers: container.querySelector('.iv-image-markers')
         });
       }
     }, {
@@ -838,6 +847,7 @@
                 snapHandleDim = _this3$_state.snapHandleDim,
                 snapImageDim = _this3$_state.snapImageDim;
             var image = _this3._elements.image;
+            var markers = _this3._elements.markers;
 
             var imageCurrentDim = _this3._getImageCurrentDim(); // find handle left and top and make sure they lay between the snap image
 
@@ -855,6 +865,10 @@
               top: "".concat(top, "px")
             });
             css(image, {
+              left: "".concat(imgLeft, "px"),
+              top: "".concat(imgTop, "px")
+            });
+            css(markers, {
               left: "".concat(imgLeft, "px"),
               top: "".concat(imgTop, "px")
             });
@@ -1194,7 +1208,8 @@
             container = _this$_elements6.container,
             snapView = _this$_elements6.snapView,
             snapImage = _this$_elements6.snapImage,
-            zoomHandle = _this$_elements6.zoomHandle; // calculate content width of image and snap image
+            zoomHandle = _this$_elements6.zoomHandle, // calculate content width of image and snap image
+            markers = _this$_elements6.markers;
 
         var imageWidth = parseInt(css(image, 'width'), 10);
         var imageHeight = parseInt(css(image, 'height'), 10);
@@ -1219,6 +1234,15 @@
         }; // reset image position and zoom
 
         css(image, {
+          width: "".concat(imgWidth, "px"),
+          height: "".concat(imgHeight, "px"),
+          left: "".concat((contWidth - imgWidth) / 2, "px"),
+          top: "".concat((contHeight - imgHeight) / 2, "px"),
+          maxWidth: 'none',
+          maxHeight: 'none'
+        }); // set the snap Image dimension
+
+        css(markers, {
           width: "".concat(imgWidth, "px"),
           height: "".concat(imgHeight, "px"),
           left: "".concat((contWidth - imgWidth) / 2, "px"),

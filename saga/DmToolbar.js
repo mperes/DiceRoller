@@ -60,8 +60,13 @@ class DmToolbar {
       context._deck._gameSession.sendMultiplayerAction(ACTION_SHOW_MAP);
     }
 
+    this.toggleMarkers = function() {
+      context._deck._gameSession._imageLoader._view.toggleClass('marking');
+    }
+
     this._view = $('<div id="dm-toolbar" />');
     this._view.append('<div id="load-audio" class="action"><span class="label">Audio Player</span></div>');
+    this._view.append(this._getActionButton('map-markers', 'Add Markers', this.toggleMarkers));
     this._view.append(this._getActionButton('krynn-map', 'Krynn Map', this.toggleMap));
     this._view.append(this._getActionButton('dm-draw', 'Draw Card', this.draw));
     this._view.append(this._getActionButton('dm-table-clear', 'Discard Table', this.discardTable));

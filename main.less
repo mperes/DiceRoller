@@ -562,14 +562,113 @@ input.squareButton.primary {
     bottom: 25px;
     left: 10px;
     top: unset;
+    opacity: 0!important;
+    pointer-events: none!important;
   }
-  .image-marks {
+  .iv-image-markers {
+    position: absolute;
+    z-index: 2;
+    pointer-events: none;
+    .marker {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border-radius: 10px;
+      box-sizing: border-box;
+      position: absolute;
+      transform: translateX(-50%) translateY(-50%);
+      background: transparent;
+      @pulseColor: #364241;
+      .pulse {
+        width: 10px;
+        height: 10px;
+        border: 5px solid @pulseColor;
+        -webkit-border-radius: 30px;
+        -moz-border-radius: 30px;
+        border-radius: 30px;
+        background-color: transparent;
+        z-index: 10;
+        position: absolute;
+      }
+      .dot {
+        border: 10px solid @pulseColor;
+        background: transparent;
+        -webkit-border-radius: 60px;
+        -moz-border-radius: 60px;
+        border-radius: 60px;
+        height: 50px;
+        width: 50px;
+        -webkit-animation: pulse 3s ease-out;
+        -moz-animation: pulse 3s ease-out;
+        animation: pulse 3s ease-out;
+        -webkit-animation-iteration-count: infinite;
+        -moz-animation-iteration-count: infinite;
+        animation-iteration-count: infinite;
+        position: absolute;
+        top: -25px;
+        left: -25px;
+        z-index: 1;
+        opacity: 0;
+      }
+      @-moz-keyframes pulse {
+       0% {
+          -moz-transform: scale(0);
+          opacity: 0.0;
+       }
+       25% {
+          -moz-transform: scale(0);
+          opacity: 0.1;
+       }
+       50% {
+          -moz-transform: scale(0.1);
+          opacity: 0.3;
+       }
+       75% {
+          -moz-transform: scale(0.5);
+          opacity: 0.5;
+       }
+       100% {
+          -moz-transform: scale(1);
+          opacity: 0.0;
+       }
+      }
+      @-webkit-keyframes "pulse" {
+       0% {
+          -webkit-transform: scale(0);
+          opacity: 0.0;
+       }
+       25% {
+          -webkit-transform: scale(0);
+          opacity: 0.1;
+       }
+       50% {
+          -webkit-transform: scale(0.1);
+          opacity: 0.3;
+       }
+       75% {
+          -webkit-transform: scale(0.5);
+          opacity: 0.5;
+       }
+       100% {
+          -webkit-transform: scale(1);
+          opacity: 0.0;
+       }
+      }
+    }
   }
   &.hidden {
     img {
       visibility: hidden!important;
     }
     pointer-events: none;
+  }
+  &.marking {
+    .iv-image {
+      pointer-events: none;
+    }
+    .iv-image-markers {
+      pointer-events: all;
+    }
   }
 }
 
@@ -630,4 +729,8 @@ input.squareButton.primary {
     margin: 5px 0 0 0;
     width: 100%;
   }
+}
+
+#table-top > div:not(#image-loader){
+  z-index: 2;
 }

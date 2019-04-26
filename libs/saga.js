@@ -541,8 +541,13 @@ class DmToolbar {
       context._deck._gameSession.sendMultiplayerAction(ACTION_SHOW_MAP);
     }
 
+    this.toggleMarkers = function() {
+      context._deck._gameSession._imageLoader._view.toggleClass('marking');
+    }
+
     this._view = $('<div id="dm-toolbar" />');
     this._view.append('<div id="load-audio" class="action"><span class="label">Audio Player</span></div>');
+    this._view.append(this._getActionButton('map-markers', 'Add Markers', this.toggleMarkers));
     this._view.append(this._getActionButton('krynn-map', 'Krynn Map', this.toggleMap));
     this._view.append(this._getActionButton('dm-draw', 'Draw Card', this.draw));
     this._view.append(this._getActionButton('dm-table-clear', 'Discard Table', this.discardTable));
@@ -912,6 +917,18 @@ class ImageLoader {
     this._viewer = null;
     $(container).prepend(this._view);
     this.load('assets/image/krynn_map.jpg');
+
+    const self = this;
+    this._view.on('click', '.iv-image-markers', function(e){
+      let offset = $(this).offset();
+      let relativeX = (e.pageX - offset.left);
+      let relativeY = (e.pageY - offset.top);
+      let percentX = relativeX / $(this).width() * 100;
+      let percentY = relativeY / $(this).height() * 100;
+      let marker = $('<div class="marker"><div class="dot"></div><div class="pulse"></div></div>').css('left', percentX+'%').css('top', percentY+'%');
+      $(this).append(marker);
+      self._view.removeClass('marking');
+    });
   }
   load(src) {
     let self = this;
