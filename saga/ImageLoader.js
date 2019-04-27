@@ -32,6 +32,7 @@ class ImageLoader {
       let pos = [percentX, percentY];
       self.addMarker(pos);
       self._view.removeClass('marking');
+      $('#map-markers').removeClass('toggled');
       self._gameSession.sendMultiplayerAction(ACTION_ADD_MAP_MARKER, pos.join(','));
     });
   }

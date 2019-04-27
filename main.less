@@ -299,6 +299,16 @@ input.squareButton.primary {
       &:first-child {
         margin-left: 5px;
       }
+      &:hover {
+        background: lighten(@color, 5%);
+      }
+      &.toggled {
+        background: #333;
+        color: white;
+        &:hover {
+          background: #222;
+        }
+      }
     }
   }
   #player-list {
@@ -689,6 +699,7 @@ input.squareButton.primary {
     }
     .iv-image-markers {
       pointer-events: all;
+      cursor: crosshair;
     }
   }
 }

@@ -540,6 +540,8 @@ class DmToolbar {
     }
 
     this.toggleMap = function() {
+      $('#map-markers, #map-markers-delete').toggle();
+      $('#krynn-map').toggleClass('toggled');
       context._deck._gameSession._imageLoader._view.toggleClass('hidden');
       if(context._deck._gameSession._imageLoader._view.hasClass('hidden')) {
         context._deck._gameSession.sendMultiplayerAction(ACTION_HIDE_MAP);
@@ -549,6 +551,7 @@ class DmToolbar {
     }
 
     this.toggleMarkers = function() {
+      $('#map-markers').addClass('toggled');
       context._deck._gameSession._imageLoader._view.toggleClass('marking');
     }
 
@@ -564,6 +567,7 @@ class DmToolbar {
     this._view.append(this._getActionButton('krynn-map', 'Krynn Map', this.toggleMap));
     this._view.append(this._getActionButton('dm-draw', 'Draw Card', this.draw));
     this._view.append(this._getActionButton('dm-table-clear', 'Discard Table', this.discardTable));
+    this._view.find('#map-markers, #map-markers-delete').toggle();
     $(container).prepend(this._view);
     this._localFileReader = new LocalFileReader('#load-audio', '', this.createAudioPlayer);
   }
@@ -963,6 +967,7 @@ class ImageLoader {
       let pos = [percentX, percentY];
       self.addMarker(pos);
       self._view.removeClass('marking');
+      $('#map-markers').removeClass('toggled');
       self._gameSession.sendMultiplayerAction(ACTION_ADD_MAP_MARKER, pos.join(','));
     });
   }
