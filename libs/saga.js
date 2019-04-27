@@ -147,6 +147,7 @@ const ACTION_AUDIO_CONTINUE = 23;
 const ACTION_AUDIO_VOLUME = 24;
 const ACTION_HIDE_MAP = 25;
 const ACTION_ADD_MAP_MARKER = 26;
+const ACTION_REMOVE_MAP_MARKERS = 27;
 //*---------------------------------------------------------------------
 //* Deck Class
 //* By Miguel Peres (m.peres@gmail.com)
@@ -551,9 +552,15 @@ class DmToolbar {
       context._deck._gameSession._imageLoader._view.toggleClass('marking');
     }
 
+    this.removeMarkers = function() {
+      context._deck._gameSession._imageLoader.removeMarkers();
+      context._deck._gameSession.sendMultiplayerAction(ACTION_REMOVE_MAP_MARKERS);
+    }
+
     this._view = $('<div id="dm-toolbar" />');
     this._view.append('<div id="load-audio" class="action"><span class="label">Audio Player</span></div>');
-    this._view.append(this._getActionButton('map-markers', 'Add Markers', this.toggleMarkers));
+    this._view.append(this._getActionButton('map-markers-delete', 'Remove Markers', this.removeMarkers));
+    this._view.append(this._getActionButton('map-markers', 'Add Marker', this.toggleMarkers));
     this._view.append(this._getActionButton('krynn-map', 'Krynn Map', this.toggleMap));
     this._view.append(this._getActionButton('dm-draw', 'Draw Card', this.draw));
     this._view.append(this._getActionButton('dm-table-clear', 'Discard Table', this.discardTable));
@@ -849,6 +856,11 @@ class GameSession {
             if(message.fromDM)
               context.sendSingleplayerAction(message.sID, ACTION_OK, 'ACTION_ADD_MAP_MARKER');
             break;
+          case ACTION_REMOVE_MAP_MARKERS:
+            context._imageLoader.removeMarkers();
+            if(message.fromDM)
+              context.sendSingleplayerAction(message.sID, ACTION_OK, 'ACTION_REMOVE_MAP_MARKERS');
+            break;
           default:
 
         }
@@ -937,6 +949,9 @@ class ImageLoader {
     this.addMarker = function(pos) {
       let marker = $('<div class="marker"><div class="dot"></div><div class="pulse"></div></div>').css('left', pos[0]).css('top', pos[1]);
       self._view.find('.iv-image-markers').append(marker);
+    }
+    this.removeMarkers = function() {
+      self._view.find('.iv-image-markers .marker').remove();
     }
     this._view.on('click', '.iv-image-markers', function(e) {
       if(!self._gameSession._isDM) return;

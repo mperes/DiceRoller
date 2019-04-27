@@ -19,6 +19,9 @@ class ImageLoader {
       let marker = $('<div class="marker"><div class="dot"></div><div class="pulse"></div></div>').css('left', pos[0]).css('top', pos[1]);
       self._view.find('.iv-image-markers').append(marker);
     }
+    this.removeMarkers = function() {
+      self._view.find('.iv-image-markers .marker').remove();
+    }
     this._view.on('click', '.iv-image-markers', function(e) {
       if(!self._gameSession._isDM) return;
       let offset = $(this).offset();

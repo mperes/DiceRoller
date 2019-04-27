@@ -227,6 +227,11 @@ class GameSession {
             if(message.fromDM)
               context.sendSingleplayerAction(message.sID, ACTION_OK, 'ACTION_ADD_MAP_MARKER');
             break;
+          case ACTION_REMOVE_MAP_MARKERS:
+            context._imageLoader.removeMarkers();
+            if(message.fromDM)
+              context.sendSingleplayerAction(message.sID, ACTION_OK, 'ACTION_REMOVE_MAP_MARKERS');
+            break;
           default:
 
         }
