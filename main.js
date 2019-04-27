@@ -19,6 +19,12 @@ function preLoadAndStart() {
         gameSession.setHand($(e.target).val());
       });
       $('#multiplayer-join').click((e)=> {
+        let handSize = getHandSize();
+        if(handSize <= 0) {
+          $('#multiplayer').addClass('error');
+          return;
+        }
+        $('#multiplayer').removeClass('error');
         gameSession.joinMultiPlayer(isDM());
       });
       $('#multiplayer-create').click((e)=> {
@@ -35,4 +41,9 @@ function preLoadAndStart() {
 
 function isDM() {
   return $('#multiplayer-isdm input').is(':checked');
+}
+function getHandSize() {
+  let handSize = $('#multiplayer-hand').val();
+  if(handSize.trim() === '') return 0;
+  return parseInt(handSize);
 }

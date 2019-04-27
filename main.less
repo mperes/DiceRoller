@@ -105,6 +105,19 @@ input.squareButton.primary {
     left: 50%;
     top: 30%;
     transform: translateX(-50%) translateY(230px);
+    #multiplayer-error {
+      margin-bottom: 10px;
+      padding: 10px;
+      border-radius: 5px;
+      background-color: #ffcbcb;
+      color: #a03f3f;
+      font-weight: bold;
+      position: absolute;
+      width: 100%;
+      box-sizing: border-box;
+      top: -47px;
+      display: none;
+    }
     #multiplayer-isdm {
       margin-top: 10px;
       font-size: 11px;
@@ -143,6 +156,14 @@ input.squareButton.primary {
     }
     .squareButton {
       width: 150px;
+    }
+    &.error {
+      #multiplayer-error {
+        display: block;
+      }
+      #multiplayer-hand {
+        box-shadow: 0 0 20px #ffcbcb;
+      }
     }
   }
 }
