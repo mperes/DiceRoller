@@ -28,6 +28,7 @@ function preLoadAndStart() {
         gameSession.joinMultiPlayer(isDM());
       });
       $('#multiplayer-create').click((e)=> {
+        $('#multiplayer').removeClass('error');
         gameSession.createMultiPlayer(isDM());
       });
       $('#multiplayer-isdm input').click((e)=> {
