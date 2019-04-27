@@ -139,9 +139,8 @@ class GameSession {
               context.sendSingleplayerAction(message.sID, ACTION_OK, 'ACTION_PLAYER_SETUP');
             break;
           case ACTION_GIVE_INITIAL_HAND:
-            //if(context._deck !== null)
-              context.setupPlayer(message.details);
-              context._player.giveInitialHand();
+            context.setupPlayer(message.details);
+            context._player.giveInitialHand();
             if(message.fromDM)
               context.sendSingleplayerAction(message.sID, ACTION_OK, 'ACTION_GIVE_INITIAL_HAND');
             break;
@@ -222,6 +221,11 @@ class GameSession {
             context.adjustAudioVolume(parseFloat(message.details));
             if(message.fromDM)
               context.sendSingleplayerAction(message.sID, ACTION_OK, 'ACTION_AUDIO_VOLUME');
+            break;
+          case ACTION_ADD_MAP_MARKER:
+            context._imageLoader.addMarker(message.details.split(','));
+            if(message.fromDM)
+              context.sendSingleplayerAction(message.sID, ACTION_OK, 'ACTION_ADD_MAP_MARKER');
             break;
           default:
 

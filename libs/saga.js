@@ -146,6 +146,7 @@ const ACTION_AUDIO_PAUSE = 22;
 const ACTION_AUDIO_CONTINUE = 23;
 const ACTION_AUDIO_VOLUME = 24;
 const ACTION_HIDE_MAP = 25;
+const ACTION_ADD_MAP_MARKER = 26;
 //*---------------------------------------------------------------------
 //* Deck Class
 //* By Miguel Peres (m.peres@gmail.com)
@@ -760,9 +761,8 @@ class GameSession {
               context.sendSingleplayerAction(message.sID, ACTION_OK, 'ACTION_PLAYER_SETUP');
             break;
           case ACTION_GIVE_INITIAL_HAND:
-            //if(context._deck !== null)
-              context.setupPlayer(message.details);
-              context._player.giveInitialHand();
+            context.setupPlayer(message.details);
+            context._player.giveInitialHand();
             if(message.fromDM)
               context.sendSingleplayerAction(message.sID, ACTION_OK, 'ACTION_GIVE_INITIAL_HAND');
             break;
@@ -843,6 +843,11 @@ class GameSession {
             context.adjustAudioVolume(parseFloat(message.details));
             if(message.fromDM)
               context.sendSingleplayerAction(message.sID, ACTION_OK, 'ACTION_AUDIO_VOLUME');
+            break;
+          case ACTION_ADD_MAP_MARKER:
+            context._imageLoader.addMarker(message.details.split(','));
+            if(message.fromDM)
+              context.sendSingleplayerAction(message.sID, ACTION_OK, 'ACTION_ADD_MAP_MARKER');
             break;
           default:
 
@@ -929,15 +934,21 @@ class ImageLoader {
     this.load('assets/image/krynn_map.jpg');
 
     const self = this;
-    this._view.on('click', '.iv-image-markers', function(e){
+    this.addMarker = function(pos) {
+      let marker = $('<div class="marker"><div class="dot"></div><div class="pulse"></div></div>').css('left', pos[0]).css('top', pos[1]);
+      self._view.find('.iv-image-markers').append(marker);
+    }
+    this._view.on('click', '.iv-image-markers', function(e) {
+      if(!self._gameSession._isDM) return;
       let offset = $(this).offset();
       let relativeX = (e.pageX - offset.left);
       let relativeY = (e.pageY - offset.top);
-      let percentX = relativeX / $(this).width() * 100;
-      let percentY = relativeY / $(this).height() * 100;
-      let marker = $('<div class="marker"><div class="dot"></div><div class="pulse"></div></div>').css('left', percentX+'%').css('top', percentY+'%');
-      $(this).append(marker);
+      let percentX = (relativeX / $(this).width() * 100) + '%';
+      let percentY = (relativeY / $(this).height() * 100) + '%';
+      let pos = [percentX, percentY];
+      self.addMarker(pos);
       self._view.removeClass('marking');
+      self._gameSession.sendMultiplayerAction(ACTION_ADD_MAP_MARKER, pos.join(','));
     });
   }
   load(src) {
