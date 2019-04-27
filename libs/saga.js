@@ -145,6 +145,7 @@ const ACTION_AUDIO_PLAY = 21;
 const ACTION_AUDIO_PAUSE = 22;
 const ACTION_AUDIO_CONTINUE = 23;
 const ACTION_AUDIO_VOLUME = 24;
+const ACTION_HIDE_MAP = 25;
 //*---------------------------------------------------------------------
 //* Deck Class
 //* By Miguel Peres (m.peres@gmail.com)
@@ -538,7 +539,11 @@ class DmToolbar {
 
     this.toggleMap = function() {
       context._deck._gameSession._imageLoader._view.toggleClass('hidden');
-      context._deck._gameSession.sendMultiplayerAction(ACTION_SHOW_MAP);
+      if(context._deck._gameSession._imageLoader._view.hasClass('hidden')) {
+        context._deck._gameSession.sendMultiplayerAction(ACTION_HIDE_MAP);
+      } else {
+        context._deck._gameSession.sendMultiplayerAction(ACTION_SHOW_MAP);
+      }
     }
 
     this.toggleMarkers = function() {
@@ -810,9 +815,14 @@ class GameSession {
               context._playerList.disconnectPlayer(message.details);
             break;
           case ACTION_SHOW_MAP:
-            context._imageLoader._view.toggleClass('hidden');
+            context._imageLoader._view.removeClass('hidden');
             if(message.fromDM)
-              context.sendSingleplayerAction(message.sID, ACTION_OK, 'SHOW_MAP');
+              context.sendSingleplayerAction(message.sID, ACTION_OK, 'ACTION_SHOW_MAP');
+            break;
+          case ACTION_HIDE_MAP:
+            context._imageLoader._view.addClass('hidden');
+            if(message.fromDM)
+              context.sendSingleplayerAction(message.sID, ACTION_OK, 'ACTION_HIDE_MAP');
             break;
           case ACTION_AUDIO_PLAY:
             context.playAudio(message.details);

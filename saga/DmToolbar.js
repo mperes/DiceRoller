@@ -57,7 +57,11 @@ class DmToolbar {
 
     this.toggleMap = function() {
       context._deck._gameSession._imageLoader._view.toggleClass('hidden');
-      context._deck._gameSession.sendMultiplayerAction(ACTION_SHOW_MAP);
+      if(context._deck._gameSession._imageLoader._view.hasClass('hidden')) {
+        context._deck._gameSession.sendMultiplayerAction(ACTION_HIDE_MAP);
+      } else {
+        context._deck._gameSession.sendMultiplayerAction(ACTION_SHOW_MAP);
+      }
     }
 
     this.toggleMarkers = function() {

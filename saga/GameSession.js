@@ -194,9 +194,14 @@ class GameSession {
               context._playerList.disconnectPlayer(message.details);
             break;
           case ACTION_SHOW_MAP:
-            context._imageLoader._view.toggleClass('hidden');
+            context._imageLoader._view.removeClass('hidden');
             if(message.fromDM)
-              context.sendSingleplayerAction(message.sID, ACTION_OK, 'SHOW_MAP');
+              context.sendSingleplayerAction(message.sID, ACTION_OK, 'ACTION_SHOW_MAP');
+            break;
+          case ACTION_HIDE_MAP:
+            context._imageLoader._view.addClass('hidden');
+            if(message.fromDM)
+              context.sendSingleplayerAction(message.sID, ACTION_OK, 'ACTION_HIDE_MAP');
             break;
           case ACTION_AUDIO_PLAY:
             context.playAudio(message.details);
