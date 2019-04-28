@@ -68,6 +68,9 @@ class Player {
     let healFor = Math.min(amount, this._maxHandSize-this._handSize);
     this._handSize += healFor;
     this._deck.draw(this._hand, this._container.hand, healFor, true);
+    let percentage = this._handSize / this._maxHandSize * 100;
+    this._deck._gameSession.sendMultiplayerAction(ACTION_NOTIFY_HEALTH, percentage.toString());
+    this._deck._gameSession._playerList.updateHealth(this._deck._gameSession._sessionID, percentage);
   }
   setupTurnButton() {
     const context = this;
