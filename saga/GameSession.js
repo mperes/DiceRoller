@@ -76,7 +76,7 @@ class GameSession {
     if(multiplayerID === null) return;
     if(multiplayerID.trim() === '') return;
     this.loading(true);
-    this.connect(multiplayerID);
+    this.connect(multiplayerID.trim());
   }
   connect(multiplayerID) {
     let context = this;
@@ -231,6 +231,9 @@ class GameSession {
             context._imageLoader.removeMarkers();
             if(message.fromDM)
               context.sendSingleplayerAction(message.sID, ACTION_OK, 'ACTION_REMOVE_MAP_MARKERS');
+            break;
+          case ACTION_HEAL:
+            context._player.heal(parseInt(message.details));
             break;
           default:
 

@@ -64,6 +64,11 @@ class Player {
 
     this.setupTurnButton();
   }
+  heal(amount) {
+    let healFor = Math.min(amount, this._maxHandSize-this._handSize);
+    this._handSize += healFor;
+    this._deck.draw(this._hand, this._container.hand, healFor, true);
+  }
   setupTurnButton() {
     const context = this;
     $('#player-turn-begin').click((e) => {

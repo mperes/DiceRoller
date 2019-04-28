@@ -148,6 +148,7 @@ const ACTION_AUDIO_VOLUME = 24;
 const ACTION_HIDE_MAP = 25;
 const ACTION_ADD_MAP_MARKER = 26;
 const ACTION_REMOVE_MAP_MARKERS = 27;
+const ACTION_HEAL = 28;
 //*---------------------------------------------------------------------
 //* Deck Class
 //* By Miguel Peres (m.peres@gmail.com)
@@ -709,7 +710,7 @@ class GameSession {
     if(multiplayerID === null) return;
     if(multiplayerID.trim() === '') return;
     this.loading(true);
-    this.connect(multiplayerID);
+    this.connect(multiplayerID.trim());
   }
   connect(multiplayerID) {
     let context = this;
@@ -864,6 +865,9 @@ class GameSession {
             context._imageLoader.removeMarkers();
             if(message.fromDM)
               context.sendSingleplayerAction(message.sID, ACTION_OK, 'ACTION_REMOVE_MAP_MARKERS');
+            break;
+          case ACTION_HEAL:
+            context._player.heal(parseInt(message.details));
             break;
           default:
 
@@ -1073,6 +1077,11 @@ class Player {
 
     this.setupTurnButton();
   }
+  heal(amount) {
+    let healFor = Math.min(amount, this._maxHandSize-this._handSize);
+    this._handSize += healFor;
+    this._deck.draw(this._hand, this._container.hand, healFor, true);
+  }
   setupTurnButton() {
     const context = this;
     $('#player-turn-begin').click((e) => {
@@ -1151,9 +1160,18 @@ class PlayerList {
     let damage = this._getActionButton('give-damage', 'Damage', function() {
       context._gameSession.sendSingleplayerAction(parseInt(sessionID), ACTION_GIVE_DAMAGE);
     });
+    let heal = this._getActionButton('give-heal', 'Heal', function() {
+      let numberOfCards = prompt("How many cards do you want to heal?", "");
+      if(numberOfCards === null) return;
+      if(numberOfCards.trim() === '') return;
+      let reg = /^\d+$/;
+      if(!reg.test(numberOfCards)) return;
+      if(parseInt(numberOfCards) <= 0) return;
+      context._gameSession.sendSingleplayerAction(parseInt(sessionID), ACTION_HEAL, numberOfCards);
+    });
+    actions.append(heal);
     actions.append(damage);
     actions.append(giveInitialHand);
-    //actions.append(setupAction);
     let newPlayer = $('<div class="player" id="player-'+sessionID+'" />').append(thumbnail).append(actions);
     if(isSelf) newPlayer.addClass('self');
     if(isDM) {
