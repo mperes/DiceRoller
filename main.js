@@ -36,6 +36,19 @@ function preLoadAndStart() {
         $('#multiplayer-hand').toggleClass('disabled');
         $('#multiplayer-create').toggleClass('disabled');
       });
+
+      for(let i=0; i<24; i++) {
+        let src = 'img/avatars/avatar_'+i+'.jpg';
+        let img = $('<img alt="avatar" src="" />').attr('src', src).click((e) => {
+          $('#multiplayer-avatar-chosen').attr('src', src);
+          gameSession._avatar = i;
+          $('#multiplayer-avatar-list').toggle();
+        });
+        $('#multiplayer-avatar-list').append(img);
+      }
+      $('#multiplayer-avatar-chosen').click((e)=> {
+        $('#multiplayer-avatar-list').toggle();
+      });
     };
   });
 }

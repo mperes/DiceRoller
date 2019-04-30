@@ -10,12 +10,15 @@ class PlayerList {
     this._gameSession = gameSession;
     this._checkOnlinePlayers = setInterval(this.checkOnlinePlayers.bind(this), 10000);
   }
-  addPlayer(displayName, sessionID, handSize, isDM, isSelf) {
+  addPlayer(avatar, displayName, sessionID, handSize, isDM, isSelf) {
     let context = this;
-    this._list.push({displayName: displayName, sessionID: sessionID, handSize: handSize, isDM: isDM, isSelf: isSelf, ping: false, pong: false});
-    let thumbnail = $('<div class="thumbnail" />').text(displayName);
+    this._list.push({avatar: avatar, displayName: displayName, sessionID: sessionID, handSize: handSize, isDM: isDM, isSelf: isSelf, ping: false, pong: false});
+    let thumbnail = $('<div class="thumbnail" />').text(displayName)
     let health = $('<div class="health"><div class="left"></div></div>');
-    thumbnail.append(health);
+    thumbnail.append(health)
+    let avatarUrl = 'url(img/avatars/avatar_'+avatar+'.jpg)';
+    console.log(avatarUrl);
+    thumbnail.css('background', avatarUrl);
     thumbnail.click(function() {
       if(!context._gameSession._isDM) return;
       context.toggleTurn(sessionID);

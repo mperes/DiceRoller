@@ -17,6 +17,7 @@ class GameSession {
 
     this._deck = null;
     this._player = null;
+    this._avatar = 0;
     this._chatBox = null;
     this._imageLoader = null;
     this._audioPlayer = null;
@@ -92,7 +93,7 @@ class GameSession {
         context.loading(false);
         let isSelf = (parseInt(message.SID) === parseInt(context._sessionID)) ? true : false;
         context._playerList.reset();
-        context._playerList.addPlayer(context._displayName, context._sessionID, context._handSize, context._isDM, isSelf);
+        context._playerList.addPlayer(context._avatar, context._displayName, context._sessionID, context._handSize, context._isDM, isSelf);
         $('#container').removeClass('logged-off');
         if (context._chatBox == null) {
           context._chatBox = new ChatBox(context, '#table-top');
@@ -104,7 +105,7 @@ class GameSession {
         if(parseInt(message.sID) === parseInt(context._sessionID)) return;
         switch (message.action) {
           case ACTION_PLAYER_JOIN:
-            context._playerList.addPlayer(message.displayName, message.sID, context._handSize, false, false);
+            context._playerList.addPlayer(message.avatar, message.displayName, message.sID, context._handSize, false, false);
             if(context._isDM) {
               context.sendSingleplayerAction(message.sID, ACTION_ADD_DM);
             } else {
@@ -112,7 +113,7 @@ class GameSession {
             }
             break;
           case ACTION_DM_JOIN:
-            context._playerList.addPlayer(message.displayName, message.sID, 0, true, false);
+            context._playerList.addPlayer(message.avatar, message.displayName, message.sID, 0, true, false);
             context.sendSingleplayerAction(message.sID, ACTION_ADD_PLAYER);
             break;
           case ACTION_DRAW_TO_TABLE:
@@ -128,10 +129,10 @@ class GameSession {
               context.sendSingleplayerAction(message.sID, ACTION_OK, 'ACTION_SEND_TABLE_TO_GRAVEYARD');
             break;
           case ACTION_ADD_PLAYER:
-            context._playerList.addPlayer(message.displayName, message.sID, context._handSize, false, false);
+            context._playerList.addPlayer(message.avatar, message.displayName, message.sID, context._handSize, false, false);
             break;
           case ACTION_ADD_DM:
-            context._playerList.addPlayer(message.displayName, message.sID, 0, true, false);
+            context._playerList.addPlayer(message.avatar, message.displayName, message.sID, 0, true, false);
             break;
           case ACTION_PLAYER_SETUP:
             context.setupPlayer(message.details);
@@ -262,6 +263,7 @@ class GameSession {
     if(this._ws) {
       let command = {
           to: this._roomID,
+          avatar: this._avatar,
           displayName: this._displayName,
           fromDM: this._isDM,
           action: action,
@@ -275,6 +277,7 @@ class GameSession {
     if(this._ws) {
       let command = {
           toS: parseInt(sessionID),
+          avatar: this._avatar,
           displayName: this._displayName,
           fromDM: this._isDM,
           action: action,

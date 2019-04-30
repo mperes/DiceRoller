@@ -125,6 +125,35 @@ input.squareButton.primary {
         margin: 0 5px 0 0
       }
     }
+    #multiplayer-avatar {
+      text-align: center;
+      @avatarSize: 50px;
+      #multiplayer-avatar-list {
+        white-space: normal;
+        width: @avatarSize * 8;
+        padding: 10px;
+        background: white;
+        border-radius: 5px;
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%) translateY(-100%);
+        top: -10px;
+        display: none;
+        img {
+          width: @avatarSize;
+          height: @avatarSize;
+          cursor: pointer;
+        }
+      }
+      #multiplayer-avatar-chosen {
+        width: 100px;
+        height: 100px;
+        border-radius: 5px;
+        display: inline-block;
+        margin-bottom: 10px;
+        cursor: pointer;
+      }
+    }
     #multiplayer-player {
       width: 225px;
       display: block;
@@ -332,19 +361,22 @@ input.squareButton.primary {
         text-align: center;
         padding: 5px;
         box-sizing: border-box;
+        color: white;
+        text-shadow: 1px 1px 0 black;
+        box-shadow: 0 0 10px rgba(0,0,0,0.35);
         .health {
-          width: 90px;
-          height: 15px;
-          background: rgba(0, 0, 0, 0.5);
+          width: 96px;
+          height: 10px;
+          background: rgba(0,0,0,0.5);
           border-radius: 3px;
           position: absolute;
-          bottom: 5px;
-          left: 5px;
+          bottom: 2px;
+          left: 2px;
           padding: 3px;
           box-sizing: border-box;
           text-align: left;
           .left {
-            background-color: #c5473b;
+            background-color: #ca2b1c;
             display: inline-block;
             height: 100%;
             width: 100%;
@@ -355,7 +387,18 @@ input.squareButton.primary {
       &.hasTurn {
         .thumbnail {
           box-shadow: 0 0 10px #5be1ff;
-          border: 1px solid #40ffca;
+          &:after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100px;
+            height: 100px;
+            border: 2px solid #40ffca;
+            border-radius: 4px;
+            box-sizing: border-box;
+            opacity: 0.85;
+          }
         }
         .actions {
           .give-damage {
