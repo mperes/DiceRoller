@@ -17,6 +17,7 @@ class GameSession {
 
     this._deck = null;
     this._player = null;
+    this._avatar = 0;
     this._chatBox = null;
     this._imageLoader = null;
     this._audioPlayer = null;
@@ -76,7 +77,7 @@ class GameSession {
     if(multiplayerID === null) return;
     if(multiplayerID.trim() === '') return;
     this.loading(true);
-    this.connect(multiplayerID);
+    this.connect(multiplayerID.trim());
   }
   connect(multiplayerID) {
     let context = this;
@@ -92,7 +93,7 @@ class GameSession {
         context.loading(false);
         let isSelf = (parseInt(message.SID) === parseInt(context._sessionID)) ? true : false;
         context._playerList.reset();
-        context._playerList.addPlayer(context._displayName, context._sessionID, context._handSize, context._isDM, isSelf);
+        context._playerList.addPlayer(context._avatar, context._displayName, context._sessionID, context._handSize, context._isDM, isSelf);
         $('#container').removeClass('logged-off');
         if (context._chatBox == null) {
           context._chatBox = new ChatBox(context, '#table-top');
@@ -104,7 +105,7 @@ class GameSession {
         if(parseInt(message.sID) === parseInt(context._sessionID)) return;
         switch (message.action) {
           case ACTION_PLAYER_JOIN:
-            context._playerList.addPlayer(message.displayName, message.sID, context._handSize, false, false);
+            context._playerList.addPlayer(message.avatar, message.displayName, message.sID, context._handSize, false, false);
             if(context._isDM) {
               context.sendSingleplayerAction(message.sID, ACTION_ADD_DM);
             } else {
@@ -112,7 +113,7 @@ class GameSession {
             }
             break;
           case ACTION_DM_JOIN:
-            context._playerList.addPlayer(message.displayName, message.sID, 0, true, false);
+            context._playerList.addPlayer(message.avatar, message.displayName, message.sID, 0, true, false);
             context.sendSingleplayerAction(message.sID, ACTION_ADD_PLAYER);
             break;
           case ACTION_DRAW_TO_TABLE:
@@ -128,10 +129,10 @@ class GameSession {
               context.sendSingleplayerAction(message.sID, ACTION_OK, 'ACTION_SEND_TABLE_TO_GRAVEYARD');
             break;
           case ACTION_ADD_PLAYER:
-            context._playerList.addPlayer(message.displayName, message.sID, context._handSize, false, false);
+            context._playerList.addPlayer(message.avatar, message.displayName, message.sID, context._handSize, false, false);
             break;
           case ACTION_ADD_DM:
-            context._playerList.addPlayer(message.displayName, message.sID, 0, true, false);
+            context._playerList.addPlayer(message.avatar, message.displayName, message.sID, 0, true, false);
             break;
           case ACTION_PLAYER_SETUP:
             context.setupPlayer(message.details);
@@ -139,9 +140,8 @@ class GameSession {
               context.sendSingleplayerAction(message.sID, ACTION_OK, 'ACTION_PLAYER_SETUP');
             break;
           case ACTION_GIVE_INITIAL_HAND:
-            //if(context._deck !== null)
-              context.setupPlayer(message.details);
-              context._player.giveInitialHand();
+            context.setupPlayer(message.details);
+            context._player.giveInitialHand();
             if(message.fromDM)
               context.sendSingleplayerAction(message.sID, ACTION_OK, 'ACTION_GIVE_INITIAL_HAND');
             break;
@@ -194,9 +194,14 @@ class GameSession {
               context._playerList.disconnectPlayer(message.details);
             break;
           case ACTION_SHOW_MAP:
-            context._imageLoader._view.toggleClass('hidden');
+            context._imageLoader._view.removeClass('hidden');
             if(message.fromDM)
-              context.sendSingleplayerAction(message.sID, ACTION_OK, 'SHOW_MAP');
+              context.sendSingleplayerAction(message.sID, ACTION_OK, 'ACTION_SHOW_MAP');
+            break;
+          case ACTION_HIDE_MAP:
+            context._imageLoader._view.addClass('hidden');
+            if(message.fromDM)
+              context.sendSingleplayerAction(message.sID, ACTION_OK, 'ACTION_HIDE_MAP');
             break;
           case ACTION_AUDIO_PLAY:
             context.playAudio(message.details);
@@ -217,6 +222,19 @@ class GameSession {
             context.adjustAudioVolume(parseFloat(message.details));
             if(message.fromDM)
               context.sendSingleplayerAction(message.sID, ACTION_OK, 'ACTION_AUDIO_VOLUME');
+            break;
+          case ACTION_ADD_MAP_MARKER:
+            context._imageLoader.addMarker(message.details.split(','));
+            if(message.fromDM)
+              context.sendSingleplayerAction(message.sID, ACTION_OK, 'ACTION_ADD_MAP_MARKER');
+            break;
+          case ACTION_REMOVE_MAP_MARKERS:
+            context._imageLoader.removeMarkers();
+            if(message.fromDM)
+              context.sendSingleplayerAction(message.sID, ACTION_OK, 'ACTION_REMOVE_MAP_MARKERS');
+            break;
+          case ACTION_HEAL:
+            context._player.heal(parseInt(message.details));
             break;
           default:
 
@@ -245,6 +263,7 @@ class GameSession {
     if(this._ws) {
       let command = {
           to: this._roomID,
+          avatar: this._avatar,
           displayName: this._displayName,
           fromDM: this._isDM,
           action: action,
@@ -258,6 +277,7 @@ class GameSession {
     if(this._ws) {
       let command = {
           toS: parseInt(sessionID),
+          avatar: this._avatar,
           displayName: this._displayName,
           fromDM: this._isDM,
           action: action,

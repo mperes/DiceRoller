@@ -145,6 +145,10 @@ const ACTION_AUDIO_PLAY = 21;
 const ACTION_AUDIO_PAUSE = 22;
 const ACTION_AUDIO_CONTINUE = 23;
 const ACTION_AUDIO_VOLUME = 24;
+const ACTION_HIDE_MAP = 25;
+const ACTION_ADD_MAP_MARKER = 26;
+const ACTION_REMOVE_MAP_MARKERS = 27;
+const ACTION_HEAL = 28;
 //*---------------------------------------------------------------------
 //* Deck Class
 //* By Miguel Peres (m.peres@gmail.com)
@@ -537,20 +541,34 @@ class DmToolbar {
     }
 
     this.toggleMap = function() {
+      $('#map-markers, #map-markers-delete').toggle();
+      $('#krynn-map').toggleClass('toggled');
       context._deck._gameSession._imageLoader._view.toggleClass('hidden');
-      context._deck._gameSession.sendMultiplayerAction(ACTION_SHOW_MAP);
+      if(context._deck._gameSession._imageLoader._view.hasClass('hidden')) {
+        context._deck._gameSession.sendMultiplayerAction(ACTION_HIDE_MAP);
+      } else {
+        context._deck._gameSession.sendMultiplayerAction(ACTION_SHOW_MAP);
+      }
     }
 
     this.toggleMarkers = function() {
+      $('#map-markers').addClass('toggled');
       context._deck._gameSession._imageLoader._view.toggleClass('marking');
+    }
+
+    this.removeMarkers = function() {
+      context._deck._gameSession._imageLoader.removeMarkers();
+      context._deck._gameSession.sendMultiplayerAction(ACTION_REMOVE_MAP_MARKERS);
     }
 
     this._view = $('<div id="dm-toolbar" />');
     this._view.append('<div id="load-audio" class="action"><span class="label">Audio Player</span></div>');
-    this._view.append(this._getActionButton('map-markers', 'Add Markers', this.toggleMarkers));
+    this._view.append(this._getActionButton('map-markers-delete', 'Remove Markers', this.removeMarkers));
+    this._view.append(this._getActionButton('map-markers', 'Add Marker', this.toggleMarkers));
     this._view.append(this._getActionButton('krynn-map', 'Krynn Map', this.toggleMap));
     this._view.append(this._getActionButton('dm-draw', 'Draw Card', this.draw));
     this._view.append(this._getActionButton('dm-table-clear', 'Discard Table', this.discardTable));
+    this._view.find('#map-markers, #map-markers-delete').toggle();
     $(container).prepend(this._view);
     this._localFileReader = new LocalFileReader('#load-audio', '', this.createAudioPlayer);
   }
@@ -633,6 +651,7 @@ class GameSession {
 
     this._deck = null;
     this._player = null;
+    this._avatar = 0;
     this._chatBox = null;
     this._imageLoader = null;
     this._audioPlayer = null;
@@ -692,7 +711,7 @@ class GameSession {
     if(multiplayerID === null) return;
     if(multiplayerID.trim() === '') return;
     this.loading(true);
-    this.connect(multiplayerID);
+    this.connect(multiplayerID.trim());
   }
   connect(multiplayerID) {
     let context = this;
@@ -708,7 +727,7 @@ class GameSession {
         context.loading(false);
         let isSelf = (parseInt(message.SID) === parseInt(context._sessionID)) ? true : false;
         context._playerList.reset();
-        context._playerList.addPlayer(context._displayName, context._sessionID, context._handSize, context._isDM, isSelf);
+        context._playerList.addPlayer(context._avatar, context._displayName, context._sessionID, context._handSize, context._isDM, isSelf);
         $('#container').removeClass('logged-off');
         if (context._chatBox == null) {
           context._chatBox = new ChatBox(context, '#table-top');
@@ -720,7 +739,7 @@ class GameSession {
         if(parseInt(message.sID) === parseInt(context._sessionID)) return;
         switch (message.action) {
           case ACTION_PLAYER_JOIN:
-            context._playerList.addPlayer(message.displayName, message.sID, context._handSize, false, false);
+            context._playerList.addPlayer(message.avatar, message.displayName, message.sID, context._handSize, false, false);
             if(context._isDM) {
               context.sendSingleplayerAction(message.sID, ACTION_ADD_DM);
             } else {
@@ -728,7 +747,7 @@ class GameSession {
             }
             break;
           case ACTION_DM_JOIN:
-            context._playerList.addPlayer(message.displayName, message.sID, 0, true, false);
+            context._playerList.addPlayer(message.avatar, message.displayName, message.sID, 0, true, false);
             context.sendSingleplayerAction(message.sID, ACTION_ADD_PLAYER);
             break;
           case ACTION_DRAW_TO_TABLE:
@@ -744,10 +763,10 @@ class GameSession {
               context.sendSingleplayerAction(message.sID, ACTION_OK, 'ACTION_SEND_TABLE_TO_GRAVEYARD');
             break;
           case ACTION_ADD_PLAYER:
-            context._playerList.addPlayer(message.displayName, message.sID, context._handSize, false, false);
+            context._playerList.addPlayer(message.avatar, message.displayName, message.sID, context._handSize, false, false);
             break;
           case ACTION_ADD_DM:
-            context._playerList.addPlayer(message.displayName, message.sID, 0, true, false);
+            context._playerList.addPlayer(message.avatar, message.displayName, message.sID, 0, true, false);
             break;
           case ACTION_PLAYER_SETUP:
             context.setupPlayer(message.details);
@@ -755,9 +774,8 @@ class GameSession {
               context.sendSingleplayerAction(message.sID, ACTION_OK, 'ACTION_PLAYER_SETUP');
             break;
           case ACTION_GIVE_INITIAL_HAND:
-            //if(context._deck !== null)
-              context.setupPlayer(message.details);
-              context._player.giveInitialHand();
+            context.setupPlayer(message.details);
+            context._player.giveInitialHand();
             if(message.fromDM)
               context.sendSingleplayerAction(message.sID, ACTION_OK, 'ACTION_GIVE_INITIAL_HAND');
             break;
@@ -810,9 +828,14 @@ class GameSession {
               context._playerList.disconnectPlayer(message.details);
             break;
           case ACTION_SHOW_MAP:
-            context._imageLoader._view.toggleClass('hidden');
+            context._imageLoader._view.removeClass('hidden');
             if(message.fromDM)
-              context.sendSingleplayerAction(message.sID, ACTION_OK, 'SHOW_MAP');
+              context.sendSingleplayerAction(message.sID, ACTION_OK, 'ACTION_SHOW_MAP');
+            break;
+          case ACTION_HIDE_MAP:
+            context._imageLoader._view.addClass('hidden');
+            if(message.fromDM)
+              context.sendSingleplayerAction(message.sID, ACTION_OK, 'ACTION_HIDE_MAP');
             break;
           case ACTION_AUDIO_PLAY:
             context.playAudio(message.details);
@@ -833,6 +856,19 @@ class GameSession {
             context.adjustAudioVolume(parseFloat(message.details));
             if(message.fromDM)
               context.sendSingleplayerAction(message.sID, ACTION_OK, 'ACTION_AUDIO_VOLUME');
+            break;
+          case ACTION_ADD_MAP_MARKER:
+            context._imageLoader.addMarker(message.details.split(','));
+            if(message.fromDM)
+              context.sendSingleplayerAction(message.sID, ACTION_OK, 'ACTION_ADD_MAP_MARKER');
+            break;
+          case ACTION_REMOVE_MAP_MARKERS:
+            context._imageLoader.removeMarkers();
+            if(message.fromDM)
+              context.sendSingleplayerAction(message.sID, ACTION_OK, 'ACTION_REMOVE_MAP_MARKERS');
+            break;
+          case ACTION_HEAL:
+            context._player.heal(parseInt(message.details));
             break;
           default:
 
@@ -861,6 +897,7 @@ class GameSession {
     if(this._ws) {
       let command = {
           to: this._roomID,
+          avatar: this._avatar,
           displayName: this._displayName,
           fromDM: this._isDM,
           action: action,
@@ -874,6 +911,7 @@ class GameSession {
     if(this._ws) {
       let command = {
           toS: parseInt(sessionID),
+          avatar: this._avatar,
           displayName: this._displayName,
           fromDM: this._isDM,
           action: action,
@@ -919,15 +957,25 @@ class ImageLoader {
     this.load('assets/image/krynn_map.jpg');
 
     const self = this;
-    this._view.on('click', '.iv-image-markers', function(e){
+    this.addMarker = function(pos) {
+      let marker = $('<div class="marker"><div class="dot"></div><div class="pulse"></div></div>').css('left', pos[0]).css('top', pos[1]);
+      self._view.find('.iv-image-markers').append(marker);
+    }
+    this.removeMarkers = function() {
+      self._view.find('.iv-image-markers .marker').remove();
+    }
+    this._view.on('click', '.iv-image-markers', function(e) {
+      if(!self._gameSession._isDM) return;
       let offset = $(this).offset();
       let relativeX = (e.pageX - offset.left);
       let relativeY = (e.pageY - offset.top);
-      let percentX = relativeX / $(this).width() * 100;
-      let percentY = relativeY / $(this).height() * 100;
-      let marker = $('<div class="marker"><div class="dot"></div><div class="pulse"></div></div>').css('left', percentX+'%').css('top', percentY+'%');
-      $(this).append(marker);
+      let percentX = (relativeX / $(this).width() * 100) + '%';
+      let percentY = (relativeY / $(this).height() * 100) + '%';
+      let pos = [percentX, percentY];
+      self.addMarker(pos);
       self._view.removeClass('marking');
+      $('#map-markers').removeClass('toggled');
+      self._gameSession.sendMultiplayerAction(ACTION_ADD_MAP_MARKER, pos.join(','));
     });
   }
   load(src) {
@@ -1032,6 +1080,14 @@ class Player {
 
     this.setupTurnButton();
   }
+  heal(amount) {
+    let healFor = Math.min(amount, this._maxHandSize-this._handSize);
+    this._handSize += healFor;
+    this._deck.draw(this._hand, this._container.hand, healFor, true);
+    let percentage = this._handSize / this._maxHandSize * 100;
+    this._deck._gameSession.sendMultiplayerAction(ACTION_NOTIFY_HEALTH, percentage.toString());
+    this._deck._gameSession._playerList.updateHealth(this._deck._gameSession._sessionID, percentage);
+  }
   setupTurnButton() {
     const context = this;
     $('#player-turn-begin').click((e) => {
@@ -1091,12 +1147,15 @@ class PlayerList {
     this._gameSession = gameSession;
     this._checkOnlinePlayers = setInterval(this.checkOnlinePlayers.bind(this), 10000);
   }
-  addPlayer(displayName, sessionID, handSize, isDM, isSelf) {
+  addPlayer(avatar, displayName, sessionID, handSize, isDM, isSelf) {
     let context = this;
-    this._list.push({displayName: displayName, sessionID: sessionID, handSize: handSize, isDM: isDM, isSelf: isSelf, ping: false, pong: false});
-    let thumbnail = $('<div class="thumbnail" />').text(displayName);
+    this._list.push({avatar: avatar, displayName: displayName, sessionID: sessionID, handSize: handSize, isDM: isDM, isSelf: isSelf, ping: false, pong: false});
+    let thumbnail = $('<div class="thumbnail" />').text(displayName)
     let health = $('<div class="health"><div class="left"></div></div>');
-    thumbnail.append(health);
+    thumbnail.append(health)
+    let avatarUrl = 'url(img/avatars/avatar_'+avatar+'.jpg)';
+    console.log(avatarUrl);
+    thumbnail.css('background', avatarUrl);
     thumbnail.click(function() {
       if(!context._gameSession._isDM) return;
       context.toggleTurn(sessionID);
@@ -1110,9 +1169,18 @@ class PlayerList {
     let damage = this._getActionButton('give-damage', 'Damage', function() {
       context._gameSession.sendSingleplayerAction(parseInt(sessionID), ACTION_GIVE_DAMAGE);
     });
+    let heal = this._getActionButton('give-heal', 'Heal', function() {
+      let numberOfCards = prompt("How many cards do you want to heal?", "");
+      if(numberOfCards === null) return;
+      if(numberOfCards.trim() === '') return;
+      let reg = /^\d+$/;
+      if(!reg.test(numberOfCards)) return;
+      if(parseInt(numberOfCards) <= 0) return;
+      context._gameSession.sendSingleplayerAction(parseInt(sessionID), ACTION_HEAL, numberOfCards);
+    });
+    actions.append(heal);
     actions.append(damage);
     actions.append(giveInitialHand);
-    //actions.append(setupAction);
     let newPlayer = $('<div class="player" id="player-'+sessionID+'" />').append(thumbnail).append(actions);
     if(isSelf) newPlayer.addClass('self');
     if(isDM) {

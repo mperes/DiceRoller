@@ -10,12 +10,15 @@ class PlayerList {
     this._gameSession = gameSession;
     this._checkOnlinePlayers = setInterval(this.checkOnlinePlayers.bind(this), 10000);
   }
-  addPlayer(displayName, sessionID, handSize, isDM, isSelf) {
+  addPlayer(avatar, displayName, sessionID, handSize, isDM, isSelf) {
     let context = this;
-    this._list.push({displayName: displayName, sessionID: sessionID, handSize: handSize, isDM: isDM, isSelf: isSelf, ping: false, pong: false});
-    let thumbnail = $('<div class="thumbnail" />').text(displayName);
+    this._list.push({avatar: avatar, displayName: displayName, sessionID: sessionID, handSize: handSize, isDM: isDM, isSelf: isSelf, ping: false, pong: false});
+    let thumbnail = $('<div class="thumbnail" />').text(displayName)
     let health = $('<div class="health"><div class="left"></div></div>');
-    thumbnail.append(health);
+    thumbnail.append(health)
+    let avatarUrl = 'url(img/avatars/avatar_'+avatar+'.jpg)';
+    console.log(avatarUrl);
+    thumbnail.css('background', avatarUrl);
     thumbnail.click(function() {
       if(!context._gameSession._isDM) return;
       context.toggleTurn(sessionID);
@@ -29,9 +32,18 @@ class PlayerList {
     let damage = this._getActionButton('give-damage', 'Damage', function() {
       context._gameSession.sendSingleplayerAction(parseInt(sessionID), ACTION_GIVE_DAMAGE);
     });
+    let heal = this._getActionButton('give-heal', 'Heal', function() {
+      let numberOfCards = prompt("How many cards do you want to heal?", "");
+      if(numberOfCards === null) return;
+      if(numberOfCards.trim() === '') return;
+      let reg = /^\d+$/;
+      if(!reg.test(numberOfCards)) return;
+      if(parseInt(numberOfCards) <= 0) return;
+      context._gameSession.sendSingleplayerAction(parseInt(sessionID), ACTION_HEAL, numberOfCards);
+    });
+    actions.append(heal);
     actions.append(damage);
     actions.append(giveInitialHand);
-    //actions.append(setupAction);
     let newPlayer = $('<div class="player" id="player-'+sessionID+'" />').append(thumbnail).append(actions);
     if(isSelf) newPlayer.addClass('self');
     if(isDM) {

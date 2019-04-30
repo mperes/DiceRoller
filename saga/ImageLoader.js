@@ -15,15 +15,25 @@ class ImageLoader {
     this.load('assets/image/krynn_map.jpg');
 
     const self = this;
-    this._view.on('click', '.iv-image-markers', function(e){
+    this.addMarker = function(pos) {
+      let marker = $('<div class="marker"><div class="dot"></div><div class="pulse"></div></div>').css('left', pos[0]).css('top', pos[1]);
+      self._view.find('.iv-image-markers').append(marker);
+    }
+    this.removeMarkers = function() {
+      self._view.find('.iv-image-markers .marker').remove();
+    }
+    this._view.on('click', '.iv-image-markers', function(e) {
+      if(!self._gameSession._isDM) return;
       let offset = $(this).offset();
       let relativeX = (e.pageX - offset.left);
       let relativeY = (e.pageY - offset.top);
-      let percentX = relativeX / $(this).width() * 100;
-      let percentY = relativeY / $(this).height() * 100;
-      let marker = $('<div class="marker"><div class="dot"></div><div class="pulse"></div></div>').css('left', percentX+'%').css('top', percentY+'%');
-      $(this).append(marker);
+      let percentX = (relativeX / $(this).width() * 100) + '%';
+      let percentY = (relativeY / $(this).height() * 100) + '%';
+      let pos = [percentX, percentY];
+      self.addMarker(pos);
       self._view.removeClass('marking');
+      $('#map-markers').removeClass('toggled');
+      self._gameSession.sendMultiplayerAction(ACTION_ADD_MAP_MARKER, pos.join(','));
     });
   }
   load(src) {
