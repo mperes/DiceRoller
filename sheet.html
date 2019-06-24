@@ -1,0 +1,353 @@
+<div id="character-sheat-header">
+  <h1>Character Sheet</h1>
+  <div id="character-sheat-toolbar">
+    <button class="upload">Upload</button>
+  </div>
+</div>
+<form>
+  <div class="container">
+    <div class="row">
+      <div class="col-md-6">
+        <fieldset>
+          <legend>Personal Information</legend>
+          <div class="container-fluid">
+            <div class="row">
+              <div class="col-md-12">
+                <label for="hero">Hero</label>
+                <input name="hero" id="hero" type="text" />
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-12">
+                <label for="race">Race</label>
+                <input name="race" id="race" type="text" />
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-12">
+                <label for="role">Role</label>
+                <input name="role" id="role" type="text" />
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-10">
+                <input class="al" name="demeanor" id="demeanor" type="text" placeholder="Demeanor"/>
+              </div>
+              <div class="col-md-2">
+                <input name="demeanor-card" id="demeanor-card" type="text" placeholder="card" />
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-10">
+                <input class="al" name="nature" id="nature" type="text" placeholder="Nature"/>
+              </div>
+              <div class="col-md-2">
+                <input name="nature-card" id="nature-card" type="text" placeholder="card" />
+              </div>
+            </div>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>Physical Description</legend>
+          <div class="container-fluid">
+            <div class="row">
+              <div class="col-md-6">
+                <label for="age">Age</label>
+                <input name="age" id="age" type="text" />
+              </div>
+              <div class="col-md-6">
+                <label for="sex">Sex</label>
+                <input name="sex" id="sex" type="text" />
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-6">
+                <label for="hair">Hair</label>
+                <input name="hair" id="hair" type="text" />
+              </div>
+              <div class="col-md-6">
+                <label for="eyes">Eyes</label>
+                <input name="eyes" id="eyes" type="text" />
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-6">
+                <label for="height">Height</label>
+                <input name="height" id="height" type="text" />
+              </div>
+              <div class="col-md-6">
+                <label for="weight">Weight</label>
+                <input name="weight" id="weight" type="text" />
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-12">
+                <textarea name="distinguishing-features" id="distinguishing-features" placeholder="Distinguishing Features" rows="5"></textarea>
+              </div>
+            </div>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>Background</legend>
+          <div class="container-fluid">
+            <div class="row">
+              <div class="col-md-12">
+                <label for="homeland">Homeland</label>
+                <input name="homeland" id="homeland" type="text" />
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-12">
+                <label for="social-status">Social Status</label>
+                <input name="social-status" id="social-status" type="text" />
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-12">
+                <label for="reputation">Reputation</label>
+                <input name="reputation" id="reputation" type="text" />
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-4">
+                <label for="hand">Hand</label>
+                <input name="hand" id="hand" type="text" />
+              </div>
+              <div class="col-md-4">
+                <label for="wealth">Wealth</label>
+                <input name="wealth" id="wealth" type="text" />
+              </div>
+              <div class="col-md-4">
+                <label for="quests">Quests</label>
+                <input name="quests" id="quests" type="text" />
+              </div>
+            </div>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>Special Abilities/Limitations</legend>
+          <div class="container-fluid">
+            <div class="row">
+              <div class="col-md-12">
+                <textarea name="special-abilities-and-limitations" id="special-abilities-and-limitations" rows="5"></textarea>
+              </div>
+            </div>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>Treasures</legend>
+          <div class="container-fluid">
+            <div class="row">
+              <div class="col-md-12">
+                <textarea name="treasures" id="treasures" rows="10"></textarea>
+              </div>
+            </div>
+          </div>
+        </fieldset>
+      </div>
+      <div class="col-md-6">
+        <fieldset id="ability-scores">
+          <legend>Ability Scores</legend>
+          <div class="container-fluid">
+            <div class="row">
+              <div class="col-md-6">
+                <fieldset>
+                  <legend>Coordination</legend>
+                  <div class="container-fluid">
+                    <div class="row">
+                      <div class="col-md-6">
+                        <label for="agility" class="p-rel">Agility</label>
+                        <div class="p-rel ability-score agility"><input name="agility" id="agility" type="number" min="1" max="9" /></div>
+                      </div>
+                      <div class="ability-codes col-md-6">
+                        <div class="ability-code"><input type="radio" name="agility-code" value="A" /></div>
+                        <div class="ability-code"><input type="radio" name="agility-code" value="B" /></div>
+                        <div class="ability-code"><input type="radio" name="agility-code" value="C" /></div>
+                        <div class="ability-code"><input type="radio" name="agility-code" value="D" /></div>
+                        <div class="ability-code"><input type="radio" name="agility-code" value="X" /></div>
+                      </div>
+                    </div>
+                    <div class="row">
+                      <div class="col-md-6">
+                        <label for="dexterity" class="p-rel">Dexterity</label>
+                        <div class="p-rel ability-score dexterity"><input name="dexterity" id="dexterity" type="number" min="1" max="9" /></div>
+                      </div>
+                      <div class="ability-codes col-md-6">
+                        <div class="ability-code"><input type="radio" name="dexterity-code" value="A" /></div>
+                        <div class="ability-code"><input type="radio" name="dexterity-code" value="B" /></div>
+                        <div class="ability-code"><input type="radio" name="dexterity-code" value="C" /></div>
+                        <div class="ability-code"><input type="radio" name="dexterity-code" value="D" /></div>
+                        <div class="ability-code"><input type="radio" name="dexterity-code" value="X" /></div>
+                      </div>
+                    </div>
+                  </div>
+                </fieldset>
+                <fieldset>
+                  <legend>Physique</legend>
+                  <div class="container-fluid">
+                    <div class="row">
+                      <div class="col-md-6">
+                        <label for="endurance" class="p-rel">Endurance</label>
+                        <div class="p-rel ability-score endurance"><input name="endurance" id="endurance" type="number" min="1" max="9" /></div>
+                      </div>
+                      <div class="ability-codes col-md-6">
+                        <div class="ability-code"><input type="radio" name="endurance-code" value="A" /></div>
+                        <div class="ability-code"><input type="radio" name="endurance-code" value="B" /></div>
+                        <div class="ability-code"><input type="radio" name="endurance-code" value="C" /></div>
+                        <div class="ability-code"><input type="radio" name="endurance-code" value="D" /></div>
+                        <div class="ability-code"><input type="radio" name="endurance-code" value="X" /></div>
+                      </div>
+                    </div>
+                    <div class="row">
+                      <div class="col-md-6">
+                        <label for="strength" class="p-rel">Strength</label>
+                        <div class="p-rel ability-score strength"><input name="strength" id="strength" type="number" min="1" max="9" /></div>
+                      </div>
+                      <div class="ability-codes col-md-6">
+                        <div class="ability-code"><input type="radio" name="strength-code" value="A" /></div>
+                        <div class="ability-code"><input type="radio" name="strength-code" value="B" /></div>
+                        <div class="ability-code"><input type="radio" name="strength-code" value="C" /></div>
+                        <div class="ability-code"><input type="radio" name="strength-code" value="D" /></div>
+                        <div class="ability-code"><input type="radio" name="strength-code" value="X" /></div>
+                      </div>
+                    </div>
+                  </div>
+                </fieldset>
+              </div>
+              <div class="col-md-6">
+                <fieldset>
+                  <legend>Intellect</legend>
+                  <div class="container-fluid">
+                    <div class="row">
+                      <div class="col-md-6">
+                        <label for="reason" class="p-rel">Reason</label>
+                        <div class="p-rel ability-score reason"><input name="reason" id="reason" type="number" min="1" max="9" /></div>
+                      </div>
+                      <div class="ability-codes col-md-6">
+                        <div class="ability-code"><input type="radio" name="reason-code" value="A" /></div>
+                        <div class="ability-code"><input type="radio" name="reason-code" value="B" /></div>
+                        <div class="ability-code"><input type="radio" name="reason-code" value="C" /></div>
+                        <div class="ability-code"><input type="radio" name="reason-code" value="D" /></div>
+                        <div class="ability-code"><input type="radio" name="reason-code" value="X" /></div>
+                      </div>
+                    </div>
+                    <div class="row">
+                      <div class="col-md-6">
+                        <label for="perception" class="p-rel">Perception</label>
+                        <div class="p-rel ability-score perception"><input name="perception" id="perception" type="number" min="1" max="9" /></div>
+                      </div>
+                      <div class="ability-codes col-md-6">
+                        <div class="ability-code"><input type="radio" name="perception-code" value="A" /></div>
+                        <div class="ability-code"><input type="radio" name="perception-code" value="B" /></div>
+                        <div class="ability-code"><input type="radio" name="perception-code" value="C" /></div>
+                        <div class="ability-code"><input type="radio" name="perception-code" value="D" /></div>
+                        <div class="ability-code"><input type="radio" name="perception-code" value="X" /></div>
+                      </div>
+                    </div>
+                  </div>
+                </fieldset>
+                <fieldset>
+                  <legend>Essence</legend>
+                  <div class="container-fluid">
+                    <div class="row">
+                      <div class="col-md-6">
+                        <label for="spirit" class="p-rel">Spirit</label>
+                        <div class="p-rel ability-score spirit"><input name="spirit" id="spirit" type="number" min="1" max="9" /></div>
+                      </div>
+                      <div class="ability-codes col-md-6">
+                        <div class="ability-code"><input type="radio" name="spirit-code" value="A" /></div>
+                        <div class="ability-code"><input type="radio" name="spirit-code" value="B" /></div>
+                        <div class="ability-code"><input type="radio" name="spirit-code" value="C" /></div>
+                        <div class="ability-code"><input type="radio" name="spirit-code" value="D" /></div>
+                        <div class="ability-code"><input type="radio" name="spirit-code" value="X" /></div>
+                      </div>
+                    </div>
+                    <div class="row">
+                      <div class="col-md-6">
+                        <label for="presence" class="p-rel">Presence</label>
+                        <div class="p-rel ability-score presence"><input name="presence" id="presence" type="number" min="1" max="9" /></div>
+                      </div>
+                      <div class="ability-codes col-md-6">
+                        <div class="ability-code"><input type="radio" name="presence-code" value="A" /></div>
+                        <div class="ability-code"><input type="radio" name="presence-code" value="B" /></div>
+                        <div class="ability-code"><input type="radio" name="presence-code" value="C" /></div>
+                        <div class="ability-code"><input type="radio" name="presence-code" value="D" /></div>
+                        <div class="ability-code"><input type="radio" name="presence-code" value="X" /></div>
+                      </div>
+                    </div>
+                  </div>
+                </fieldset>
+              </div>
+            </div>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>Arms & Armors</legend>
+          <div class="container-fluid">
+            <div class="row">
+              <div class="col-md-10">
+                <label for="melee-weapon">Melee Weapon</label>
+                <input name="melee-weapon" id="melee-weapon" type="text" />
+              </div>
+              <div class="col-md-2">
+                <input name="melee-weapon-dmg" id="melee-weapon-dmg" type="number" min="0" max="9" placeholder="dmg" />
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-10">
+                <label for="missile-weapon">Missile Weapon</label>
+                <input name="missile-weapon" id="missile-weapon" type="text" />
+              </div>
+              <div class="col-md-2">
+                <input name="missile-weapon-dmg" id="missile-weapon-dmg" type="number" min="0" max="9" placeholder="dmg" />
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-10">
+                <label for="armor">Armor</label>
+                <input name="armor" id="armor" type="text" />
+              </div>
+              <div class="col-md-2">
+                <input name="armor-def" id="armor-def" type="number" min="0" max="9" placeholder="def" />
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-10">
+                <label for="shield">Shield</label>
+                <input name="shield" id="shield" type="text" />
+              </div>
+              <div class="col-md-2">
+                <input name="shield-def" id="shield-def" type="number" min="0" max="9" placeholder="def" />
+              </div>
+            </div>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>Spell Casting</legend>
+          <div class="container-fluid">
+            <div class="row">
+              <div class="col-md-6">
+                <label for="pool-sorcery">Sorcery Pool</label>
+                <input name="pool-sorcery" id="shield" type="number" min="0" max="81" />
+              </div>
+              <div class="col-md-6">
+                <label for="pool-mysticism">Mysticism Pool</label>
+                <input name="pool-mysticism" id="pool-mysticism" type="number" min="0" max="81" />
+              </div>
+            </div>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>Additional Information</legend>
+          <div class="container-fluid">
+            <div class="row">
+              <div class="col-md-12">
+                <textarea name="additional-information" id="additional-information" rows="5"></textarea>
+              </div>
+            </div>
+          </div>
+        </fieldset>
+      </div>
+    </div>
+  </div>
+</form>

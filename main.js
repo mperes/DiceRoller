@@ -1,11 +1,12 @@
 "use strict";
 
 var gameSession;
+var characterSheet;
 preLoadAndStart();
 
 function preLoadAndStart() {
   $(document).ready(function() {
-
+    characterSheet = new Sheet('#character-sheet');
     var tmpImg = new Image() ;
     tmpImg.src = 'img/fate_deck.jpg';
     tmpImg.onload = function() {

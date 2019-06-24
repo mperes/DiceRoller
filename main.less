@@ -814,3 +814,223 @@ input.squareButton.primary {
 #table-top > div:not(#image-loader){
   z-index: 2;
 }
+
+#character-sheet {
+  height: 100%;
+  overflow-y: scroll;
+  position: relative;
+  #character-sheat-header {
+    position: -webkit-sticky; /* Safari */
+    position: sticky;
+    background: white;
+    border-top: 10px solid white;
+    border-bottom: 10px solid white;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 2;
+    box-shadow: 0px 10px 10px 0px rgba(255,255,255,1);
+    margin-bottom: 10px;
+    h1 {
+      text-align: center;
+      margin: 0;
+    }
+    #character-sheat-toolbar {
+      position: absolute;
+      top: 10px;
+      right: 50px;
+      button {
+        overflow: hidden;
+        border-radius: 50px;
+        width: 30px;
+        height: 30px;
+        text-align: center;
+        background: #3fa1ec;
+        border: none;
+        color: white;
+        outline: none;
+      }
+    }
+  }
+  fieldset {
+    margin-bottom: 20px;
+    border-radius: 5px;
+    padding-bottom: 15px;
+    padding-top: 15px;
+    legend {
+      text-align: center;
+    }
+    fieldset {
+      margin-bottom: 0;
+      border: 0;
+      padding-bottom: 0px;
+      padding-top: 0px;
+      legend {
+        background: #eee;
+        width: 100%;
+        border-radius: 5px;
+        margin-bottom: 5px;
+      }
+    }
+  }
+  .container-fluid {
+    label {
+      position: absolute;
+      top: 50%;
+      left: 15px;
+      transform: translateY(-50%);
+      &:after {
+        content: ':';
+      }
+    }
+    .p-rel {
+      position: relative;
+      top: 0;
+      left: 0;
+      transform: none;
+    }
+    input[type="text"], input[type="number"] {
+      width: 100%;
+      box-sizing: border-box;
+      box-sizing: border-box;
+      text-align: right;
+      border: 0;
+      font-weight: bold;
+      font-family: sans-serif;
+      outline: none;
+      &.al {
+        text-align: left;
+      }
+      &::placeholder {
+        font-family: 'Quicksand', sans-serif;
+        font-weight: normal;
+        color: black;
+      }
+    }
+    textarea {
+      width: 100%;
+      box-sizing: border-box;
+      border: 0;
+      resize: vertical;
+      padding: 0;
+      outline: none;
+    }
+    .ability-score {
+      input {
+        text-align: left!important;
+        font-size: 36px;
+      }
+      &:after {
+        content: '';
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        display: block;
+        background-repeat: no-repeat;
+        background-position: right center;
+        background-size: contain;
+        opacity: 0.1;
+        top: 0;
+        right: 0;
+        pointer-events: none;
+      }
+      &.agility:after {
+        background-image: url('../img/codes/code-agility.png');
+      }
+      &.dexterity:after {
+        background-image: url('../img/codes/code-dexterity.png');
+      }
+      &.endurance:after {
+        background-image: url('../img/codes/code-endurance.png');
+      }
+      &.strength:after {
+        background-image: url('../img/codes/code-strength.png');
+      }
+      &.reason:after {
+        background-image: url('../img/codes/code-reason.png');
+      }
+      &.perception:after {
+        background-image: url('../img/codes/code-perception.png');
+      }
+      &.spirit:after {
+        background-image: url('../img/codes/code-spirit.png');
+      }
+      &.presence:after {
+        background-image: url('../img/codes/code-presence.png');
+      }
+    }
+    .ability-codes {
+      padding-top: 0px;
+    }
+    .ability-code {
+      height: 20px;
+      width: 50%;
+      box-sizing: border-box;
+      float: left;
+      position: relative;
+      input {
+        position: absolute;
+        -webkit-appearance: none;
+        appearance: none;
+        width: 100%;
+        height: 100%;
+        outline: none;
+        text-align: center;
+        &[value=A] {
+          &:after {
+            content: 'A';
+          }
+        }
+        &[value=B] {
+          &:after {
+            content: 'B';
+          }
+        }
+        &[value=C] {
+          &:after {
+            content: 'C';
+          }
+        }
+        &[value=D] {
+          &:after {
+            content: 'D';
+          }
+        }
+        &[value=X] {
+          &:after {
+            content: 'X';
+          }
+        }
+      }
+      input:checked {
+        background: #333;
+        color: white;
+        border-radius: 3px;
+        &:after {
+          font-weight: bold;
+          font-family: sans-serif;
+        }
+      }
+    }
+    .row {
+      border-bottom: 1px solid #DDD;
+      &:first-child {
+        //border-top: 1px solid #DDD;
+      }
+      &:last-child {
+        border-bottom: 0;
+        //border-top: 1px solid #DDD;
+      }
+    }
+  }
+  #ability-scores {
+    .row {
+      border-bottom: 0;
+      border-top: 0;
+    }
+    .row .row:first-child {
+      border-bottom: 1px solid #DDD;
+      margin-bottom: 10px;
+    }
+  }
+}

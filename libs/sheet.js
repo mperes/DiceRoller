@@ -2,182 +2,92 @@
 
 class Sheet {
   constructor(container, json) {
-    this._characterName = '';
-    this._rollGroups = Array();
+    this._characterData = [];
+    this._savingEnabled = true;
+    if(window.localStorage.getItem('tableTopCharacterSheet') != null) {
+      this._characterData = JSON.parse(window.localStorage.getItem('tableTopCharacterSheet'));
+    }
     Object.defineProperty(this, '_container', { value: jQuery(container), writable: true });
-    if (typeof (json) === 'undefined') {
-      let newGroup = this.addGroup();
-      newGroup.addRoll('', '');
-      this.render();
-      this.edit();
-    } else {
-      this.load(json);
-      this.render();
-    }
+    this.loadSheet();
   }
-  addGroup(name) {
-    let newGroup = new RollGroup(name);
-    this._rollGroups.push(newGroup);
-    return newGroup;
-  }
-  getJSON() {
-    let sheet = {};
-    sheet._characterName = this._characterName;
-    sheet._rollGroups = this._rollGroups;
-    return JSON.stringify(sheet);
-  }
-  set name(name) {
-    this._characterName = name;
-  }
-  get name() {
-    return this._characterName;
-  }
-  render() {
-    this._container.html();
-    this._rollGroups.forEach((group) => {
-      this._container.append(group.render());
-    });
-    let addButtonGroup = jQuery('<input type="button" />').addClass('squareButton').addClass('dashed').addClass('editOnly').val('New Group');
-    addButtonGroup.click((e) => {
-      let newGroup = this.addGroup("");
-      newGroup.addRoll("","");
-      jQuery(e.target).before(newGroup.render());
-    });
-
-    this._container.append(addButtonGroup);
-  }
-  edit() {
-    this._container.parent().addClass('editing');
-  }
-  save() {
-    this.deleteEmptyGroups()
-    this._container.parent().removeClass('editing');
-  }
-  download() {
-    let fileName = (this._characterName.trim() === '') ? 'sheet.txt' : this._characterName+'.txt';
-    fileName = fileName.replace(/ /g,"_");
-    let fileContents = this.getJSON();
-    saveTextAs(fileContents, fileName);
-  }
-  deleteEmptyGroups() {
-    for(let i=this._rollGroups.length-1; i>= 0; i--) {
-      let group = this._rollGroups[i];
-      group.deleteEmptyRolls();
-      if(group.isEmpty()) {
-        group.remove();
-        this._rollGroups.splice(i, 1);
+  loadSheet() {
+    var self = this;
+    this._container.load('sheet.html', function() {
+      jQuery('input, textarea').change(function() {
+        self.saveCharacterSheet()
+      });
+      if(self._characterData.length > 0) {
+        self.fillSheetFrom();
       }
-    }
-  }
-  load(json) {
-    let sheet = JSON.parse(json);
-    this._characterName = sheet._characterName;
-    sheet._rollGroups.forEach((group) => {
-      let newGroup = this.addGroup(group._name);
-      group._rolls.forEach((roll) => {
-        newGroup.addRoll(roll._name, roll._set);
+      jQuery('#character-sheat-toolbar .upload').click(function() {
+        self.uploadSheet()
       });
     });
   }
-}
-
-class RollGroup {
-  constructor(name) {
-    this._name = name;
-    this._rolls = Array();
-    Object.defineProperty(this, '_view', { value: null, writable: true });
+  saveCharacterSheet() {
+    if(!this._savingEnabled) return;
+    this._characterData = this._container.find('form').serializeArray();
+    window.localStorage.setItem('tableTopCharacterSheet', JSON.stringify(this._characterData));
   }
-  addRoll(name, set) {
-    let newRoll = new Roll(name, set);
-    this._rolls.push(newRoll);
-    return newRoll;
+  uploadSheet() {
+    jQuery.ajax({
+      type: "POST",
+      url: "https://api.jsonbin.io/b",
+      contentType: "application/json",
+      dataType: "json",
+      data: JSON.stringify(this._characterData),
+      crossDomain: true,
+      headers: {
+        'secret-key': '$2a$10$cKeOfrm1OzzMBizWESpBwOoWFsRHfmcRAaiaULJiHfCVC.GUBBJIO',
+        'collection-id': '5d10d49fb19ce41159e0f0f7',
+        'private': true,
+        'name': jQuery('#character-sheet #hero').val() + ' - ' + new Date().toJSON().slice(0,10).split('-').reverse().join('/')
+      },
+      success: function(data, textStatus, errorThrown) {
+        //console.log(data);
+      },
+      error: function(jqXHR, textStatus, errorThrown) {
+
+      },
+      complete: function(jqXHR, textStatus) {
+
+      }
+    });
   }
-  render(parent) {
-    let container = jQuery('<ul />');
-    let titleContainer = jQuery('<li />').addClass('title');
-    let title = jQuery('<input type="text" placeholder="Group name" />').val(this._name);
-    title.change((e) => {
-      this._name = e.target.value
+  deleteSheet(id) {
+    jQuery.ajax({
+      type: "DELETE",
+      url: "https://api.jsonbin.io/b/"+id,
+      contentType: "application/json",
+      crossDomain: true,
+      headers: {
+        'secret-key': '$2a$10$cKeOfrm1OzzMBizWESpBwOoWFsRHfmcRAaiaULJiHfCVC.GUBBJIO'
+      },
+      success: function(data, textStatus, errorThrown) {
+        //console.log(data);
+      },
+      error: function(jqXHR, textStatus, errorThrown) {
+
+      },
+      complete: function(jqXHR, textStatus) {
+
+      }
     });
-
-    titleContainer.append(title);
-    container.append(titleContainer);
-
-    this._rolls.forEach((roll) => {
-      container.append(roll.render());
-    });
-
-    let addRollButtonContainer = jQuery('<li />').addClass('editOnly');
-    let addRollButton = jQuery('<input type="button" />').addClass('squareButton').addClass('small').val('Add roll');
-    addRollButton.click((e) => {
-      let newRoll = this.addRoll("", "");
-      jQuery(e.target).parent().before(newRoll.render());
-    });
-    addRollButtonContainer.append(addRollButton);
-    container.append(addRollButtonContainer);
-
-    this._view = container;
-    return container;
   }
-  deleteEmptyRolls() {
-    for(let i=this._rolls.length-1; i>= 0; i--) {
-      let roll = this._rolls[i];
-      if(roll.isEmpty()) {
-        roll.remove();
-        this._rolls.splice(i, 1);
+  fillSheetFrom() {
+    this._savingEnabled = false;
+    for(var i=0; i<this._characterData.length; i++) {
+      var field = this._characterData[i];
+      var form = this._container.find('form');
+      if(field.value.trim() != "") {
+        var element = form.find('input[name="'+field.name+'"], textarea[name="'+field.name+'"]');
+        if(element.length > 1) {
+          element.filter('[value="'+field.value+'"]').prop('checked', true);
+        } else {
+          form.find('input[name="'+field.name+'"], textarea[name="'+field.name+'"]').val(field.value);
+        }
       }
     }
-  }
-  isEmpty() {
-    return (this._rolls.length === 0);
-  }
-  remove() {
-    this._view.remove();
-  }
-}
-
-class Roll {
-  constructor(name, set) {
-    this._name = name;
-    this._set = set;
-    Object.defineProperty(this, '_view', { value: null, writable: true });
-  }
-  render() {
-    let container = jQuery('<li />');
-    let label = jQuery('<div />').addClass('roll_label');
-    let labelInput = jQuery('<input type="text" placeholder="Roll" />').val(this._name);
-    labelInput.change((e) => { this._name = e.target.value });
-    label.append(labelInput);
-    let set = jQuery('<div />').addClass('roll_set');
-    let setInput = jQuery('<input type="text" placeholder="1d20" pattern="[1-9,d,D]" />').val(this._set);
-    setInput.change((e) => { this._set = e.target.value.toUpperCase(); });
-    setInput.keypress((e) => {
-      let keyCode = e.which;
-      let allowedChars = [
-        //32, //Spacebar
-        43, //+
-        45, //-
-        68, //d
-        100, //D
-      ]
-      if ( !(keyCode >= 48 && keyCode <= 57) && !allowedChars.includes(keyCode))
-        e.preventDefault();
-    });
-    setInput.keydown((e) => {
-      if (e.keyCode == 9) { //Tab
-        let event = new CustomEvent('tabbedToNextField');
-        e.dispatchEvent(event);
-      }
-    });
-    set.append(setInput);
-    container.append(label).append(set);
-    this._view = container;
-    return container;
-  }
-  remove() {
-    this._view.remove();
-  }
-  isEmpty() {
-    return (this._name.trim() === '' && this._set.trim() === '');
+    this._savingEnabled = true;
   }
 }
