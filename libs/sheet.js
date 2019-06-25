@@ -119,6 +119,11 @@ class Sheet {
             var item = jQuery('<li/>').text(self._sheetList[i][0].value);
             list.append(item);
           }
+          function asc_sort(a, b){
+            return ($(b).text()) < ($(a).text()) ? 1 : -1;
+          }
+          list.children('li').sort(asc_sort).appendTo(list);
+
           container.append(list);
           jQuery.magnificPopup.open({
             items: {

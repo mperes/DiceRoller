@@ -839,6 +839,7 @@ input.squareButton.primary {
       position: absolute;
       top: 10px;
       right: 50px;
+      overflow: hidden;
       button {
         overflow: hidden;
         border-radius: 50px;
@@ -849,28 +850,27 @@ input.squareButton.primary {
         border: none;
         color: white;
         outline: none;
+        position: relative;
+        box-sizing: border-box;
+        float: left;
+        margin-left: 5px;
         &:before {
           margin: 0!important;
           line-height: 27px;
           display: inline;
-        }
-        &.attach {
-          &:before {
-            line-height: 29px;
-          }
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
         }
         &.cancel {
           background: #CCC;
           color: black;
           margin-left: 20px;
-          &:before {
-            line-height: 29px;
-          }
         }
-        &.icon-spin6 {
-          &:before {
-            line-height: 28px;
-          }
+        &.animate-spin {
+          pointer-events: none;
+          cursor: default;
         }
       }
     }
