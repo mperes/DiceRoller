@@ -94,6 +94,12 @@ class Sheet {
       }
     });
   }
+  loadCharacter(index) {
+    if(index > this._sheetList.length-1) return;
+    this._characterData = this._sheetList[index];
+    this.fillSheetFrom();
+    this.saveCharacterSheet();
+  }
   addSheetToList(id) {
     var self = this;
     jQuery.ajax({
@@ -116,7 +122,12 @@ class Sheet {
           container.append('<h2>Select a Hero</h2>');
           var list = jQuery('<ul/>');
           for(var i=0; i<self._sheetList.length; i++) {
-            var item = jQuery('<li/>').text(self._sheetList[i][0].value);
+            var item = jQuery('<li/>').attr('data-index', i).text(self._sheetList[i][0].value);
+            item.click(function() {
+              var index = parseInt(jQuery(this).attr('data-index'));
+              self.loadCharacter(index);
+              jQuery.magnificPopup.close();
+            })
             list.append(item);
           }
           function asc_sort(a, b){
