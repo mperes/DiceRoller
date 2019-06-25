@@ -849,6 +849,29 @@ input.squareButton.primary {
         border: none;
         color: white;
         outline: none;
+        &:before {
+          margin: 0!important;
+          line-height: 27px;
+          display: inline;
+        }
+        &.attach {
+          &:before {
+            line-height: 29px;
+          }
+        }
+        &.cancel {
+          background: #CCC;
+          color: black;
+          margin-left: 20px;
+          &:before {
+            line-height: 29px;
+          }
+        }
+        &.icon-spin6 {
+          &:before {
+            line-height: 28px;
+          }
+        }
       }
     }
   }
@@ -1031,6 +1054,21 @@ input.squareButton.primary {
     .row .row:first-child {
       border-bottom: 1px solid #DDD;
       margin-bottom: 10px;
+    }
+  }
+}
+.mfp-content {
+  background: white;
+  max-width: 600px;
+  border-radius: 10px;
+  padding: 20px;
+  ul {
+    li {
+      font-size: 18px;
+      border-top: 1px solid #EEE;
+      &:first-child {
+        border-top: none;
+      }
     }
   }
 }

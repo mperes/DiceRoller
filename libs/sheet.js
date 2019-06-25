@@ -3,6 +3,8 @@
 class Sheet {
   constructor(container, json) {
     this._characterData = [];
+    this._sheetList = [];
+    this._numberOfSheets = 0;
     this._savingEnabled = true;
     if(window.localStorage.getItem('tableTopCharacterSheet') != null) {
       this._characterData = JSON.parse(window.localStorage.getItem('tableTopCharacterSheet'));
@@ -20,7 +22,18 @@ class Sheet {
         self.fillSheetFrom();
       }
       jQuery('#character-sheat-toolbar .upload').click(function() {
-        self.uploadSheet()
+        var btn = jQuery(this);
+        btn.removeClass('icon-upload');
+        btn.addClass('icon-spin1');
+        btn.addClass('animate-spin');
+        self.uploadSheet();
+      });
+      jQuery('#character-sheat-toolbar .download').click(function() {
+        var btn = jQuery(this);
+        btn.removeClass('icon-download');
+        btn.addClass('icon-spin1');
+        btn.addClass('animate-spin');
+        self.getSheetList();
       });
     });
   }
@@ -50,7 +63,74 @@ class Sheet {
 
       },
       complete: function(jqXHR, textStatus) {
+        var btn = jQuery('#character-sheat-toolbar .upload');
+        btn.removeClass('icon-spin1');
+        btn.removeClass('animate-spin');
+        btn.addClass('icon-upload');
+      }
+    });
+  }
+  getSheetList() {
+    this._sheetList = [];
+    var self = this;
+    jQuery.ajax({
+      type: "GET",
+      url: "https://api.jsonbin.io/e/collection/5d10d49fb19ce41159e0f0f7/all-bins",
+      contentType: "application/json",
+      crossDomain: true,
+      headers: {
+        'secret-key': '$2a$10$cKeOfrm1OzzMBizWESpBwOoWFsRHfmcRAaiaULJiHfCVC.GUBBJIO'
+      },
+      success: function(data, textStatus, errorThrown) {
+        for(var i=0; i<data.records.length; i++) {
+          var sheet = data.records[i];
+          self._numberOfSheets = data.records.length;
+          self.addSheetToList(sheet.id)
+        }
+      },
+      error: function(jqXHR, textStatus, errorThrown) {
+      },
+      complete: function(jqXHR, textStatus) {
+      }
+    });
+  }
+  addSheetToList(id) {
+    var self = this;
+    jQuery.ajax({
+      type: "GET",
+      url: "https://api.jsonbin.io/b/"+id,
+      contentType: "application/json",
+      crossDomain: true,
+      headers: {
+        'secret-key': '$2a$10$cKeOfrm1OzzMBizWESpBwOoWFsRHfmcRAaiaULJiHfCVC.GUBBJIO'
+      },
+      success: function(data, textStatus, errorThrown) {
+        self._sheetList.push(data);
+        if(self._sheetList.length >= self._numberOfSheets) {
+          var btn = jQuery('#character-sheat-toolbar .download');
+          btn.removeClass('icon-spin1');
+          btn.removeClass('animate-spin');
+          btn.addClass('icon-download');
 
+          var container = jQuery('<div></div>');
+          container.append('<h2>Select a Hero</h2>');
+          var list = jQuery('<ul/>');
+          for(var i=0; i<self._sheetList.length; i++) {
+            var item = jQuery('<li/>').text(self._sheetList[i][0].value);
+            list.append(item);
+          }
+          container.append(list);
+          jQuery.magnificPopup.open({
+            items: {
+              src: container, // can be a HTML string, jQuery object, or CSS selector
+              type: 'inline'
+            }
+          });
+        }
+      },
+      error: function(jqXHR, textStatus, errorThrown) {
+      },
+      complete: function(jqXHR, textStatus) {
       }
     });
   }
