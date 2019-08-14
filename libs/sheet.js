@@ -35,7 +35,13 @@ class Sheet {
         btn.addClass('animate-spin');
         self.getSheetList();
       });
+      jQuery('#character-sheat-toolbar .close').click(function() {
+        self._container.addClass('closed');
+      });
     });
+  }
+  openSheet() {
+    this._container.removeClass('closed');
   }
   saveCharacterSheet() {
     if(!this._savingEnabled) return;

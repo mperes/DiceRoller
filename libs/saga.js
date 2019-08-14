@@ -1154,12 +1154,16 @@ class PlayerList {
     let health = $('<div class="health"><div class="left"></div></div>');
     thumbnail.append(health)
     let avatarUrl = 'url(img/avatars/avatar_'+avatar+'.jpg)';
-    console.log(avatarUrl);
     thumbnail.css('background', avatarUrl);
     thumbnail.click(function() {
-      if(!context._gameSession._isDM) return;
-      context.toggleTurn(sessionID);
-      context._gameSession.sendMultiplayerAction(ACTION_GIVE_TURN, sessionID.toString());
+      if(!context._gameSession._isDM) {
+        //TODO: Do some refactoring on this code, push chracter sheet into the game session.
+        characterSheet.openSheet();
+      }
+      else {
+        context.toggleTurn(sessionID);
+        context._gameSession.sendMultiplayerAction(ACTION_GIVE_TURN, sessionID.toString());
+      }
     })
     let actions = $('<div class="actions" />');
     let giveInitialHand = this._getActionButton('give-hand', 'Give initial hand', function() {

@@ -94,9 +94,10 @@ input.squareButton.primary {
     opacity: 0.8;
     h1 {
       font-size: 8em;
+      margin: 0;
     }
     h2 {
-      margin-top: -5px;
+      margin-top: -2em;
     }
   }
   #multiplayer {
@@ -132,6 +133,7 @@ input.squareButton.primary {
         white-space: normal;
         width: @avatarSize * 8;
         padding: 10px;
+        box-sizing: content-box;
         background: white;
         border-radius: 5px;
         position: absolute;
@@ -815,10 +817,14 @@ input.squareButton.primary {
   z-index: 2;
 }
 
+
 #character-sheet {
   height: 100%;
   overflow-y: scroll;
   position: relative;
+  &.closed {
+    display: none;
+  }
   #character-sheat-header {
     position: -webkit-sticky; /* Safari */
     position: sticky;
