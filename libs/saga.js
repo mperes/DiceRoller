@@ -887,7 +887,8 @@ class GameSession {
     context._ws.onopen= function(evt){
       console.log('log: Connected');
       let id = 'TableTop_' + multiplayerID;
-      this.send('{"setID":"'+id+'", "passwd":"none"}');
+      this.send('{"auth":"'+id+'", "passwd":"none"}');
+      //this.send('{"setID":"'+id+'", "passwd":"none"}');
       context._roomID = id;
       $('#multiplayer .sign-off p').text(multiplayerID);
       jQuery('body').addClass('signed-in');
