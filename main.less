@@ -249,7 +249,7 @@ input.squareButton.primary {
     position: absolute;
     bottom: 0;
     right: 10px;
-    width: 300px;
+    width: 200px;
     background-color: rgba(0,0,0,0.35);
     color: white;
     padding: 10px;
@@ -279,6 +279,7 @@ input.squareButton.primary {
       margin-top: 10px;
       border: 0;
       padding: 5px;
+      color: black;
     }
     &.collapsed {
       .title {
@@ -657,8 +658,9 @@ input.squareButton.primary {
       border-radius: 10px;
       box-sizing: border-box;
       position: absolute;
-      transform: translateX(-50%) translateY(-50%);
+      //transform: translateX(-50%) translateY(-50%);
       background: transparent;
+      transform: translate(-5px, -5px);
       @pulseColor: #364241;
       .pulse {
         width: 10px;
@@ -686,8 +688,8 @@ input.squareButton.primary {
         -moz-animation-iteration-count: infinite;
         animation-iteration-count: infinite;
         position: absolute;
-        top: -25px;
-        left: -25px;
+        top: -20px;
+        left: -20px;
         z-index: 1;
         opacity: 0;
       }

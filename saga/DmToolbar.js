@@ -64,6 +64,7 @@ class DmToolbar {
       } else {
         context._deck._gameSession.sendMultiplayerAction(ACTION_SHOW_MAP);
       }
+      window.dispatchEvent(new Event('resize'));
     }
 
     this.toggleMarkers = function() {

@@ -81,7 +81,8 @@ class GameSession {
   }
   connect(multiplayerID) {
     let context = this;
-    context._ws = new WebSocket('wss://cloud.achex.ca/tabletop_'+multiplayerID);
+    //context._ws = new WebSocket('wss://cloud.achex.ca/tabletop_'+multiplayerID);
+    context._ws = new WebSocket('ws://achex.ca:4010');
     context._ws.onmessage = function(evt){
       let message = JSON.parse(evt.data);
       if(message.hasOwnProperty('SID') && !message.hasOwnProperty('action')) {
@@ -195,6 +196,7 @@ class GameSession {
             break;
           case ACTION_SHOW_MAP:
             context._imageLoader._view.removeClass('hidden');
+            window.dispatchEvent(new Event('resize'));
             if(message.fromDM)
               context.sendSingleplayerAction(message.sID, ACTION_OK, 'ACTION_SHOW_MAP');
             break;
@@ -253,8 +255,8 @@ class GameSession {
     context._ws.onopen= function(evt){
       console.log('log: Connected');
       let id = 'TableTop_' + multiplayerID;
-      this.send('{"auth":"'+id+'", "passwd":"none"}');
-      //this.send('{"setID":"'+id+'", "passwd":"none"}');
+      //this.send('{"auth":"'+id+'", "passwd":"none"}');
+      this.send('{"setID":"'+id+'", "passwd":"none"}');
       context._roomID = id;
       $('#multiplayer .sign-off p').text(multiplayerID);
       jQuery('body').addClass('signed-in');
