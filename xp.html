@@ -1,0 +1,84 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xml:lang="en" lang="en" xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+  <meta name="keywords" content="XP Calculator"/>
+  <meta name="description" content="Divide XP proportionaly to the level of the character in the group."/>
+  <title>TableTop: An Online Dragonlance 5th Age Saga Fate Deck</title>
+
+  <link href="https://fonts.googleapis.com/css?family=Quicksand:300" rel="stylesheet">
+  <script>
+  const appVersion = Date.now();
+  const externalFiles1 = [
+    {file: 'reset.css', cacheBurst: false},
+    {file: 'libs/jquery-3.3.1.min.js', cacheBurst: false},
+  ];
+  function appendFile(filename, cacheBurst, fileList) {
+    cacheBurst = (typeof cacheBurst === 'boolean') ? cacheBurst : false;
+    filetype = filename.split('.')[filename.split('.').length-1];
+    filename = (cacheBurst) ? filename + '?v=' + appVersion : filename;
+    if (filetype=='js'){
+        var fileref=document.createElement('script')
+        fileref.setAttribute('type','text/javascript')
+        fileref.setAttribute('src', filename)
+    }
+    else if (filetype=='css') {
+        var fileref=document.createElement('link')
+        fileref.setAttribute('rel', 'stylesheet')
+        fileref.setAttribute('type', 'text/css')
+        fileref.setAttribute('href', filename)
+    }
+    if (typeof fileref!='undefined')
+        fileref.onload = function() {
+          if(Array.isArray(fileList))
+            appendNext(fileList);
+        }
+        document.getElementsByTagName('head')[0].appendChild(fileref)
+  }
+  function appendNext(fileList) {
+    if(fileList.length === 0) return;
+    let nextFile = fileList[0];
+    appendFile(nextFile.file, nextFile.cacheBurst, fileList);
+    fileList.splice(0, 1);
+  }
+  appendNext(externalFiles1);
+  </script>
+  <script>
+    function destribuir_xp() {
+      jQuery('#result').html('');
+      var levels_do_chars = jQuery('#lvs').val().trim().split(',').map(function(item) {
+        return parseInt(item.trim(), 10);
+      });
+      var total_de_xp = parseInt(jQuery('#xp').val().trim()) || 0;
+      levels_do_chars.sort(function(a, b){return a-b});
+      var maior_level = levels_do_chars[levels_do_chars.length-1];
+      levels_invertidos_do_chars = [];
+      soma_dos_leves_invertidos = 0;
+      for(var i=0; i<levels_do_chars.length; i++) {
+        var level_invertido = maior_level+1-levels_do_chars[i];
+        levels_invertidos_do_chars.push(level_invertido);
+        soma_dos_leves_invertidos += level_invertido;
+      }
+      for(var i=0; i<levels_invertidos_do_chars.length; i++) {
+        multiplicador_individual = 100 * levels_invertidos_do_chars[i] / soma_dos_leves_invertidos;
+        jQuery('#result').append('<li>Char LV'+levels_do_chars[i]+': '+ Math.round(total_de_xp * (multiplicador_individual/100))+'xp</li>');
+      }
+    }
+  </script>
+
+</head>
+
+<body>
+  <div>
+    <label for="lvs">Character levels:</label>
+    <input type="text" name="lvs" id="lvs" placeholder="1,2,4,5" onchange="destribuir_xp();" />
+  </div>
+  <div>
+    <label for="xp">Experience points:</label>
+    <input type="number" name="xp" id="xp" placeholder="10000" onchange="destribuir_xp();" />
+  </div>
+  <ul id="result">
+  </ul>
+</body>
+</html>
