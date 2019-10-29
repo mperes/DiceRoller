@@ -45,12 +45,20 @@
   appendNext(externalFiles1);
   </script>
   <script>
+    function getNumericSymbol(value) {
+      let v = parseInt(value);
+      if(v === 1) return value+"st";
+      else if(v === 2) return value+"nd";
+      else if(v === 3) return value+"rd";
+      else return value+"th";
+    }
     function destribuir_xp() {
       jQuery('#result').html('');
       var levels_do_chars = jQuery('#lvs').val().trim().split(',').map(function(item) {
         return parseInt(item.trim(), 10);
       });
       var total_de_xp = parseInt(jQuery('#xp').val().trim()) || 0;
+      if(total_de_xp <= 0) return;
       levels_do_chars.sort(function(a, b){return a-b});
       var maior_level = levels_do_chars[levels_do_chars.length-1];
       levels_invertidos_do_chars = [];
@@ -60,13 +68,34 @@
         levels_invertidos_do_chars.push(level_invertido);
         soma_dos_leves_invertidos += level_invertido;
       }
+      var amount = {};
       for(var i=0; i<levels_invertidos_do_chars.length; i++) {
         multiplicador_individual = 100 * levels_invertidos_do_chars[i] / soma_dos_leves_invertidos;
-        jQuery('#result').append('<li>Char LV'+levels_do_chars[i]+': '+ Math.round(total_de_xp * (multiplicador_individual/100))+'xp</li>');
+        amount[getNumericSymbol(levels_do_chars[i])] = Math.round(total_de_xp * (multiplicador_individual/100));
+        //jQuery('#result').append('<li>Char LV'+levels_do_chars[i]+': '+ Math.round(total_de_xp * (multiplicador_individual/100))+'xp</li>');
+      }
+      for (var lv in amount) {
+        if (amount.hasOwnProperty(lv)) {
+          jQuery('#result').append('<li><strong>'+ lv +'</strong> Level: '+ amount[lv] +'xp</li>');
+        }
       }
     }
   </script>
-
+  <style>
+    body {
+      font-family: sans-serif;
+      font-weight: 100;
+    }
+    ul {
+      margin-top: 20px;
+    }
+    ul li:not(first-child){
+      margin-top: 5px;
+    }
+    strong {
+      font-weight: bold;
+    }
+  </style>
 </head>
 
 <body>
