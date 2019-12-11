@@ -1,0 +1,197 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xml:lang="en" lang="en" xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+  <meta name="keywords" content="XP Calculator"/>
+  <meta name="description" content="Divide XP proportionaly to the level of the character in the group."/>
+  <title>TableTop: An Online Dragonlance 5th Age Saga Fate Deck</title>
+
+  <script>
+  const appVersion = Date.now();
+  const externalFiles1 = [
+    {file: '../bootstrap.min.css', cacheBurst: false},
+    {file: '../libs/jquery-3.3.1.min.js', cacheBurst: false},
+  ];
+  function appendFile(filename, cacheBurst, fileList) {
+    cacheBurst = (typeof cacheBurst === 'boolean') ? cacheBurst : false;
+    filetype = filename.split('.')[filename.split('.').length-1];
+    filename = (cacheBurst) ? filename + '?v=' + appVersion : filename;
+    if (filetype=='js'){
+        var fileref=document.createElement('script')
+        fileref.setAttribute('type','text/javascript')
+        fileref.setAttribute('src', filename)
+    }
+    else if (filetype=='css') {
+        var fileref=document.createElement('link')
+        fileref.setAttribute('rel', 'stylesheet')
+        fileref.setAttribute('type', 'text/css')
+        fileref.setAttribute('href', filename)
+    }
+    if (typeof fileref!='undefined')
+        fileref.onload = function() {
+          if(Array.isArray(fileList))
+            appendNext(fileList);
+        }
+        document.getElementsByTagName('head')[0].appendChild(fileref)
+  }
+  function appendNext(fileList) {
+    if(fileList.length === 0) return;
+    let nextFile = fileList[0];
+    appendFile(nextFile.file, nextFile.cacheBurst, fileList);
+    fileList.splice(0, 1);
+  }
+  appendNext(externalFiles1);
+  </script>
+  <style>
+    .col-xs-1, .col-sm-1, .col-md-1, .col-lg-1, .col-xs-2, .col-sm-2, .col-md-2, .col-lg-2, .col-xs-3, .col-sm-3, .col-md-3, .col-lg-3, .col-xs-4, .col-sm-4, .col-md-4, .col-lg-4, .col-xs-5, .col-sm-5, .col-md-5, .col-lg-5, .col-xs-6, .col-sm-6, .col-md-6, .col-lg-6, .col-xs-7, .col-sm-7, .col-md-7, .col-lg-7, .col-xs-8, .col-sm-8, .col-md-8, .col-lg-8, .col-xs-9, .col-sm-9, .col-md-9, .col-lg-9, .col-xs-10, .col-sm-10, .col-md-10, .col-lg-10, .col-xs-11, .col-sm-11, .col-md-11, .col-lg-11, .col-xs-12, .col-sm-12, .col-md-12, .col-lg-12 {
+      padding-right: 5px;
+      padding-left: 5px;
+    }
+    .container,
+    .container-fluid {
+      padding-right: 5px;
+      padding-left: 5px;
+    }
+    body {
+      font-size: 18px;
+    }
+    h2 {
+      font-size: 1em;
+      text-align: center;
+      margin: 0 0 10px 0;
+      border-bottom: 1px solid #CCC;
+      padding-bottom: 5px;
+      text-transform: uppercase;
+    }
+    .character-attributes .character-attribute:not(:first-child) {
+      margin-top: 10px;
+    }
+    .character-attribute {
+      border-radius: 3px;
+      border: 1px solid black;
+      position: relative;
+      width: 100%;
+      height: 80px;
+    }
+    .character-attribute .name {
+      position: absolute;
+      font-size: 8px;
+      top: 5px;
+      left: 50%;
+      transform: translateX(-50%);
+      text-transform: uppercase;
+    }
+    .character-attribute .value {
+      position: absolute;
+      font-size: 1em;
+      top: 50%;
+      left: 50%;
+      font-weight: bold;
+      font-size: 1.5em;
+      transform: translate(-50%, -50%);
+    }
+    .character-attribute .modifier {
+      position: absolute;
+      font-size: 12px;
+      bottom: 5px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+    .character-savingthrows,
+    .character-skills {
+      border-radius: 3px;
+      border: 1px solid black;
+      padding: 10px;
+    }
+    .character-skills {
+      margin-top: 10px;
+    }
+    .character-skills .attribute {
+      color: #CCC;
+    }
+    .character-savingthrow .checked,
+    .character-savingthrow .empty,
+    .character-savingthrow .value,
+    .character-skill .checked,
+    .character-skill .empty,
+    .character-skill .value {
+      margin-right: 5px;
+    }
+    .character-savingthrow .name,
+    .character-skill .name {
+      display: inline-block;
+      text-transform: capitalize;
+    }
+    .character-savingthrow:not(.proficient) .checked,
+    .character-skill:not(.proficient) .checked {
+      display: none;
+    }
+    .character-savingthrow.proficient .empty,
+    .character-skill.proficient .empty {
+      display: none;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="row">
+      <div class="col-sm-12">
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-sm-4">
+        <div class="row">
+          <div class="col-sm-3">
+            <div class="character-attributes">
+              <div class="character-attribute strength"><span class="name">strength</span><span class="value">10</span><span class="modifier">0</span></div>
+              <div class="character-attribute dexterity"><span class="name">dexterity</span><span class="value">10</span><span class="modifier">0</span></div>
+              <div class="character-attribute constitution"><span class="name">constitution</span><span class="value">10</span><span class="modifier">0</span></div>
+              <div class="character-attribute intelligence"><span class="name">intelligence</span><span class="value">10</span><span class="modifier">0</span></div>
+              <div class="character-attribute wisdom"><span class="name">wisdom</span><span class="value">10</span><span class="modifier">0</span></div>
+              <div class="character-attribute charisma"><span class="name">charisma</span><span class="value">10</span><span class="modifier">0</span></div>
+            </div>
+          </div>
+          <div class="col-sm-9">
+            <div class="character-savingthrows">
+              <h2>saving throws</h2>
+              <div class="character-savingthrow strength"></span><span class="checked">☑</span><span class="empty">☐</span></span><span class="value">0</span><span class="name">strength</div>
+              <div class="character-savingthrow dexterity"></span><span class="checked">☑</span><span class="empty">☐</span></span><span class="value">0</span><span class="name">dexterity</span></div>
+              <div class="character-savingthrow constitution"></span><span class="checked">☑</span><span class="empty">☐</span></span><span class="value">0</span><span class="name">constitution</span></div>
+              <div class="character-savingthrow intelligence"></span><span class="checked">☑</span><span class="empty">☐</span></span><span class="value">0</span><span class="name">intelligence</span></div>
+              <div class="character-savingthrow wisdom"></span><span class="checked">☑</span><span class="empty">☐</span></span><span class="value">0</span><span class="name">wisdom</span></div>
+              <div class="character-savingthrow charisma"></span><span class="checked">☑</span><span class="empty">☐</span></span><span class="value">0</span><span class="name">charisma</span></div>
+            </div>
+            <div class="character-skills">
+              <h2>skills</h2>
+              <div class="character-skill acrobatics"></span><span class="checked">☑</span><span class="empty">☐</span></span><span class="value">0</span><span class="name">acrobatics <span class="attribute">(dex)</span></div>
+              <div class="character-skill animal"></span><span class="checked">☑</span><span class="empty">☐</span></span><span class="value">0</span><span class="name">animal handling <span class="attribute">(wis)</span></div>
+              <div class="character-skill arcana"></span><span class="checked">☑</span><span class="empty">☐</span></span><span class="value">0</span><span class="name">arcana <span class="attribute">(int)</span></div>
+              <div class="character-skill athletics"></span><span class="checked">☑</span><span class="empty">☐</span></span><span class="value">0</span><span class="name">athletics <span class="attribute">(str)</span></div>
+              <div class="character-skill deception"></span><span class="checked">☑</span><span class="empty">☐</span></span><span class="value">0</span><span class="name">deception <span class="attribute">(cha)</span></div>
+              <div class="character-skill history"></span><span class="checked">☑</span><span class="empty">☐</span></span><span class="value">0</span><span class="name">history <span class="attribute">(int)</span></div>
+              <div class="character-skill insight"></span><span class="checked">☑</span><span class="empty">☐</span></span><span class="value">0</span><span class="name">insight <span class="attribute">(wis)</span></div>
+              <div class="character-skill intimidation"></span><span class="checked">☑</span><span class="empty">☐</span></span><span class="value">0</span><span class="name">intimidation <span class="attribute">(cha)</span></div>
+              <div class="character-skill investigation"></span><span class="checked">☑</span><span class="empty">☐</span></span><span class="value">0</span><span class="name">investigation <span class="attribute">(int)</span></div>
+              <div class="character-skill medicine"></span><span class="checked">☑</span><span class="empty">☐</span></span><span class="value">0</span><span class="name">medicine <span class="attribute">(wis)</span></div>
+              <div class="character-skill nature"></span><span class="checked">☑</span><span class="empty">☐</span></span><span class="value">0</span><span class="name">nature <span class="attribute">(int)</span></div>
+              <div class="character-skill perception"></span><span class="checked">☑</span><span class="empty">☐</span></span><span class="value">0</span><span class="name">perception <span class="attribute">(wis)</span></div>
+              <div class="character-skill performance"></span><span class="checked">☑</span><span class="empty">☐</span></span><span class="value">0</span><span class="name">performance <span class="attribute">(cha)</span></div>
+              <div class="character-skill persuasion"></span><span class="checked">☑</span><span class="empty">☐</span></span><span class="value">0</span><span class="name">persuasion <span class="attribute">(cha)</span></div>
+              <div class="character-skill religion"></span><span class="checked">☑</span><span class="empty">☐</span></span><span class="value">0</span><span class="name">religion <span class="attribute">(int)</span></div>
+              <div class="character-skill sleight"></span><span class="checked">☑</span><span class="empty">☐</span></span><span class="value">0</span><span class="name">sleight of hand <span class="attribute">(dex)</span></div>
+              <div class="character-skill stealth"></span><span class="checked">☑</span><span class="empty">☐</span></span><span class="value">0</span><span class="name">stealth <span class="attribute">(dex)</span></div>
+              <div class="character-skill survival"></span><span class="checked">☑</span><span class="empty">☐</span></span><span class="value">0</span><span class="name">survival <span class="attribute">(wis)</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-sm-4">
+      </div>
+      <div class="col-sm-4">
+      </div>
+    </div>
+  </div>
+</body>
+</html>
